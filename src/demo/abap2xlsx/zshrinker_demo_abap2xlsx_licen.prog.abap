@@ -1,17 +1,18 @@
-**********************************************************************
+********************************************************************************
 *
 * LICENSE and NOTICE
 *
-* Shrinker is using an adapted copy of abap2xlsx
-*   which is under the Apache 2.0 License described below.
+* Shrinker is using an adapted copy of abap2xlsx for its demonstration,
+* named "Shrinked abap2xlsx", whose objects were generated automatically
+* by Shrinker from the abap2xlsx original objects, as described right
+* after the abap2xlsx license below.
 *
-*   abap2xlsx source: https://github.com/abap2xlsx/abap2xlsx
+* abap2xlsx is licensed under the Apache 2.0 License described below.
 *
-* The objects of the shrinked are copied/adapted is described right after the license below.
-*
-**********************************************************************
+********************************************************************************
 
-**********************************************************************
+
+********************************************************************************
 *
 * Apache License
 *                            Version 2.0, January 2004
@@ -216,10 +217,39 @@
 *   limitations under the License.
 *
 *
-**********************************************************************
+********************************************************************************
 
-**********************************************************************
+
+********************************************************************************
 *
+* This version of "Shrinked abap2xlsx" has been made as follows:
 *
+*   1. Log in system ABAP 7.52 SP 04
+*   2. Install abapGit to any package e.g. $abapgit
+*      - Version of abapGit used: https://github.com/abapGit/abapGit/commit/6b8b29cd46a75a654ad94a5947ed528c980b09c9
+*   3. Install abap2xlsx via abapGit to any package e.g. $abap2xlsx
+*      - Version of abap2xlsx used: https://github.com/abap2xlsx/abap2xlsx/commit/ccda3a0aa8ea4dbcabd8e7be46848af1849ab71e
+*   4. Install Shrinker via abapGit to any package e.g. $shrinker
+*      - Version of Shrinker used: https://github.com/sandraros/shrinker/commit/ae365d0bff060104c48c3fa43cf06f6cdf3eb78b
+*   5. Run the program ZSHRINKER_DEMO_SHRINKER with the Shrinker package e.g.
+*      $shrinker and keep all other default values.
+*      That will generate 2 repository objects with name starting with
+*      ZSHRINKER_DEMO_SHRINKER_*, which contain all Shrinker code.
+*   6. Create manually empty repository objects and activate them:
+*      - Executable program ZSHRINKER_DEMO_ABAPGIT_DEF
+*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP1
+*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP2
+*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP3
+*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP4
+*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP5
+*      - Executable program ZSHRINKER_DEMO_ABAPGIT_STANDAL
+*   7. Run the program ZSHRINKER_DEMO_ABAPGIT with all abapGit packages e.g.
+*      $abapGit* and keep all other default values.
+*      That will generate the 7 repository objects with names starting with
+*      ZSHRINKER_DEMO_ABAPGIT*, which contain all abapGit code.
+*   8. Run the program ZSHRINKER_DEMO_ABAP2XLSX with all abap2xlsx packages e.g.
+*      $abap2xlsx* and keep all other default values.
+*      That will generate 5 repository objects with name starting with
+*      ZSHRINKER_DEMO_ABAP2XLSX*, which contain all abap2xlsx code.
 *
-**********************************************************************
+********************************************************************************

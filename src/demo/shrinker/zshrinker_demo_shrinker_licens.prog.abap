@@ -2,12 +2,12 @@
 *
 * LICENSE and NOTICE
 *
-* Shrinker is using an adapted copy of abapGit for its demonstration,
-* named "Shrinked abapGit", whose objects were generated automatically
-* by Shrinker from the abapGit original objects, as described right after the
-* abapGit license below.
+* This is the shrinked version of Shrinker ("shrinking itself"), provided for
+* demonstration only.
+* Its objects were generated automatically by Shrinker from the Shrinker
+* original objects, as described below right after the Shrinker license.
 *
-* abapGit is licensed under the MIT License described below.
+* Shrinker is licensed under the MIT License described below.
 *
 ********************************************************************************
 
@@ -41,7 +41,7 @@
 
 ********************************************************************************
 *
-* This version of "Shrinked abapGit" has been made as follows:
+* This version of "Shrinked Shrinker" has been made as follows:
 *
 *   1. Log in system ABAP 7.52 SP 04
 *   2. Install abapGit to any package e.g. $abapgit
@@ -52,17 +52,5 @@
 *      $shrinker and keep all other default values.
 *      That will generate 2 repository objects with name starting with
 *      ZSHRINKER_DEMO_SHRINKER_*, which contain all Shrinker code.
-*   5. Create manually empty repository objects and activate them:
-*      - Executable program ZSHRINKER_DEMO_ABAPGIT_DEF
-*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP1
-*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP2
-*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP3
-*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP4
-*      - Include ZSHRINKER_DEMO_ABAPGIT_IMP5
-*      - Executable program ZSHRINKER_DEMO_ABAPGIT_STANDAL
-*   6. Run the program ZSHRINKER_DEMO_ABAPGIT with all abapGit packages e.g.
-*      $abapGit* and keep all other default values.
-*      That will generate the 7 repository objects with names starting with
-*      ZSHRINKER_DEMO_ABAPGIT*, which contain all abapGit code.
 *
 ********************************************************************************
