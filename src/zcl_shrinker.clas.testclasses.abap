@@ -128,7 +128,7 @@ CLASS ltc_scan_abap_statement DEFINITION
     "! If the cursor is after the colon, only the lines till the next comma or dot after the cursor should be returned.
     METHODS w_lon_lf_w_ma_lf_c_w_dot FOR TESTING RAISING cx_static_check.
 
-    TYPES ty_scan_result TYPE lcl_abap_statement_at_cursor=>ty_scan_result.
+    TYPES ty_scan_result TYPE zif_shrinker_abap_scan=>ty_scan_result.
     CONSTANTS type LIKE lcl_abap_statement_at_cursor=>type VALUE lcl_abap_statement_at_cursor=>type.
     DATA scan_result TYPE ty_scan_result.
 

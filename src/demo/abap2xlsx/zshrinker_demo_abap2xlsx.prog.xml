@@ -52,6 +52,12 @@
      <ENTRY>Interface pool to contain public section of ZCL_EXCEL_WRITER_HUGE_FILE</ENTRY>
      <LENGTH>80</LENGTH>
     </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T10</KEY>
+     <ENTRY>Include program containing the license and notice</ENTRY>
+     <LENGTH>98</LENGTH>
+    </item>
    </TPOOL>
   </asx:values>
  </asx:abap>

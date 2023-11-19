@@ -84,6 +84,15 @@ CLASS zcl_shrinker DEFINITION
       RAISING
         zcx_shrinker.
 
+    "! Get the ABAP statement located at a position (line and column) in a given ABAP source code.
+    CLASS-METHODS get_abap_statement_at_cursor
+      IMPORTING
+        it_source       TYPE zif_shrinker_abap_code_adapter=>ty_abap_source_code
+        VALUE(i_linenr) TYPE numeric
+        VALUE(i_offset) TYPE numeric DEFAULT 0
+      RETURNING
+        VALUE(result)    TYPE zif_shrinker_abap_scan=>ty_scan_result.
+
     "! <p class="shorttext synchronized" lang="en"></p>
     "!
     "! @parameter package_range | <p class="shorttext synchronized" lang="en"></p>
@@ -429,9 +438,11 @@ CLASS zcl_shrinker DEFINITION
         range_of_obj_name TYPE ty_range_of_obj_name
       RETURNING
         VALUE(result)     TYPE ty_ddic_all.
+
     METHODS remove_test_classes
       CHANGING
         abap_source_code TYPE ty_abap_source_code_4_classes.
+
     TYPES:
       BEGIN OF ty_scanned_class,
         name                   TYPE seoclsname,
@@ -439,7 +450,7 @@ CLASS zcl_shrinker DEFINITION
         cu_co_ci               TYPE abap_bool,
         is_test_class          TYPE abap_bool,
         is_deferred            TYPE abap_bool,
-        statement_tokens       TYPE lcl_abap_statement_at_cursor=>ty_ut_stokes,
+        statement_tokens       TYPE zif_shrinker_abap_scan=>ty_ut_stokes,
         "! True if FRIENDS, LOCAL FRIENDS or GLOBAL FRIENDS
         any_friends            TYPE abap_bool,
         "! 'LOCAL', 'GLOBAL' or empty (word before FRIENDS)
@@ -452,6 +463,7 @@ CLASS zcl_shrinker DEFINITION
         start_line             TYPE i,
         end_line               TYPE i,
       END OF ty_scanned_class.
+
     "! Unique must be by name, is_definition, is_deferred, local_friends because of all these possibilities which may exist in the same source code at the same time
     "! (NB: a same class cannot have both is_deferred = 'X' and local_friends = 'X' at the same time):
     "! <ul>
@@ -466,6 +478,7 @@ CLASS zcl_shrinker DEFINITION
     "! <li>CLASS zcl_xxx IMPLEMENTATION.</li>
     "! </ul>
     TYPES ty_scanned_classes TYPE HASHED TABLE OF ty_scanned_class WITH UNIQUE KEY name is_definition is_deferred local_friends.
+
     METHODS get_class_endclass_positions
       IMPORTING
         itab     TYPE ty_abap_source_code
@@ -1063,7 +1076,7 @@ CLASS zcl_shrinker IMPLEMENTATION.
         TYPES:
           BEGIN OF ty_include_statement,
             row    TYPE i,
-            stokes TYPE lcl_abap_statement_at_cursor=>ty_ut_stokes,
+            stokes TYPE zif_shrinker_abap_scan=>ty_ut_stokes,
           END OF ty_include_statement.
         TYPES ty_include_statements TYPE STANDARD TABLE OF ty_include_statement WITH EMPTY KEY.
         TYPES:
@@ -1238,6 +1251,15 @@ CLASS zcl_shrinker IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_abap_statement_at_cursor.
+
+    result = lcl_abap_statement_at_cursor=>get( it_source = it_source
+                                                i_linenr  = i_linenr
+                                                i_offset  = i_offset ).
+
+  ENDMETHOD.
+
+
   METHOD get_class_endclass_positions.
     DATA current_class TYPE ty_scanned_class.
 
@@ -1360,7 +1382,7 @@ CLASS zcl_shrinker IMPLEMENTATION.
               IF tabix_friends >= 2
                     AND abap_statement-stokes[ tabix_friends - 1 ]-str = 'GLOBAL'.
                 DATA(at_least_one_friend_remains) = abap_false.
-                DATA(tokens_to_remove) = VALUE lcl_abap_statement_at_cursor=>ty_ut_stokes( ).
+                DATA(tokens_to_remove) = VALUE zif_shrinker_abap_scan=>ty_ut_stokes( ).
                 LOOP AT abap_statement-stokes REFERENCE INTO DATA(token)
                     FROM tabix_friends + 1.
                   IF line_exists( miscellaneous-class_descriptions[ name     = token->str
@@ -1663,8 +1685,10 @@ CLASS zcl_shrinker IMPLEMENTATION.
 
   METHOD get_whole_abap_statement.
 
-    DATA(abap_statement) = lcl_abap_statement_at_cursor=>get( it_source = abap_source_code
-                                                              i_linenr  = line_index ).
+    DATA(abap_statement) = get_abap_statement_at_cursor( it_source = abap_source_code
+                                                         i_linenr  = line_index ).
+*    DATA(abap_statement) = lcl_abap_statement_at_cursor=>get( it_source = abap_source_code
+*                                                              i_linenr  = line_index ).
     IF abap_statement-stokes IS INITIAL.
       result = VALUE #(
           first_line_index = line_index
@@ -1811,7 +1835,7 @@ CLASS zcl_shrinker IMPLEMENTATION.
   METHOD remove_test_classes.
     DATA class_2 TYPE REF TO ty_scanned_class.
     DATA: abap_line TYPE REF TO string,
-          friend    TYPE REF TO lcl_abap_statement_at_cursor=>ty_stokes.
+          friend    TYPE REF TO zif_shrinker_abap_scan=>ty_stokes.
 
     LOOP AT abap_source_code REFERENCE INTO DATA(class).
 
@@ -1882,7 +1906,7 @@ CLASS zcl_shrinker IMPLEMENTATION.
                                         ELSE
                                             REF #( class->implementation ) ).
 
-        DATA(friends_to_remove) = VALUE lcl_abap_statement_at_cursor=>ty_ut_stokes( ).
+        DATA(friends_to_remove) = VALUE zif_shrinker_abap_scan=>ty_ut_stokes( ).
         LOOP AT class_2->statement_tokens REFERENCE INTO friend
             FROM class_2->tabix_first_friend.
           IF line_exists( test_classes[ name = friend->str ] ).

@@ -36,12 +36,19 @@ SELECTION-SCREEN POSITION 65.
 PARAMETERS standalo TYPE syrepid DEFAULT 'ZSHRINKER_DEMO_ABAPGIT_STANDAL'.
 SELECTION-SCREEN END OF LINE.
 
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT (80) t_licens VISIBLE LENGTH 63.
+SELECTION-SCREEN POSITION 65.
+PARAMETERS p_licens TYPE seoclsname DEFAULT 'ZSHRINKER_DEMO_ABAPGIT_LICENSE'.
+SELECTION-SCREEN END OF LINE.
+
 
 INITIALIZATION.
-  t_devc = 'abapGit installation packages'(t01).
+  t_devc = 'abapGit installation packages in your system'(t01).
   t_def = 'Include for class and interface definitions '(t02).
   t_imp = 'Prefix of includes 1 to 5 for class implementations'(t03).
   t_standa = 'Main abapGit executable program (~ZABAPGIT_STANDALONE)'(t04).
+  t_licens = 'Include program containing the license and notice'(t05).
 
 
 START-OF-SELECTION.
@@ -120,9 +127,11 @@ CLASS lcl_app IMPLEMENTATION.
 
     DATA(include_does_not_exist) = CONV string( 'Include/program &1 does not exist. Create it manually as empty.'(001) ).
 
-    SELECT SINGLE * FROM trdir WHERE name = @standalo INTO @DATA(trdir_standalo).
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = include_does_not_exist msgv1 = standalo.
+    IF standalo IS NOT INITIAL.
+      SELECT SINGLE * FROM trdir WHERE name = @standalo INTO @DATA(trdir_standalo).
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = include_does_not_exist msgv1 = standalo.
+      ENDIF.
     ENDIF.
 
     SELECT SINGLE * FROM trdir WHERE name = @incl_def INTO @DATA(trdir_def).
@@ -158,7 +167,7 @@ CLASS lcl_app IMPLEMENTATION.
     ( `*                                                                               ` )
     ( `* LICENSE and NOTICE                                                            ` )
     ( `*                                                                               ` )
-    ( `* See include program ZSHRINKER_DEMO_ABAPGIT_LICENSE                            ` )
+    ( |* See include program { p_licens WIDTH = 30 }                            | )
     ( `*                                                                               ` )
     ( `********************************************************************************` ) ).
 
@@ -239,8 +248,10 @@ CLASS lcl_app IMPLEMENTATION.
       first_line = last_line + 1.
     ENDDO.
 
-    INSERT REPORT standalo FROM abap_of_zabapgit_standalone DIRECTORY ENTRY trdir_standalo.
-    DELETE REPORT standalo STATE 'I'.
+    IF standalo IS NOT INITIAL.
+      INSERT REPORT standalo FROM abap_of_zabapgit_standalone DIRECTORY ENTRY trdir_standalo.
+      DELETE REPORT standalo STATE 'I'.
+    ENDIF.
 
     COMMIT WORK.
 
