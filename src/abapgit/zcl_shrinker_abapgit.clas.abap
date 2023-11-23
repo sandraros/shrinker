@@ -5,6 +5,8 @@ CLASS zcl_shrinker_abapgit DEFINITION
 
   PUBLIC SECTION.
 
+    DATA package_path TYPE string READ-ONLY.
+
     CLASS-METHODS create
       IMPORTING
         package       TYPE devclass
@@ -45,7 +47,14 @@ CLASS zcl_shrinker_abapgit DEFINITION
 
     DATA zip TYPE REF TO cl_abap_zip.
     DATA git_repository TYPE REF TO lif_abapgit_repo.
+    DATA dot_abapgit TYPE REF TO lcl_abapgit_dot_abapgit.
     DATA user_exit TYPE REF TO zif_shrinker_abapgit_user_exit.
+
+    METHODS handle_exception
+      IMPORTING
+        exception TYPE REF TO cx_root
+      RAISING
+        zcx_shrinker.
 
 ENDCLASS.
 
@@ -65,9 +74,12 @@ CLASS zcl_shrinker_abapgit IMPLEMENTATION.
           IMPORTING
             ei_repo    = result->git_repository ).
 
+        result->dot_abapgit = result->git_repository->get_dot_abapgit( ).
+        result->package_path = lcl_abapgit_folder_logic=>get_instance(
+                            )->package_to_path( iv_top     = result->git_repository->ms_data-package
+                                                io_dot     = result->dot_abapgit
+                                                iv_package = package ).
         result->user_exit = user_exit.
-
-*        result->zip = NEW cl_abap_zip( ).
 
       CATCH lcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
@@ -123,7 +135,7 @@ CLASS zcl_shrinker_abapgit IMPLEMENTATION.
         ENDIF.
 
       CATCH cx_root INTO DATA(error).
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
+        handle_exception( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -153,6 +165,23 @@ CLASS zcl_shrinker_abapgit IMPLEMENTATION.
     result = NEW cl_abap_zip( ).
     result->load( zip_xstring ).
 
+  ENDMETHOD.
+
+
+  METHOD handle_exception.
+
+    TRY.
+        DATA(abapgit_error) = CAST lcx_abapgit_exception( exception ).
+        DATA(triggering_location) = REF #( abapgit_error->mt_callstack[ 1 ] OPTIONAL ).
+        RAISE EXCEPTION TYPE zcx_shrinker
+            EXPORTING
+                previous = exception
+                text     = |Error raised by program { triggering_location->mainprogram }, include { triggering_location->include
+                           }, line { triggering_location->line }, { triggering_location->blocktype
+                           } { triggering_location->blockname }|.
+      CATCH cx_sy_move_cast_error.
+        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = exception.
+    ENDTRY.
   ENDMETHOD.
 
 

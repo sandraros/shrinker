@@ -16,63 +16,63 @@ DATA: BEGIN OF dummy_select_options,
       END OF dummy_select_options.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_devc_i VISIBLE LENGTH 60.
-SELECTION-SCREEN POSITION 62.
-SELECT-OPTIONS s_devc_i FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSX*' SIGN I OPTION CP.
+  SELECTION-SCREEN COMMENT (80) t_devc_i VISIBLE LENGTH 60.
+  SELECTION-SCREEN POSITION 62.
+  SELECT-OPTIONS s_devc_i FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSX*' SIGN I OPTION CP.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_devc_e VISIBLE LENGTH 60.
-SELECTION-SCREEN POSITION 62.
-SELECT-OPTIONS s_devc_e FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSXDEMOS*' SIGN I OPTION CP.
+  SELECTION-SCREEN COMMENT (80) t_devc_e VISIBLE LENGTH 60.
+  SELECTION-SCREEN POSITION 62.
+  SELECT-OPTIONS s_devc_e FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSXDEMOS*' SIGN I OPTION CP.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_devc VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_devc TYPE devclass DEFAULT '$SHRINKER'.
+  SELECTION-SCREEN COMMENT (80) t_devc VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_devc TYPE devclass DEFAULT '$SHRINKER'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_oo_def VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_to_def TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_DEF'.
+  SELECTION-SCREEN COMMENT (80) t_oo_def VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_to_def TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_DEF'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_oo_imp VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_to_imp TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_IMP'.
+  SELECTION-SCREEN COMMENT (80) t_oo_imp VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_to_imp TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_IMP'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_tr_s1 VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_tr_s1 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S1'. " ZEXCEL_TR_SHARED_STRINGS
+  SELECTION-SCREEN COMMENT (80) t_tr_s1 VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_tr_s1 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S1'. " ZEXCEL_TR_SHARED_STRINGS
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_tr_s2 VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_tr_s2 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S2'. " ZEXCEL_TR_SHEET
+  SELECTION-SCREEN COMMENT (80) t_tr_s2 VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_tr_s2 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S2'. " ZEXCEL_TR_SHEET
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_intf VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_intf TYPE seoclsname DEFAULT 'ZIF_SHRINKER_DEMO_ABAP2XLSX_WH'. " ZCL_EXCEL_WRITER_HUGE_FILE
+  SELECTION-SCREEN COMMENT (80) t_intf VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_intf TYPE seoclsname DEFAULT 'ZIF_SHRINKER_DEMO_ABAP2XLSX_WH'. " ZCL_EXCEL_WRITER_HUGE_FILE
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_licens VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_licens TYPE seoclsname DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_LICEN'.
+  SELECTION-SCREEN COMMENT (80) t_licens VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_licens TYPE seoclsname DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_LICEN'.
 SELECTION-SCREEN END OF LINE.
 
 INITIALIZATION.
   t_devc_i = 'abap2xlsx packages of objects to include'(t06).
   t_devc_e = 'abap2xlsx packages of objects to exclude'(t07).
-  t_devc   = 'Package of objects to be created'(t08).
+  t_devc   = 'Package of objects to be (re)generated'(t08).
   t_oo_def = 'Include = definitions of all abap2xlsx class and interface pools, made local'(t01).
   t_oo_imp = 'Include = class implementations of all abap2xlsx class pools, made local'(t02).
   t_tr_s1  = 'Transformation = copy of ZEXCEL_TR_SHARED_STRINGS'(t03).
@@ -85,7 +85,7 @@ START-OF-SELECTION.
   TRY.
       CALL METHOD ('LCL_APP')=>('CREATE_MAIN').
     CATCH cx_root INTO DATA(error).
-      MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+      zcl_shrinker_utils=>abap_message_i_for_exception( error ).
   ENDTRY.
   ASSERT 1 = 1.
 
@@ -214,10 +214,10 @@ CLASS lcl_app IMPLEMENTATION.
 
     xstring = cl_abap_codepage=>convert_to( concat_lines_of( table = table_abap_code_intf_new sep = |\n| ) && |\n| ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_intf ) }.intf.abap|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_intf ) }.intf.abap|
                           content   = xstring ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_intf ) }.intf.xml|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_intf ) }.intf.xml|
                           content   = get_interface_xml( p_intf ) ).
 
 
@@ -265,10 +265,10 @@ CLASS lcl_app IMPLEMENTATION.
                                 ( LINES OF abap_code-def_abap_source_code ) )
                         sep   = |\n| ) && |\n| ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_to_def ) }.prog.abap|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_to_def ) }.prog.abap|
                           content   = xstring ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_to_def ) }.prog.xml|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_to_def ) }.prog.xml|
                           content   = get_include_program_xml( p_to_def ) ).
 
     "-------------------
@@ -281,10 +281,10 @@ CLASS lcl_app IMPLEMENTATION.
                                 ( LINES OF abap_code-imp_abap_source_code ) )
                         sep   = |\n| ) && |\n| ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_to_imp ) }.prog.abap|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_to_imp ) }.prog.abap|
                           content   = xstring ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_to_imp ) }.prog.xml|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_to_imp ) }.prog.xml|
                           content   = get_include_program_xml( p_to_imp ) ).
 
 
@@ -314,10 +314,10 @@ CLASS lcl_app IMPLEMENTATION.
                                 ( LINES OF table_abap_code_xslt ) )
                         sep   = |\r\n| ) && |\r\n| ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_tr_s1 ) }.xslt.source.xml|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_tr_s1 ) }.xslt.source.xml|
                           content   = xstring ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_tr_s1 ) }.xslt.xml|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_tr_s1 ) }.xslt.xml|
                           content   = get_transformation_xml( p_tr_s1 ) ).
 
 
@@ -343,10 +343,10 @@ CLASS lcl_app IMPLEMENTATION.
                                 ( LINES OF table_abap_code_xslt ) )
                         sep   = |\r\n| ) && |\r\n| ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_tr_s2 ) }.xslt.source.xml|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_tr_s2 ) }.xslt.source.xml|
                           content   = xstring ).
 
-    abapgit->zip_replace( file_path = |src/{ to_lower( p_tr_s2 ) }.xslt.xml|
+    abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_tr_s2 ) }.xslt.xml|
                           content   = get_transformation_xml( p_tr_s2 ) ).
 
 
@@ -603,7 +603,7 @@ CLASS lcl_app IMPLEMENTATION.
       FIND REGEX '\<T_RELATIONSHIP\>'
           IN TABLE reader_2007_ccimp->abap_source_code
           MATCH LINE DATA(line_index)
-          IGNORING CASE.
+          IGNORING CASE ##REGEX_POSIX.
       IF sy-subrc = 0.
         DATA(types_t_relationship) = lcl_shrinker=>get_whole_abap_statement(
             line_index       = line_index

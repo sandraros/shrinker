@@ -12,17 +12,6 @@
    </PROGDIR>
    <TPOOL>
     <item>
-     <ID>R</ID>
-     <ENTRY>Demo - Shrink abap2xlsx</ENTRY>
-     <LENGTH>23</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>P_INTF</KEY>
-     <ENTRY>Pub ZCL_EXCEL_WRITER_HUGE_FILE</ENTRY>
-     <LENGTH>38</LENGTH>
-    </item>
-    <item>
      <ID>I</ID>
      <KEY>T01</KEY>
      <ENTRY>Include = definitions of all abap2xlsx class and interface pools, made local</ENTRY>
@@ -54,9 +43,44 @@
     </item>
     <item>
      <ID>I</ID>
+     <KEY>T06</KEY>
+     <ENTRY>abap2xlsx packages of objects to include</ENTRY>
+     <LENGTH>80</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T07</KEY>
+     <ENTRY>abap2xlsx packages of objects to exclude</ENTRY>
+     <LENGTH>80</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T08</KEY>
+     <ENTRY>Package of objects to be created</ENTRY>
+     <LENGTH>64</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
      <KEY>T10</KEY>
      <ENTRY>Include program containing the license and notice</ENTRY>
      <LENGTH>98</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T11</KEY>
+     <ENTRY>Sub-package(s), end with slash - separate several sub-packages with slash)</ENTRY>
+     <LENGTH>108</LENGTH>
+    </item>
+    <item>
+     <ID>R</ID>
+     <ENTRY>Demo - Shrink abap2xlsx</ENTRY>
+     <LENGTH>23</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_INTF</KEY>
+     <ENTRY>Pub ZCL_EXCEL_WRITER_HUGE_FILE</ENTRY>
+     <LENGTH>38</LENGTH>
     </item>
    </TPOOL>
   </asx:values>
