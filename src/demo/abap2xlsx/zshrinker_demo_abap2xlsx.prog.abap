@@ -69,6 +69,7 @@ SELECTION-SCREEN BEGIN OF LINE.
   PARAMETERS p_licens TYPE seoclsname DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_LICEN'.
 SELECTION-SCREEN END OF LINE.
 
+
 INITIALIZATION.
   t_devc_i = 'abap2xlsx packages of objects to include'(t06).
   t_devc_e = 'abap2xlsx packages of objects to exclude'(t07).

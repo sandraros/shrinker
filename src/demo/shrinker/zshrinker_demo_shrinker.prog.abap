@@ -5,9 +5,33 @@
 *&---------------------------------------------------------------------*
 REPORT zshrinker_demo_shrinker.
 
-PARAMETERS p_devc TYPE devclass DEFAULT '$SHRINKER'.
-PARAMETERS p_def TYPE devclass DEFAULT 'ZSHRINKER_DEMO_SHRINKER_DEF'.
-PARAMETERS p_imp TYPE devclass DEFAULT 'ZSHRINKER_DEMO_SHRINKER_IMP'.
+
+TYPES ty_include_program_name TYPE c LENGTH 30.
+
+
+SELECTION-SCREEN BEGIN OF LINE.
+  SELECTION-SCREEN COMMENT (80) t_devc VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_devc TYPE devclass DEFAULT '$SHRINKER'.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+  SELECTION-SCREEN COMMENT (80) t_def VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_def TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_SHRINKER_DEF'.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+  SELECTION-SCREEN COMMENT (80) t_imp VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_imp TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_SHRINKER_IMP'.
+SELECTION-SCREEN END OF LINE.
+
+
+INITIALIZATION.
+  t_devc = 'Package containing Shrinker, from which class/interface pools are read'(t03).
+  t_def  = 'Include to update with all Shrinker class/interface pool definitions, made local'(t01).
+  t_imp  = 'Include to update with all Shrinker class pool implementations, made local'(t02).
 
 
 START-OF-SELECTION.
