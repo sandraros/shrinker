@@ -19,6 +19,18 @@
      <ENTRY>Circular reference while resolving order in DDIC objects</ENTRY>
      <LENGTH>112</LENGTH>
     </item>
+    <item>
+     <ID>I</ID>
+     <KEY>002</KEY>
+     <ENTRY>Program &amp;1 does not exist</ENTRY>
+     <LENGTH>50</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>003</KEY>
+     <ENTRY>No file found for object &amp;1 &amp;2 in source Git repository</ENTRY>
+     <LENGTH>110</LENGTH>
+    </item>
    </TPOOL>
   </asx:values>
  </asx:abap>

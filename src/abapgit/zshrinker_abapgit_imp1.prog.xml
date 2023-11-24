@@ -5,15 +5,14 @@
    <PROGDIR>
     <NAME>ZSHRINKER_ABAPGIT_IMP1</NAME>
     <SUBC>I</SUBC>
-    <APPL>S</APPL>
     <RLOAD>E</RLOAD>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>Shrinker class implementations - Part 1</ENTRY>
-     <LENGTH>39</LENGTH>
+     <ENTRY>Shrinked version of abapGit-Class implementations part 1/5</ENTRY>
+     <LENGTH>58</LENGTH>
     </item>
    </TPOOL>
   </asx:values>

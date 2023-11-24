@@ -108,10 +108,8 @@ CLASS lcl_app IMPLEMENTATION.
     ENDIF.
 
     INSERT REPORT p_def FROM abap_code-def_abap_source_code DIRECTORY ENTRY trdir_def.
-    DELETE REPORT p_def STATE 'I'.
 
     INSERT REPORT p_imp FROM abap_code-imp_abap_source_code DIRECTORY ENTRY trdir_imp.
-    DELETE REPORT p_imp STATE 'I'.
 
     COMMIT WORK.
 

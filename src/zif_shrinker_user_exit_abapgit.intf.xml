@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOINTERF>
-    <CLSNAME>ZIF_SHRINKER_ABAPGIT_USER_EXIT</CLSNAME>
+    <CLSNAME>ZIF_SHRINKER_USER_EXIT_ABAPGIT</CLSNAME>
     <LANGU>E</LANGU>
     <DESCRIPT>User Exit</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>

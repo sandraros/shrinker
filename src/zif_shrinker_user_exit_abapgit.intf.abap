@@ -1,4 +1,4 @@
-INTERFACE zif_shrinker_abapgit_user_exit
+INTERFACE zif_shrinker_user_exit_abapgit
   PUBLIC .
 
   METHODS is_to_be_deserialized

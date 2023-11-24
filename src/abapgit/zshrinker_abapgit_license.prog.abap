@@ -46,30 +46,21 @@
 *   2. Install abapGit to any package e.g. $abapgit
 *      - Version of abapGit used: https://github.com/abapGit/abapGit/commit/6b8b29cd46a75a654ad94a5947ed528c980b09c9
 *   3. Install Shrinker via abapGit to any package e.g. $shrinker
-*      - Version of Shrinker used: https://github.com/sandraros/shrinker/commit/ae365d0bff060104c48c3fa43cf06f6cdf3eb78b
-*   4. Run the program ZSHRINKER_DEMO_SHRINKER with the Shrinker package e.g.
+*   4. Run the program ZSHRINKER_CREATE_OBJ_ABAPGIT with the Shrinker package e.g.
 *      $shrinker and keep all other default values.
-*      That will generate 2 repository objects with name starting with
-*      ZSHRINKER_DEMO_SHRINKER_*, which contain all Shrinker code.
-*   5. Create manually empty repository objects and activate them:
-*      - Executable program ZSHRINKER_ABAPGIT_DEF
+*      That will generate these empty repository objects:
+*      - Include ZSHRINKER_ABAPGIT_DEF
 *      - Include ZSHRINKER_ABAPGIT_IMP1
 *      - Include ZSHRINKER_ABAPGIT_IMP2
 *      - Include ZSHRINKER_ABAPGIT_IMP3
 *      - Include ZSHRINKER_ABAPGIT_IMP4
 *      - Include ZSHRINKER_ABAPGIT_IMP5
-*   6. Run the program ZSHRINKER_DEMO_ABAPGIT with the following parameters
-*      - abapGit installation packages in your system:
-*            $abapgit*
-*      - Include for class and interface definitions:
-*            ZSHRINKER_ABAPGIT_DEF
-*      - Prefix of includes 1 to 5 for class implementations:
-*            ZSHRINKER_ABAPGIT_IMP
-*      - standalone program:
-*            empty
-*      - Include program containing the license and notice:
-*
-*      That will generate the 6 repository objects with names starting with
-*      ZSHRINKER_ABAPGIT*, which contain all abapGit code.
+*      - Executable program ZSHRINKER_ABAPGIT_STANDALONE
+*   5. Activate all empty repository objects above via SE80 > Menu Environment > Inactive Objects >
+*      select all the objects above in the SE80 object list > Right-Click > Activate.
+*   6. Run the program ZSHRINKER_SHRINK_ABAPGIT with the Shrinker package e.g.
+*      $shrinker and keep all other default values.
+*      That will update the code of the repository objects above,
+*      with all original abapGit code shrinked.
 *
 ********************************************************************************

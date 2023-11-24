@@ -5,15 +5,14 @@
    <PROGDIR>
     <NAME>ZSHRINKER_ABAPGIT_DEF</NAME>
     <SUBC>I</SUBC>
-    <APPL>S</APPL>
     <RLOAD>E</RLOAD>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>Demo - Result of shrinking class/interface definitions of abapGit</ENTRY>
-     <LENGTH>65</LENGTH>
+     <ENTRY>Shrinked version of abapGit-Class/Interface pool definitions</ENTRY>
+     <LENGTH>60</LENGTH>
     </item>
    </TPOOL>
   </asx:values>

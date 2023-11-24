@@ -5,8 +5,8 @@
 *&---------------------------------------------------------------------*
 REPORT zshrinker_demo_abap2xlsx.
 
-INCLUDE zshrinker_demo_shrinker_def.
-INCLUDE zshrinker_demo_shrinker_imp.
+*INCLUDE zshrinker_demo_shrinker_def.
+*INCLUDE zshrinker_demo_shrinker_imp.
 
 TYPES ty_include_program_name TYPE c LENGTH 30.
 TYPES ty_transformation_name TYPE c LENGTH 30.
@@ -96,12 +96,13 @@ CLASS lcl_app DEFINITION
 
   PUBLIC SECTION.
 
-    INTERFACES lif_shrinker_abap_code_adapter.
-    INTERFACES zif_shrinker_abapgit_user_exit.
+*    INTERFACES lif_shrinker_abap_code_adapter.
+    INTERFACES zif_shrinker_abap_code_adapter.
+    INTERFACES zif_shrinker_user_exit_abapgit.
 
     CLASS-METHODS create_main
       RAISING
-        lcx_shrinker
+*        lcx_shrinker
         zcx_shrinker.
 
     CLASS-METHODS create
@@ -110,7 +111,7 @@ CLASS lcl_app DEFINITION
 
     METHODS main
       RAISING
-        lcx_shrinker
+*        lcx_shrinker
         zcx_shrinker.
 
   PRIVATE SECTION.
@@ -175,8 +176,8 @@ CLASS lcl_app IMPLEMENTATION.
     " Serialize the target package
     "==============================================================================
 
-    DATA(abapgit) = zcl_shrinker_abapgit=>create( package   = p_devc
-                                                  user_exit = me ).
+    DATA(abapgit) = zcl_shrinker_connect_abapgit=>create( package   = p_devc
+                                                          user_exit = me ).
 
     abapgit->serialize( ).
 
@@ -190,12 +191,12 @@ CLASS lcl_app IMPLEMENTATION.
     DATA(table_abap_code_clas) = VALUE string_table( ).
     READ REPORT 'ZCL_EXCEL_WRITER_HUGE_FILE====CU' INTO table_abap_code_clas.
     IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE lcx_shrinker.
+      RAISE EXCEPTION TYPE zcx_shrinker.
     ENDIF.
 
     FIND '  PUBLIC SECTION.' IN TABLE table_abap_code_clas IGNORING CASE MATCH LINE tabix_public_section.
     IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE lcx_shrinker.
+      RAISE EXCEPTION TYPE zcx_shrinker.
     ENDIF.
 
     DATA(header_lines) = VALUE string_table(
@@ -226,7 +227,7 @@ CLASS lcl_app IMPLEMENTATION.
     " Interface and Class definitions, and class implementations
     "==============================================================================
 
-    DATA(package_range) = VALUE lcl_shrinker=>ty_package_range( ).
+    DATA(package_range) = VALUE zcl_shrinker=>ty_package_range( ).
     SELECT 'I'      AS sign,
            'EQ'     AS option,
            devclass AS low
@@ -235,7 +236,7 @@ CLASS lcl_app IMPLEMENTATION.
       AND devclass NOT IN @s_devc_e
     INTO TABLE @package_range.
 
-    DATA(shrinker) = lcl_shrinker=>create( customizer = me ).
+    DATA(shrinker) = zcl_shrinker=>create( customizer = me ).
     DATA(abap_code) = shrinker->get_one_abap_code(
                     package_range        = package_range
                     global_replacements  = VALUE #( ( posix_regex = 'ZEXCEL_TR_SHARED_STRINGS' with = p_tr_s1 )
@@ -253,7 +254,7 @@ CLASS lcl_app IMPLEMENTATION.
         AND NOT ( syntax_check-wrd = p_tr_s1
               AND syntax_check-mid-keyword = 'CALL'
               AND syntax_check-mid-msgnumber = '608' ).
-      RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = 'Syntax error &1'(001) msgv1 = syntax_check-mess.
+      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Syntax error &1'(001) msgv1 = syntax_check-mess.
     ENDIF.
 
     "-------------------
@@ -296,8 +297,7 @@ CLASS lcl_app IMPLEMENTATION.
     DATA(table_abap_code_xslt) = VALUE string_table( ).
     READ REPORT 'ZEXCEL_TR_SHARED_STRINGS======XT' INTO table_abap_code_xslt.
     IF sy-subrc <> 0.
-      " TODO ERROR DOES NOT EXIST
-      RAISE EXCEPTION TYPE lcx_shrinker.
+      RAISE EXCEPTION TYPE zcx_shrinker.
     ENDIF.
 
     DATA(xml_header_lines) = VALUE string_table(
@@ -329,7 +329,7 @@ CLASS lcl_app IMPLEMENTATION.
 
     READ REPORT 'ZEXCEL_TR_SHEET===============XT' INTO table_abap_code_xslt.
     IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE lcx_shrinker.
+      RAISE EXCEPTION TYPE zcx_shrinker.
     ENDIF.
 
     REPLACE ALL OCCURRENCES
@@ -350,26 +350,11 @@ CLASS lcl_app IMPLEMENTATION.
     abapgit->zip_replace( file_path = |{ abapgit->package_path }{ to_lower( p_tr_s2 ) }.xslt.xml|
                           content   = get_transformation_xml( p_tr_s2 ) ).
 
-
-*    "==============================================================================
-*    " Save to frontend
-*    "==============================================================================
-*
-*    zip = abapgit->get_zip( ).
-*    DATA(zip_xstring) = zip->save( ).
-*
-*    abapgit->file_download(
-*      iv_path = p_zip
-*      iv_xstr = zip_xstring ).
-
     "==============================================================================
     " Recreate ABAP objects from the ZIP file = Deserialize objects via abapGit
     "==============================================================================
 
     abapgit->deserialize( ).
-*CATCH zcx_shrinker. " General exception
-
-*    recreate_abap_objects_from_zip( zip_xstring ).
 
 
   ENDMETHOD.
@@ -591,7 +576,7 @@ CLASS lcl_app IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD lif_shrinker_abap_code_adapter~adapt_source_code.
+  METHOD zif_shrinker_abap_code_adapter~adapt_source_code.
 
     DATA(reader_2007_ccimp) = REF #( classes_interfaces-classes[ name = 'ZCL_EXCEL_READER_2007' ]-includes[ extension_code = 'CCIMP' ] OPTIONAL ).
     IF reader_2007_ccimp IS BOUND.
@@ -606,7 +591,7 @@ CLASS lcl_app IMPLEMENTATION.
           MATCH LINE DATA(line_index)
           IGNORING CASE ##REGEX_POSIX.
       IF sy-subrc = 0.
-        DATA(types_t_relationship) = lcl_shrinker=>get_whole_abap_statement(
+        DATA(types_t_relationship) = zcl_shrinker=>get_whole_abap_statement(
             line_index       = line_index
             abap_source_code = reader_2007_ccimp->abap_source_code ).
         DELETE reader_2007_ccimp->abap_source_code
@@ -625,7 +610,7 @@ CLASS lcl_app IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_shrinker_abapgit_user_exit~is_to_be_deserialized.
+  METHOD zif_shrinker_user_exit_abapgit~is_to_be_deserialized.
 
     result = xsdbool( line_exists( shrinker_objects_to_recreate[ object   = object
                                                                  obj_name = obj_name ] ) ).

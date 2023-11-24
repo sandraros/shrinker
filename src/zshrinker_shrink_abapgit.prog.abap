@@ -1,52 +1,66 @@
 *&---------------------------------------------------------------------*
-*& Report zshrinker_demo_abapgit
+*& Report zshrinker_shrink_abapgit
 *&---------------------------------------------------------------------*
 *&
 *&---------------------------------------------------------------------*
-REPORT zshrinker_demo_abapgit.
+REPORT zshrinker_shrink_abapgit.
 
-INCLUDE zshrinker_demo_shrinker_def.
-INCLUDE zshrinker_demo_shrinker_imp.
+
+TYPES ty_include_program_name TYPE c LENGTH 30.
+
 
 DATA: BEGIN OF dummy_select_options,
         devclass TYPE devclass,
       END OF dummy_select_options.
 
+
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_devc VISIBLE LENGTH 60.
-SELECTION-SCREEN POSITION 62.
-SELECT-OPTIONS s_devc FOR dummy_select_options-devclass DEFAULT '$ABAPGIT*' SIGN I OPTION CP.
+  SELECTION-SCREEN COMMENT (80) t_devc VISIBLE LENGTH 60.
+  SELECTION-SCREEN POSITION 62.
+  SELECT-OPTIONS s_devc FOR dummy_select_options-devclass DEFAULT '$ABAPGIT*' SIGN I OPTION CP.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_def VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS incl_def TYPE syrepid DEFAULT 'ZSHRINKER_DEMO_ABAPGIT_DEF'.
+  SELECTION-SCREEN COMMENT (80) t_def VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS incl_def TYPE ty_include_program_name DEFAULT 'ZSHRINKER_ABAPGIT_DEF'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_imp VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS incl_imp TYPE syrepid DEFAULT 'ZSHRINKER_DEMO_ABAPGIT_IMP'.
+  SELECTION-SCREEN COMMENT (80) t_nb_imp VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_nb_imp TYPE i DEFAULT 5.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_standa VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS standalo TYPE syrepid DEFAULT 'ZSHRINKER_DEMO_ABAPGIT_STANDAL'.
+  SELECTION-SCREEN COMMENT (80) t_imp VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS incl_imp TYPE ty_include_program_name DEFAULT 'ZSHRINKER_ABAPGIT_IMP'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_licens VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_licens TYPE seoclsname DEFAULT 'ZSHRINKER_DEMO_ABAPGIT_LICENSE'.
+  SELECTION-SCREEN COMMENT (80) t_standa VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  " IMPORTANT : do not create the standalone program because of two reasons:
+  "   1) It's not needed by Shrinker. If you need it, install the official ZABAPGIT_STANDALONE program.
+  "   2) It makes the ZSHRINKER_ABAPGIT* include programs have double usage, first one by this one,
+  "      second by ZCL_SHRINKER_CONNECT_ABAPGIT, which interrupts many times the installation of Shrinker
+  "      by abapGit with popup asking about selecting the main program for each include when activating them.
+  PARAMETERS standalo TYPE syrepid DEFAULT ''. " ZSHRINKER_ABAPGIT_STANDALONE
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+  SELECTION-SCREEN COMMENT (80) t_licens VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_licens TYPE ty_include_program_name DEFAULT 'ZSHRINKER_ABAPGIT_LICENSE'.
 SELECTION-SCREEN END OF LINE.
 
 
 INITIALIZATION.
   t_devc = 'abapGit installation packages in your system'(t01).
   t_def = 'Include for class and interface definitions '(t02).
-  t_imp = 'Prefix of includes 1 to 5 for class implementations'(t03).
+  t_nb_imp = 'Number of includes for class implementations'(t06).
+  t_imp = 'Prefix of includes for class implementations'(t03).
   t_standa = 'Main abapGit executable program (~ZABAPGIT_STANDALONE)'(t04).
   t_licens = 'Include program containing the license and notice'(t05).
 
@@ -63,18 +77,14 @@ START-OF-SELECTION.
 CLASS lcl_app DEFINITION.
   PUBLIC SECTION.
 
-    INTERFACES lif_shrinker_abap_code_adapter.
+    INTERFACES zif_shrinker_abap_code_adapter.
 
     CLASS-METHODS main
       RAISING
-        lcx_shrinker.
-
-    METHODS main_2
-      RAISING
-        lcx_shrinker.
+        zcx_shrinker.
 
   PRIVATE SECTION.
-    CLASS-DATA shrinker_classes_interfaces TYPE REF TO lcl_shrinker.
+    CLASS-DATA shrinker_classes_interfaces TYPE REF TO zcl_shrinker.
 
     CLASS-METHODS get_mime_object
       IMPORTING
@@ -82,9 +92,13 @@ CLASS lcl_app DEFINITION.
       RETURNING
         VALUE(result) TYPE string_table.
 
+    METHODS main_2
+      RAISING
+        zcx_shrinker.
+
     CLASS-METHODS replace_abapmerge
       CHANGING
-        abap_source_code TYPE lcl_shrinker=>ty_abap_source_code.
+        abap_source_code TYPE zcl_shrinker=>ty_abap_source_code.
 
     CLASS-METHODS split_at_regex
       IMPORTING
@@ -130,25 +144,27 @@ CLASS lcl_app IMPLEMENTATION.
     IF standalo IS NOT INITIAL.
       SELECT SINGLE * FROM trdir WHERE name = @standalo INTO @DATA(trdir_standalo).
       IF sy-subrc <> 0.
-        RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = include_does_not_exist msgv1 = standalo.
+        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = include_does_not_exist msgv1 = standalo.
       ENDIF.
     ENDIF.
 
     SELECT SINGLE * FROM trdir WHERE name = @incl_def INTO @DATA(trdir_def).
     IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_def.
+      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_def.
     ENDIF.
 
-    DATA(incl_impx) = EXACT progname( |{ incl_imp }1| ).
-    SELECT SINGLE * FROM trdir WHERE name = @incl_impx INTO @DATA(trdir_imp).
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_impx.
-    ENDIF.
+    DO p_nb_imp TIMES.
+      DATA(incl_impx) = EXACT progname( |{ incl_imp }{ sy-index }| ).
+      SELECT SINGLE * FROM trdir WHERE name = @incl_impx INTO @DATA(trdir_imp).
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_impx.
+      ENDIF.
+    ENDDO.
 
     "=================================
     " All classes and interfaces
     "=================================
-    shrinker_classes_interfaces = lcl_shrinker=>create( me ).
+    shrinker_classes_interfaces = zcl_shrinker=>create( me ).
 
     DATA(abap_of_zabapgit_oo) = shrinker_classes_interfaces->get_one_abap_code(
                                 package_range        = s_devc[]
@@ -179,7 +195,7 @@ CLASS lcl_app IMPLEMENTATION.
         ( `` )
         ( `****************************************************` )
         ( `INTERFACE lif_abapmerge_marker.                     ` )
-        ( `* ZSHRINKER_DEMO_ABAPGIT 2023                       ` )
+        ( |* ZSHRINKEDABAPGIT_RUN_SHRINKER { sy-datum(4) }     | )
         ( `ENDINTERFACE.                                       ` )
         ( `****************************************************` )
         ) INTO TABLE abap_of_zabapgit_oo-def_abap_source_code.
@@ -190,14 +206,14 @@ CLASS lcl_app IMPLEMENTATION.
                         ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code ) ) ).
 
     IF syntax_check_oo-mess IS NOT INITIAL.
-      RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check_oo-mess.
+      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check_oo-mess.
     ENDIF.
 
     "=================================
     " ZABAPGIT
     "=================================
 
-    DATA(shrinker_zabapgit_standalone) = lcl_shrinker=>create( me ).
+    DATA(shrinker_zabapgit_standalone) = zcl_shrinker=>create( me ).
 
     DATA(abap_of_zabapgit_standalone) = shrinker_zabapgit_standalone->get_abap_for_program(
             program_name        = 'ZABAPGIT'
@@ -210,21 +226,19 @@ CLASS lcl_app IMPLEMENTATION.
     DATA(syntax_check) = shrinker_zabapgit_standalone->syntax_check( abap_of_zabapgit_standalone ).
 
     IF syntax_check-mess IS NOT INITIAL.
-      RAISE EXCEPTION TYPE lcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check-mess.
+      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check-mess.
     ENDIF.
 
     "=================================
     " Replace code of includes and program
     "=================================
     INSERT REPORT incl_def FROM abap_of_zabapgit_oo-def_abap_source_code DIRECTORY ENTRY trdir_def.
-    DELETE REPORT incl_def STATE 'I'.
 
     " To write 5 includes
-    DATA(total_includes) = 5.
-    DATA(total_include_lines) = lines( abap_of_zabapgit_oo-imp_abap_source_code ) DIV total_includes.
+    DATA(total_include_lines) = lines( abap_of_zabapgit_oo-imp_abap_source_code ) DIV p_nb_imp.
     DATA(first_line) = 1.
-    DO total_includes TIMES.
-      IF sy-index < total_includes.
+    DO p_nb_imp TIMES.
+      IF sy-index < p_nb_imp.
         DATA(last_line) = first_line + total_include_lines - 1.
       ELSE.
         last_line = lines( abap_of_zabapgit_oo-imp_abap_source_code ).
@@ -236,21 +250,19 @@ CLASS lcl_app IMPLEMENTATION.
         ADD 1 TO last_line.
       ENDWHILE.
 
-      DATA(abap_source_code) = VALUE lcl_shrinker=>ty_abap_source_code(
+      DATA(abap_source_code) = VALUE zcl_shrinker=>ty_abap_source_code(
                     ( LINES OF header_lines )
                     ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code FROM first_line TO last_line ) ).
 
       incl_impx = EXACT #( |{ incl_imp }{ sy-index }| ).
       trdir_imp-name = incl_impx.
       INSERT REPORT incl_impx FROM abap_source_code DIRECTORY ENTRY trdir_imp.
-      DELETE REPORT incl_impx STATE 'I'.
 
       first_line = last_line + 1.
     ENDDO.
 
     IF standalo IS NOT INITIAL.
       INSERT REPORT standalo FROM abap_of_zabapgit_standalone DIRECTORY ENTRY trdir_standalo.
-      DELETE REPORT standalo STATE 'I'.
     ENDIF.
 
     COMMIT WORK.
@@ -268,7 +280,7 @@ CLASS lcl_app IMPLEMENTATION.
         REGEX '@@abapmerge include (\S+)\.w3mi\.data\.\S+ > (.*)$'
         IN TABLE abap_source_code
         IGNORING CASE
-        RESULTS DATA(matches).
+        RESULTS DATA(matches) ##REGEX_POSIX.
 
     SORT matches BY line DESCENDING.
 
@@ -298,7 +310,7 @@ CLASS lcl_app IMPLEMENTATION.
         REGEX '@@abapmerge include-cua (\S+)\.prog.xml > (.*)$'
         IN TABLE abap_source_code
         IGNORING CASE
-        RESULTS matches.
+        RESULTS matches ##REGEX_POSIX.
 
     SORT matches BY line DESCENDING.
 
@@ -490,7 +502,7 @@ CLASS lcl_app IMPLEMENTATION.
 
   METHOD split_at_regex.
 
-    FIND ALL OCCURRENCES OF REGEX regex IN val RESULTS DATA(matches).
+    FIND ALL OCCURRENCES OF REGEX regex IN val RESULTS DATA(matches) ##REGEX_POSIX.
 
     " 0 match means 1 segment (split 'ab' at ':' -> 0 match and result is 'ab')
     IF matches IS INITIAL.
@@ -514,7 +526,7 @@ CLASS lcl_app IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD lif_shrinker_abap_code_adapter~adapt_source_code.
+  METHOD zif_shrinker_abap_code_adapter~adapt_source_code.
 
     DATA(zabapgit) = REF #( other_source_units[ name = 'ZABAPGIT' ] OPTIONAL ).
     IF zabapgit IS BOUND.
