@@ -21,18 +21,18 @@
 
 *"* test class
 *include Lcl_excel=====================ccau.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGIB4U DEFINITION DEFERRED.
-*CLASS Lcl_excel DEFINITION LOCAL FRIENDS SHRIS5ZPAUXVKEPN5HWE45KZXGIB4U.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM DEFINITION DEFERRED.
+*CLASS Lcl_excel DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM.
 
 *----------------------------------------------------------------------*
-*       CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGIB4U DEFINITION
+*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM DEFINITION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
 
 
 *----------------------------------------------------------------------*
-*       CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGIB4U IMPLEMENTATION
+*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM IMPLEMENTATION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
@@ -1234,18 +1234,18 @@ endclass. "LCL_EXCEL_COMMENTS implementation
 
 *"* test class
 *include Lcl_excel_common==============ccau.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGMB4U DEFINITION DEFERRED.
-*CLASS Lcl_excel_common DEFINITION LOCAL FRIENDS SHRIS5ZPAUXVKEPN5HWE45KZXGMB4U.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM DEFINITION DEFERRED.
+*CLASS Lcl_excel_common DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM.
 
 *----------------------------------------------------------------------*
-*       CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGMB4U DEFINITION
+*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM DEFINITION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
 
 
 *----------------------------------------------------------------------*
-*       CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGMB4U IMPLEMENTATION
+*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM IMPLEMENTATION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
@@ -1559,8 +1559,8 @@ class LCL_EXCEL_COMMON implementation.
 
   ENDMETHOD.
   METHOD convert_column_a_row2columnrow.
-    DATA: lv_row_alpha     TYPE string,
-          lv_column_alpha  TYPE zexcel_cell_column_alpha.
+    DATA: lv_row_alpha    TYPE string,
+          lv_column_alpha TYPE zexcel_cell_column_alpha.
 
     lv_row_alpha = i_row.
     lv_column_alpha = Lcl_excel_common=>convert_column2alpha( i_column ).
@@ -1919,6 +1919,15 @@ class LCL_EXCEL_COMMON implementation.
       <fcat>-scrtext_s = ls_salv_t_column_ref-r_column->get_short_text( ).
       <fcat>-scrtext_m = ls_salv_t_column_ref-r_column->get_medium_text( ).
       <fcat>-scrtext_l = ls_salv_t_column_ref-r_column->get_long_text( ).
+      <fcat>-currency_column = ls_salv_t_column_ref-r_column->get_currency_column( ).
+      " If currency column not in structure then clear the field again
+      IF <fcat>-currency_column IS NOT INITIAL.
+        READ TABLE lt_salv_t_column_ref WITH KEY columnname = <fcat>-currency_column TRANSPORTING NO FIELDS.
+        IF sy-subrc <> 0.
+          CLEAR <fcat>-currency_column.
+        ENDIF.
+      ENDIF.
+
       IF ip_conv_exit_length = abap_false.
         <fcat>-abap_type = lo_salv_column_table->get_ddic_inttype( ).
       ENDIF.
@@ -1978,7 +1987,11 @@ class LCL_EXCEL_COMMON implementation.
   METHOD number_to_excel_string.
     DATA: lv_value_c TYPE c LENGTH 100.
 
-    WRITE ip_value TO lv_value_c EXPONENT 0 NO-GROUPING NO-SIGN.
+    IF ip_currency IS INITIAL.
+      WRITE ip_value TO lv_value_c EXPONENT 0 NO-GROUPING NO-SIGN.
+    ELSE.
+      WRITE ip_value TO lv_value_c EXPONENT 0 NO-GROUPING NO-SIGN CURRENCY ip_currency.
+    ENDIF.
     REPLACE ALL OCCURRENCES OF ',' IN lv_value_c WITH '.'.
 
     ep_value = lv_value_c.
@@ -5281,30 +5294,30 @@ endclass. "LCL_EXCEL_RANGES implementation
 *"* local helper classes
 
 *
-  CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGRB4U DEFINITION
-      INHERITING FROM SHRIS5ZPAUXVKEPN5HWE45KZXGQB4U
+  CLASS SHRI5M32Z4R2IEPO5IXU7NULMM7CQM DEFINITION
+      INHERITING FROM SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
       CREATE PRIVATE.
     PUBLIC SECTION.
       CLASS-METHODS create
         IMPORTING i_data TYPE xstring
-        RETURNING VALUE(r_zip) TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXGQB4U
+        RETURNING VALUE(r_zip) TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
         RAISING Lcx_excel.
       METHODS read REDEFINITION.
     PRIVATE SECTION.
       DATA: abap_zip TYPE REF TO cl_abap_zip.
       METHODS constructor IMPORTING i_data TYPE xstring
                           RAISING Lcx_excel.
-  ENDCLASS.                    "SHRIS5ZPAUXVKEPN5HWE45KZXGRB4U DEFINITION
+  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMM7CQM DEFINITION
 
 *
-  CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGSB4U DEFINITION
-    INHERITING FROM SHRIS5ZPAUXVKEPN5HWE45KZXGQB4U
+  CLASS SHRI5M32Z4R2IEPO5IXU7NULMNACQM DEFINITION
+    INHERITING FROM SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
     CREATE PRIVATE.
     PUBLIC SECTION.
       CLASS-METHODS create
         IMPORTING i_data TYPE xstring
                   i_alternate_zip_class TYPE seoclsname
-        RETURNING VALUE(r_zip) TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXGQB4U
+        RETURNING VALUE(r_zip) TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
         RAISING Lcx_excel.
       METHODS read REDEFINITION.
     PRIVATE SECTION.
@@ -5313,12 +5326,12 @@ endclass. "LCL_EXCEL_RANGES implementation
         IMPORTING i_data TYPE xstring
                   i_alternate_zip_class TYPE seoclsname
         RAISING Lcx_excel.
-  ENDCLASS.                    "SHRIS5ZPAUXVKEPN5HWE45KZXGSB4U DEFINITION
+  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMNACQM DEFINITION
 
 *
-  CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGRB4U IMPLEMENTATION.
+  CLASS SHRI5M32Z4R2IEPO5IXU7NULMM7CQM IMPLEMENTATION.
     METHOD create.
-      CREATE OBJECT r_zip TYPE SHRIS5ZPAUXVKEPN5HWE45KZXGRB4U
+      CREATE OBJECT r_zip TYPE SHRI5M32Z4R2IEPO5IXU7NULMM7CQM
         EXPORTING
           i_data = i_data.
     ENDMETHOD.                    "create
@@ -5359,12 +5372,12 @@ endclass. "LCL_EXCEL_RANGES implementation
       ENDIF.
 
     ENDMETHOD.                    "read
-  ENDCLASS.                    "SHRIS5ZPAUXVKEPN5HWE45KZXGRB4U IMPLEMENTATION
+  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMM7CQM IMPLEMENTATION
 
 *
-  CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGSB4U IMPLEMENTATION.
+  CLASS SHRI5M32Z4R2IEPO5IXU7NULMNACQM IMPLEMENTATION.
     METHOD create.
-      CREATE OBJECT r_zip TYPE SHRIS5ZPAUXVKEPN5HWE45KZXGSB4U
+      CREATE OBJECT r_zip TYPE SHRI5M32Z4R2IEPO5IXU7NULMNACQM
         EXPORTING
           i_alternate_zip_class = i_alternate_zip_class
           i_data                = i_data.
@@ -5421,15 +5434,15 @@ endclass. "LCL_EXCEL_RANGES implementation
       ENDIF.
 
     ENDMETHOD.                    "read
-  ENDCLASS.                    "SHRIS5ZPAUXVKEPN5HWE45KZXGSB4U IMPLEMENTATION
+  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMNACQM IMPLEMENTATION
 
 *"* test class
 *include Lcl_excel_reader_2007=========ccau.
 *"* use this source file for your ABAP unit test classes
 
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGVB4U DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNDCQM DEFINITION DEFERRED.
 *CLASS Lcl_excel_reader_2007 DEFINITION LOCAL FRIENDS
-*    SHRIS5ZPAUXVKEPN5HWE45KZXGVB4U.
+*    SHRI5M32Z4R2IEPO5IXU7NULMNDCQM.
 
 
 
@@ -5441,9 +5454,9 @@ class LCL_EXCEL_READER_2007 implementation.
   METHOD create_zip_archive.
     CASE i_use_alternate_zip.
       WHEN space.
-        e_zip = SHRIS5ZPAUXVKEPN5HWE45KZXGRB4U=>create( i_xlsx_binary ).
+        e_zip = SHRI5M32Z4R2IEPO5IXU7NULMM7CQM=>create( i_xlsx_binary ).
       WHEN OTHERS.
-        e_zip = SHRIS5ZPAUXVKEPN5HWE45KZXGSB4U=>create( i_data                = i_xlsx_binary
+        e_zip = SHRI5M32Z4R2IEPO5IXU7NULMNACQM=>create( i_data                = i_xlsx_binary
                                                    i_alternate_zip_class = i_use_alternate_zip ).
     ENDCASE.
   ENDMETHOD.
@@ -7410,6 +7423,7 @@ class LCL_EXCEL_READER_2007 implementation.
                lc_rel_hyperlink     TYPE string VALUE 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink',
                lc_rel_comments      TYPE string VALUE 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments',
                lc_rel_printer       TYPE string VALUE 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/printerSettings'.
+    CONSTANTS lc_rel_table TYPE string VALUE 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/table'.
 
     DATA: lo_ixml_worksheet           TYPE REF TO if_ixml_document,
           lo_ixml_cells               TYPE REF TO if_ixml_node_collection,
@@ -7504,6 +7518,8 @@ class LCL_EXCEL_READER_2007 implementation.
           lt_datavalidation_range     TYPE TABLE OF string,
           lt_rtf                      TYPE zexcel_t_rtf,
           ex                          TYPE REF TO cx_root.
+    DATA lt_tables TYPE t_tables.
+    DATA ls_table TYPE t_table.
 
     FIELD-SYMBOLS:
       <ls_shared_string> TYPE t_shared_string.
@@ -7574,6 +7590,10 @@ class LCL_EXCEL_READER_2007 implementation.
             CATCH Lcx_excel.
           ENDTRY.
 
+        WHEN lc_rel_table.
+          MOVE-CORRESPONDING ls_relationship TO ls_table.
+          INSERT ls_table INTO TABLE lt_tables.
+
         WHEN OTHERS.
       ENDCASE.
 
@@ -7597,6 +7617,16 @@ class LCL_EXCEL_READER_2007 implementation.
       ENDIF.
     ENDIF.
 
+    " Read tables (must be done before loading sheet contents)
+    TRY.
+        me->load_worksheet_tables( io_ixml_worksheet = lo_ixml_worksheet
+                                   io_worksheet      = io_worksheet
+                                   iv_dirname        = lv_dirname
+                                   it_tables         = lt_tables ).
+      CATCH Lcx_excel. " Ignore reading errors - pass everything we were able to identify
+    ENDTRY.
+
+    " Sheet contents
     lo_ixml_rows = lo_ixml_worksheet->get_elements_by_tag_name_ns( name = 'row' uri = namespace-main ).
     lo_ixml_iterator = lo_ixml_rows->create_iterator( ).
     lo_ixml_row_elem ?= lo_ixml_iterator->get_next( ).
@@ -9285,6 +9315,127 @@ class LCL_EXCEL_READER_2007 implementation.
                                      iv_zcl_excel_classname = iv_zcl_excel_classname ).
 
   ENDMETHOD.
+  METHOD load_worksheet_tables.
+
+    DATA lo_ixml_table_columns TYPE REF TO if_ixml_node_collection.
+    DATA lo_ixml_table_column  TYPE REF TO if_ixml_element.
+    DATA lo_ixml_table TYPE REF TO if_ixml_element.
+    DATA lo_ixml_table_style TYPE REF TO if_ixml_element.
+    DATA lt_field_catalog TYPE zexcel_t_fieldcatalog.
+    DATA ls_field_catalog TYPE zexcel_s_fieldcatalog.
+    DATA lo_ixml_iterator TYPE REF TO if_ixml_node_iterator.
+    DATA ls_table_settings TYPE zexcel_s_table_settings.
+    DATA lv_path TYPE string.
+    DATA lt_components TYPE abap_component_tab.
+    DATA ls_component TYPE abap_componentdescr.
+    DATA lo_rtti_table TYPE REF TO cl_abap_tabledescr.
+    DATA lv_dref_table TYPE REF TO data.
+    DATA lv_num_lines TYPE i.
+    DATA lo_line_type TYPE REF TO cl_abap_structdescr.
+
+    DATA: BEGIN OF ls_table,
+            id             TYPE string,
+            name           TYPE string,
+            displayname    TYPE string,
+            ref            TYPE string,
+            totalsrowshown TYPE string,
+          END OF ls_table.
+
+    DATA: BEGIN OF ls_table_style,
+            name              TYPE string,
+            showrowstripes    TYPE string,
+            showcolumnstripes TYPE string,
+          END OF ls_table_style.
+
+    DATA: BEGIN OF ls_table_column,
+            id   TYPE string,
+            name TYPE string,
+          END OF ls_table_column.
+
+    FIELD-SYMBOLS <ls_table> LIKE LINE OF it_tables.
+    FIELD-SYMBOLS <lt_table> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <ls_field> TYPE zexcel_s_fieldcatalog.
+
+    LOOP AT it_tables ASSIGNING <ls_table>.
+
+      CONCATENATE iv_dirname <ls_table>-target INTO lv_path.
+      lv_path = resolve_path( lv_path ).
+
+      lo_ixml_table = me->get_ixml_from_zip_archive( lv_path )->get_root_element( ).
+      fill_struct_from_attributes( EXPORTING
+                                     ip_element = lo_ixml_table
+                                   CHANGING
+                                     cp_structure = ls_table ).
+
+      lo_ixml_table_style ?= lo_ixml_table->find_from_name( 'tableStyleInfo' ).
+      fill_struct_from_attributes( EXPORTING
+                                     ip_element = lo_ixml_table_style
+                                   CHANGING
+                                     cp_structure = ls_table_style ).
+
+      ls_table_settings-table_name = ls_table-name.
+      ls_table_settings-show_column_stripes = ls_table_style-showcolumnstripes.
+      ls_table_settings-show_row_stripes = ls_table_style-showrowstripes.
+
+      Lcl_excel_common=>convert_range2column_a_row(
+        EXPORTING
+          i_range        = ls_table-ref
+        IMPORTING
+          e_column_start = ls_table_settings-top_left_column
+          e_column_end   = ls_table_settings-bottom_right_column
+          e_row_start    = ls_table_settings-top_left_row
+          e_row_end      = ls_table_settings-bottom_right_row ).
+
+      lo_ixml_table_columns =  lo_ixml_table->get_elements_by_tag_name( name = 'tableColumn' ).
+      lo_ixml_iterator     =  lo_ixml_table_columns->create_iterator( ).
+      lo_ixml_table_column  ?= lo_ixml_iterator->get_next( ).
+      CLEAR lt_field_catalog.
+      WHILE lo_ixml_table_column IS BOUND.
+
+        CLEAR ls_table_column.
+        fill_struct_from_attributes( EXPORTING
+                                       ip_element = lo_ixml_table_column
+                                     CHANGING
+                                       cp_structure = ls_table_column ).
+
+        ls_field_catalog-position = lines( lt_field_catalog ) + 1.
+        ls_field_catalog-fieldname = |COMP_{ ls_field_catalog-position PAD = '0' ALIGN = RIGHT WIDTH = 4 }|.
+        ls_field_catalog-scrtext_l = ls_table_column-name.
+        ls_field_catalog-dynpfld = abap_true.
+        ls_field_catalog-abap_type = cl_abap_typedescr=>typekind_string.
+        APPEND ls_field_catalog TO lt_field_catalog.
+
+        lo_ixml_table_column ?= lo_ixml_iterator->get_next( ).
+
+      ENDWHILE.
+
+      CLEAR lt_components.
+      LOOP AT lt_field_catalog ASSIGNING <ls_field>.
+        CLEAR ls_component.
+        ls_component-name = <ls_field>-fieldname.
+        ls_component-type = cl_abap_elemdescr=>get_string( ).
+        APPEND ls_component TO lt_components.
+      ENDLOOP.
+
+      lo_line_type = cl_abap_structdescr=>get( lt_components ).
+      lo_rtti_table = cl_abap_tabledescr=>get( lo_line_type ).
+      CREATE DATA lv_dref_table TYPE HANDLE lo_rtti_table.
+      ASSIGN lv_dref_table->* TO <lt_table>.
+
+      lv_num_lines = ls_table_settings-bottom_right_row - ls_table_settings-top_left_row.
+      DO lv_num_lines TIMES.
+        APPEND INITIAL LINE TO <lt_table>.
+      ENDDO.
+
+      io_worksheet->bind_table(
+        EXPORTING
+          ip_table            = <lt_table>
+          it_field_catalog    = lt_field_catalog
+          is_table_settings   = ls_table_settings ).
+
+    ENDLOOP.
+
+  ENDMETHOD.
 endclass. "LCL_EXCEL_READER_2007 implementation
 
 *>>>>>>> LCL_EXCEL_READER_HUGE_FILE <<<<<<<*
@@ -9301,7 +9452,7 @@ endclass. "LCL_EXCEL_READER_2007 implementation
 *"* declarations
 
 * Signal "not found"
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U IMPLEMENTATION.
+CLASS SHRI5M32Z4R2IEPO5IXU7NULMNFCQM IMPLEMENTATION.
   METHOD constructor.
     super->constructor( textid = textid previous = previous ).
     me->error = error.
@@ -9309,13 +9460,13 @@ CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U IMPLEMENTATION.
   METHOD if_message~get_text.
     result = error.
   ENDMETHOD.                    "if_message~get_text
-ENDCLASS.                    "SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U IMPLEMENTATION
+ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMNFCQM IMPLEMENTATION
 
 *"* test class
 *include Lcl_excel_reader_huge_file====ccau.
 *"* use this source file for your ABAP unit test classes
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGZB4U DEFINITION DEFERRED.
-*CLASS Lcl_excel_reader_huge_file DEFINITION LOCAL FRIENDS SHRIS5ZPAUXVKEPN5HWE45KZXGZB4U.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNHCQM DEFINITION DEFERRED.
+*CLASS Lcl_excel_reader_huge_file DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7NULMNHCQM.
 
 *
 
@@ -9363,7 +9514,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
     READ TABLE shared_strings ASSIGNING <ls_shared_string> INDEX lv_tabix.
     IF sy-subrc NE 0.
       CONCATENATE 'Entry ' iv_index ' not found in Shared String Table' INTO lv_error.
-      RAISE EXCEPTION TYPE SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U
+      RAISE EXCEPTION TYPE SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
         EXPORTING
           error = lv_error.
     ENDIF.
@@ -9380,7 +9531,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
       READ TABLE styles INTO lo_style INDEX lv_tabix.
       IF sy-subrc NE 0.
         CONCATENATE 'Entry ' iv_index ' not found in Style Table' INTO lv_error.
-        RAISE EXCEPTION TYPE SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U
+        RAISE EXCEPTION TYPE SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
           EXPORTING
             error = lv_error.
       ELSE.
@@ -9419,7 +9570,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
   METHOD load_worksheet.
 
     DATA: lo_reader TYPE REF TO if_sxml_reader.
-    DATA: lx_not_found TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U.
+    DATA: lx_not_found TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMNFCQM.
 
     lo_reader = get_sxml_reader( ip_path ).
 
@@ -9428,7 +9579,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
         read_worksheet_data( io_reader    = lo_reader
                              io_worksheet = io_worksheet ).
 
-      CATCH SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U INTO lx_not_found.
+      CATCH SHRI5M32Z4R2IEPO5IXU7NULMNFCQM INTO lx_not_found.
         Lcx_excel=>raise_text( lx_not_found->error ).
     ENDTRY.
   ENDMETHOD.
@@ -9517,7 +9668,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
       io_reader->next_node( ).
       IF io_reader->node_type = c_end_of_stream.
         CONCATENATE 'XML error: Didn''t find element <' iv_element_name '>' INTO lv_error.
-        RAISE EXCEPTION TYPE SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U
+        RAISE EXCEPTION TYPE SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
           EXPORTING
             error = lv_error.
       ENDIF.
@@ -12797,7 +12948,7 @@ class LCL_EXCEL_THEME_COLOR_SCHEME implementation.
                                                                parent = lo_elements ).
       lo_scheme_element->set_attribute( name = c_name value = name ).
 
-      "! Adding colors to scheme
+      " Adding colors to scheme
       lo_color ?= io_document->create_simple_element_ns( prefix = Lcl_excel_theme=>c_theme_prefix
                                                                   name   = c_dark1
                                                       parent = lo_scheme_element ).
@@ -13920,23 +14071,23 @@ endclass. "LCL_EXCEL_THEME_OBJECTDEFAULTS implementation
 
 *"* test class
 *include Lcl_excel_worksheet===========ccau.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXG7B4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHEB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHFB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHAB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHGB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHBB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHCB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHHB4U DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNNCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNSCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNTCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNOCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNUCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNPCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNQCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNVCQM DEFINITION DEFERRED.
 *CLASS Lcl_excel_worksheet DEFINITION LOCAL FRIENDS
-*    SHRIS5ZPAUXVKEPN5HWE45KZXG7B4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHEB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHFB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHAB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHCB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHGB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHBB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHHB4U.
+*    SHRI5M32Z4R2IEPO5IXU7NULMNNCQM
+*    SHRI5M32Z4R2IEPO5IXU7NULMNSCQM
+*    SHRI5M32Z4R2IEPO5IXU7NULMNTCQM
+*    SHRI5M32Z4R2IEPO5IXU7NULMNOCQM
+*    SHRI5M32Z4R2IEPO5IXU7NULMNQCQM
+*    SHRI5M32Z4R2IEPO5IXU7NULMNUCQM
+*    SHRI5M32Z4R2IEPO5IXU7NULMNPCQM
+*    SHRI5M32Z4R2IEPO5IXU7NULMNVCQM.
 
 
 
@@ -14092,7 +14243,8 @@ class LCL_EXCEL_WORKSHEET implementation.
 
     CONSTANTS:
       lc_top_left_column TYPE zexcel_cell_column_alpha VALUE 'A',
-      lc_top_left_row    TYPE zexcel_cell_row VALUE 1.
+      lc_top_left_row    TYPE zexcel_cell_row VALUE 1,
+      lc_no_currency     TYPE waers_curc VALUE IS INITIAL.
 
     DATA:
       lv_row_int              TYPE zexcel_cell_row,
@@ -14118,7 +14270,8 @@ class LCL_EXCEL_WORKSHEET implementation.
       <ls_field_catalog>        TYPE zexcel_s_fieldcatalog,
       <ls_field_catalog_custom> TYPE zexcel_s_fieldcatalog,
       <fs_table_line>           TYPE any,
-      <fs_fldval>               TYPE any.
+      <fs_fldval>               TYPE any,
+      <fs_fldval_currency>      TYPE waers.
 
     ls_settings = is_table_settings.
 
@@ -14217,6 +14370,7 @@ class LCL_EXCEL_WORKSHEET implementation.
       LOOP AT ip_table ASSIGNING <fs_table_line>.
 
         ASSIGN COMPONENT <ls_field_catalog>-fieldname OF STRUCTURE <fs_table_line> TO <fs_fldval>.
+
         " issue #290 Add formula support in table
         IF <ls_field_catalog>-formula EQ abap_true.
           IF <ls_field_catalog>-style IS NOT INITIAL.
@@ -14268,18 +14422,26 @@ class LCL_EXCEL_WORKSHEET implementation.
                           ip_column_formula_id = ls_column_formula-id ).
           ENDIF.
         ELSE.
+          IF <ls_field_catalog>-currency_column IS INITIAL OR ip_conv_curr_amt_ext = abap_false.
+            ASSIGN lc_no_currency TO <fs_fldval_currency>.
+          ELSE.
+            ASSIGN COMPONENT <ls_field_catalog>-currency_column OF STRUCTURE <fs_table_line> TO <fs_fldval_currency>.
+          ENDIF.
+
           IF <ls_field_catalog>-style IS NOT INITIAL.
             IF <ls_field_catalog>-abap_type IS NOT INITIAL.
-              me->set_cell( ip_column = lv_column_alpha
-                          ip_row    = lv_row_int
-                          ip_value  = <fs_fldval>
-                          ip_abap_type = <ls_field_catalog>-abap_type
-                          ip_style  = <ls_field_catalog>-style
-                          ip_conv_exit_length = ip_conv_exit_length ).
+              me->set_cell( ip_column           = lv_column_alpha
+                            ip_row              = lv_row_int
+                            ip_value            = <fs_fldval>
+                            ip_abap_type        = <ls_field_catalog>-abap_type
+                            ip_currency         = <fs_fldval_currency>
+                            ip_style            = <ls_field_catalog>-style
+                            ip_conv_exit_length = ip_conv_exit_length ).
             ELSE.
               me->set_cell( ip_column = lv_column_alpha
                             ip_row    = lv_row_int
                             ip_value  = <fs_fldval>
+                            ip_currency = <fs_fldval_currency>
                             ip_style  = <ls_field_catalog>-style
                             ip_conv_exit_length = ip_conv_exit_length ).
             ENDIF.
@@ -14288,11 +14450,13 @@ class LCL_EXCEL_WORKSHEET implementation.
               me->set_cell( ip_column = lv_column_alpha
                           ip_row    = lv_row_int
                           ip_abap_type = <ls_field_catalog>-abap_type
+                          ip_currency  = <fs_fldval_currency>
                           ip_value  = <fs_fldval>
                           ip_conv_exit_length = ip_conv_exit_length ).
             ELSE.
               me->set_cell( ip_column = lv_column_alpha
                             ip_row    = lv_row_int
+                            ip_currency = <fs_fldval_currency>
                             ip_value  = <fs_fldval>
                             ip_conv_exit_length = ip_conv_exit_length ).
             ENDIF.
@@ -16886,12 +17050,18 @@ class LCL_EXCEL_WORKSHEET implementation.
                cl_abap_typedescr=>typekind_decfloat OR
                cl_abap_typedescr=>typekind_decfloat16 OR
                cl_abap_typedescr=>typekind_decfloat34.
-            lo_addit = cl_abap_elemdescr=>get_f( ).
-            CREATE DATA lo_value_new TYPE HANDLE lo_addit.
-            ASSIGN lo_value_new->* TO <fs_numeric>.
-            IF sy-subrc = 0.
-              <fs_numeric> = <fs_value>.
-              lv_value = Lcl_excel_common=>number_to_excel_string( ip_value = <fs_numeric> ).
+            IF lv_value_type = cl_abap_typedescr=>typekind_packed
+                AND ip_currency IS NOT INITIAL.
+              lv_value = Lcl_excel_common=>number_to_excel_string( ip_value    = <fs_value>
+                                                                   ip_currency = ip_currency ).
+            ELSE.
+              lo_addit = cl_abap_elemdescr=>get_f( ).
+              CREATE DATA lo_value_new TYPE HANDLE lo_addit.
+              ASSIGN lo_value_new->* TO <fs_numeric>.
+              IF sy-subrc = 0.
+                <fs_numeric> = <fs_value>.
+                lv_value = Lcl_excel_common=>number_to_excel_string( ip_value = <fs_numeric> ).
+              ENDIF.
             ENDIF.
 
           WHEN cl_abap_typedescr=>typekind_char OR cl_abap_typedescr=>typekind_string OR cl_abap_typedescr=>typekind_num OR
@@ -19389,9 +19559,9 @@ endclass. "LCX_EXCEL implementation
 *"* use this source file for the definition and implementation of
 *"* local helper classes, interface definitions and type
 *"* declarations
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U DEFINITION DEFERRED.
-*CLASS Lcl_excel_writer_2007 DEFINITION LOCAL FRIENDS SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U.
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U DEFINITION CREATE PUBLIC .
+*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM DEFINITION DEFERRED.
+*CLASS Lcl_excel_writer_2007 DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM.
+CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM DEFINITION CREATE PUBLIC .
 
   PUBLIC SECTION.
     METHODS create IMPORTING io_worksheet         TYPE REF TO Lcl_excel_worksheet
@@ -19582,7 +19752,7 @@ CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U DEFINITION CREATE PUBLIC .
       add_ignored_errors.
 ENDCLASS.
 
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U IMPLEMENTATION.
+CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM IMPLEMENTATION.
   METHOD create.
     o_excel_ref    = io_excel_writer_2007.
     o_worksheet    = io_worksheet.
@@ -21211,13 +21381,13 @@ ENDCLASS.
 *include Lcl_excel_writer_2007=========ccau.
 *"* use this source file for your ABAP unit test classes
 
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHTB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHUB4U DEFINITION DEFERRED.
-*CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHVB4U DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDICQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDJCQM DEFINITION DEFERRED.
+*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDKCQM DEFINITION DEFERRED.
 *CLASS Lcl_excel_writer_2007 DEFINITION LOCAL FRIENDS
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHTB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHUB4U
-*    SHRIS5ZPAUXVKEPN5HWE45KZXHVB4U.
+*    SHRI5M32Z4R2IEPO5IXU7N75DDICQM
+*    SHRI5M32Z4R2IEPO5IXU7N75DDJCQM
+*    SHRI5M32Z4R2IEPO5IXU7N75DDKCQM.
 
 
 
@@ -24625,7 +24795,7 @@ class LCL_EXCEL_WRITER_2007 implementation.
 
     DATA: lo_document        TYPE REF TO if_ixml_document,
           lo_element_root    TYPE REF TO if_ixml_element,
-          lo_create_xl_sheet TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U.
+          lo_create_xl_sheet TYPE REF TO SHRI5M32Z4R2IEPO5IXU7N75DDGCQM.
 
 
 
@@ -27601,7 +27771,7 @@ class LCL_EXCEL_CONVERTER implementation.
 
   ENDMETHOD.
   METHOD class_constructor.
-    DATA: ls_objects TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH4B4U.
+    DATA: ls_objects TYPE SHRI5M32Z4R2IEPO5IXU7N75DDRCQM.
     DATA: ls_option TYPE zexcel_s_converter_option,
           l_uname   TYPE sy-uname.
 
@@ -27711,7 +27881,7 @@ class LCL_EXCEL_CONVERTER implementation.
 
   ENDMETHOD.
   METHOD create_color_style.
-    DATA: ls_styles TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH7B4U.
+    DATA: ls_styles TYPE SHRI5M32Z4R2IEPO5IXU7N75DDUCQM.
     DATA: lo_style TYPE REF TO Lcl_excel_style.
 
     READ TABLE wt_styles INTO ls_styles WITH KEY guid = i_style.
@@ -28042,7 +28212,7 @@ class LCL_EXCEL_CONVERTER implementation.
   ENDMETHOD.
   METHOD execute_converter.
     DATA: lo_if               TYPE REF TO Lif_excel_converter,
-          ls_types            TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH4B4U,
+          ls_types            TYPE SHRI5M32Z4R2IEPO5IXU7N75DDRCQM,
           lo_addit            TYPE REF TO cl_abap_classdescr,
           lo_addit_superclass TYPE REF TO cl_abap_classdescr.
 
@@ -28101,7 +28271,7 @@ class LCL_EXCEL_CONVERTER implementation.
       ls_impkey                 TYPE seor_implementing_key,
       ls_classkey               TYPE seoclskey,
       lr_implementation         TYPE REF TO Lif_excel_converter,
-      ls_object                 TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH4B4U,
+      ls_object                 TYPE SHRI5M32Z4R2IEPO5IXU7N75DDRCQM,
       lr_classdescr             TYPE REF TO cl_abap_classdescr.
 
     ls_classkey-clsname = 'LIF_EXCEL_CONVERTER'.
@@ -28142,7 +28312,7 @@ class LCL_EXCEL_CONVERTER implementation.
   ENDMETHOD.
   METHOD get_color_style.
     DATA: ls_colors       TYPE zexcel_s_converter_col,
-          ls_color_styles TYPE SHRIS5ZPAUXVKEPN5HWE45KZXIAB4U,
+          ls_color_styles TYPE SHRI5M32Z4R2IEPO5IXU7N75DDVCQM,
           lo_style        TYPE REF TO Lcl_excel_style.
 
     r_style = i_style. " Default we change nothing
@@ -28265,7 +28435,7 @@ class LCL_EXCEL_CONVERTER implementation.
 
   ENDMETHOD.
   METHOD get_style.
-    DATA: ls_styles TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH7B4U,
+    DATA: ls_styles TYPE SHRI5M32Z4R2IEPO5IXU7N75DDUCQM,
           lo_style  TYPE REF TO Lcl_excel_style.
 
     CLEAR r_style.
@@ -28466,8 +28636,8 @@ class LCL_EXCEL_CONVERTER implementation.
           l_formula         TYPE zexcel_cell_formula,
           l_style           TYPE zexcel_cell_style,
           l_text            TYPE string,
-          ls_sort_values    TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH5B4U,
-          ls_subtotal_rows  TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH6B4U,
+          ls_sort_values    TYPE SHRI5M32Z4R2IEPO5IXU7N75DDSCQM,
+          ls_subtotal_rows  TYPE SHRI5M32Z4R2IEPO5IXU7N75DDTCQM,
           l_sort_level      TYPE int4,
           l_hidden          TYPE int4,
           l_line            TYPE i,
@@ -28481,7 +28651,7 @@ class LCL_EXCEL_CONVERTER implementation.
                    <fs_sfcat>   TYPE zexcel_s_converter_fcat,
                    <fs_fldval>  TYPE any,
                    <fs_sortval> TYPE any,
-                   <fs_sortv>   TYPE SHRIS5ZPAUXVKEPN5HWE45KZXH5B4U.
+                   <fs_sortv>   TYPE SHRI5M32Z4R2IEPO5IXU7N75DDSCQM.
 
     ASSIGN wo_data->* TO <fs_tab> .
 
@@ -29000,7 +29170,7 @@ class LCL_EXCEL_CONVERTER_ALV implementation.
   ENDMETHOD.
   METHOD class_constructor.
 * let's fill the color conversion routines.
-    DATA: ls_color TYPE SHRIS5ZPAUXVKEPN5HWE45KZXIBB4U.
+    DATA: ls_color TYPE SHRI5M32Z4R2IEPO5IXU7N75DDWCQM.
 * 0 all combination the same
     ls_color-col       = 0.
     ls_color-int       = 0.
@@ -29207,7 +29377,7 @@ class LCL_EXCEL_CONVERTER_ALV implementation.
   ENDMETHOD.
   METHOD get_color.
     DATA: ls_con_col TYPE zexcel_s_converter_col,
-          ls_color   TYPE SHRIS5ZPAUXVKEPN5HWE45KZXIBB4U,
+          ls_color   TYPE SHRI5M32Z4R2IEPO5IXU7N75DDWCQM,
           l_line     TYPE i,
           l_color(4) TYPE c.
     FIELD-SYMBOLS: <fs_tab>  TYPE STANDARD TABLE,
@@ -30148,12 +30318,12 @@ endclass. "LCL_EXCEL_CONVERTER_SALV_TABLE implementation
 *>>>>>>> LCL_EXCEL_OLE <<<<<<<*
 
 *--------------------------------------------------------------------*
-* CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIFB4U
+* CLASS SHRI5M32Z4R2IEPO5IXU7N75DD2CQM
 *--------------------------------------------------------------------*
 * to get protected attribute and method of cl_gui_alv_grid
 * use for method bind_ALV
 *--------------------------------------------------------------------*
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIFB4U DEFINITION INHERITING FROM cl_gui_alv_grid.
+CLASS SHRI5M32Z4R2IEPO5IXU7N75DD2CQM DEFINITION INHERITING FROM cl_gui_alv_grid.
 
   PUBLIC SECTION.
 * get ALV grid data
@@ -30163,7 +30333,7 @@ CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIFB4U DEFINITION INHERITING FROM cl_gui_alv_grid.
       EXPORTING
         et_table  TYPE REF TO data.           " dta table
 
-ENDCLASS.                    "SHRIS5ZPAUXVKEPN5HWE45KZXIFB4U DEFINITION
+ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7N75DD2CQM DEFINITION
 
 *"* class LCL_EXCEL_OLE definition
 *"* public declarations
@@ -30229,9 +30399,9 @@ endclass. "LCL_EXCEL_OLE definition
 *"* declarations
 
 *&---------------------------------------------------------------------*
-*&       Class (Implementation)  SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U
+*&       Class (Implementation)  SHRI5M32Z4R2IEPO5IXU7N75DDZCQM
 *&---------------------------------------------------------------------*
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U IMPLEMENTATION.
+CLASS SHRI5M32Z4R2IEPO5IXU7N75DDZCQM IMPLEMENTATION.
   METHOD constructor.
 *                IMPORTING object_name TYPE c
 *                          method_name TYPE c.
@@ -30316,12 +30486,12 @@ CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U IMPLEMENTATION.
     message_id = me->message_id.
     message_number = me->message_nr.
   ENDMETHOD.                    "i_oi_error~get_message
-ENDCLASS.               "SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U
+ENDCLASS.               "SHRI5M32Z4R2IEPO5IXU7N75DDZCQM
 
 *&---------------------------------------------------------------------*
 *&       Class (Implementation)  CL_GRID_ACCESSION
 *&---------------------------------------------------------------------*
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIFB4U IMPLEMENTATION.
+CLASS SHRI5M32Z4R2IEPO5IXU7N75DD2CQM IMPLEMENTATION.
 
   METHOD get_alv_attributes.
     CREATE DATA et_table LIKE io_grid->mt_outtab.
@@ -30386,7 +30556,7 @@ class LCL_EXCEL_OLE implementation.
     DATA: l_tabname             TYPE  kkblo_tabname.
 
 * local object
-    DATA: lo_grid               TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXIFB4U.
+    DATA: lo_grid               TYPE REF TO SHRI5M32Z4R2IEPO5IXU7N75DD2CQM.
 
 * data table get from ALV
     DATA: lt_alv                  TYPE REF TO data.
@@ -30503,7 +30673,7 @@ class LCL_EXCEL_OLE implementation.
 
     DATA: sema_type         TYPE  c.
 
-    DATA l_error           TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U.
+    DATA l_error           TYPE REF TO SHRI5M32Z4R2IEPO5IXU7N75DDZCQM.
     DATA count              TYPE i.
     DATA datac              TYPE i.
     DATA datareal TYPE i. " exporting column number

@@ -386,6 +386,7 @@ TYPES BEGIN OF ZEXCEL_S_FIELDCATALOG.
 TYPES ABAP_TYPE TYPE C LENGTH 1.
 TYPES COLUMN_FORMULA TYPE string.
 TYPES COLUMN_NAME TYPE ZEXCEL_COLUMN_NAME.
+TYPES CURRENCY_COLUMN TYPE ZEXCEL_FIELDNAME.
 TYPES DYNPFLD TYPE DYNPROFLD.
 TYPES FIELDNAME TYPE ZEXCEL_FIELDNAME.
 TYPES FORMULA TYPE FLAG.
@@ -1080,11 +1081,11 @@ endclass. "LCL_EXCEL_OBSOLETE_FUNC_WRAP definition
 *"* components in the private section
 
 *--------------------------------------------------------------------*
-* CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U
+* CLASS SHRI5M32Z4R2IEPO5IXU7N75DDZCQM
 *--------------------------------------------------------------------*
 * use for method bind_ALV
 *--------------------------------------------------------------------*
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U DEFINITION.
+CLASS SHRI5M32Z4R2IEPO5IXU7N75DDZCQM DEFINITION.
   PUBLIC SECTION.
     INTERFACES: i_oi_error.
     DATA: error_nr TYPE i.
@@ -1102,7 +1103,7 @@ CLASS SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U DEFINITION.
           param2 TYPE sy-msgv2,
           param3 TYPE sy-msgv3,
           param4 TYPE sy-msgv4.
-ENDCLASS.                    "SHRIS5ZPAUXVKEPN5HWE45KZXIEB4U DEFINITION
+ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7N75DDZCQM DEFINITION
 *class-pool .
 *"* class pool for class LCL_EXCEL_RANGES
 
@@ -3722,7 +3723,7 @@ CLASS Lcl_excel_common DEFINITION
         Lcx_excel.
     CLASS-METHODS convert_columnrow2column_a_row
       IMPORTING
-        !i_columnrow TYPE clike
+        !i_columnrow  TYPE clike
       EXPORTING
         !e_column     TYPE zexcel_cell_column_alpha
         !e_column_int TYPE zexcel_cell_column
@@ -3751,7 +3752,7 @@ CLASS Lcl_excel_common DEFINITION
         !e_row       TYPE zexcel_cell_row .
     CLASS-METHODS clone_ixml_with_namespaces
       IMPORTING
-        element TYPE REF TO if_ixml_element
+        element       TYPE REF TO if_ixml_element
       RETURNING
         VALUE(result) TYPE REF TO if_ixml_element.
     CLASS-METHODS date_to_excel_string
@@ -3807,6 +3808,7 @@ CLASS Lcl_excel_common DEFINITION
     CLASS-METHODS number_to_excel_string
       IMPORTING
         VALUE(ip_value) TYPE numeric
+        ip_currency     TYPE waers_curc OPTIONAL
       RETURNING
         VALUE(ep_value) TYPE zexcel_cell_value .
     CLASS-METHODS recursive_class_to_struct
@@ -3923,51 +3925,51 @@ endclass. "LCL_EXCEL_COMMON definition
 *"* definitions, interfaces or data types) you need for method
 *"* implementation or private method's signature
 
-TYPES SHRIS5ZPAUXVKEPN5HWE45KZXHZB4U TYPE c LENGTH 1.
+TYPES SHRI5M32Z4R2IEPO5IXU7N75DDOCQM TYPE c LENGTH 1.
 
-TYPES:   BEGIN OF SHRIS5ZPAUXVKEPN5HWE45KZXH4B4U,
+TYPES:   BEGIN OF SHRI5M32Z4R2IEPO5IXU7N75DDRCQM,
            seoclass   TYPE seoclsname,
            clsname    TYPE seoclsname,
-         END OF SHRIS5ZPAUXVKEPN5HWE45KZXH4B4U,
-         tt_alv_types TYPE HASHED TABLE OF SHRIS5ZPAUXVKEPN5HWE45KZXH4B4U WITH UNIQUE KEY seoclass.
+         END OF SHRI5M32Z4R2IEPO5IXU7N75DDRCQM,
+         tt_alv_types TYPE HASHED TABLE OF SHRI5M32Z4R2IEPO5IXU7N75DDRCQM WITH UNIQUE KEY seoclass.
 
-TYPES:   BEGIN OF SHRIS5ZPAUXVKEPN5HWE45KZXH5B4U,
+TYPES:   BEGIN OF SHRI5M32Z4R2IEPO5IXU7N75DDSCQM,
             fieldname      TYPE fieldname,
             row_int        TYPE zexcel_cell_row,
             value          TYPE REF TO data,
             new            TYPE flag,
             sort_level     TYPE int4,
             is_collapsed   TYPE flag,
-         END OF SHRIS5ZPAUXVKEPN5HWE45KZXH5B4U,
+         END OF SHRI5M32Z4R2IEPO5IXU7N75DDSCQM,
 
-         tt_sort_values TYPE HASHED TABLE OF SHRIS5ZPAUXVKEPN5HWE45KZXH5B4U WITH UNIQUE KEY fieldname.
-TYPES:   BEGIN OF SHRIS5ZPAUXVKEPN5HWE45KZXH6B4U,
+         tt_sort_values TYPE HASHED TABLE OF SHRI5M32Z4R2IEPO5IXU7N75DDSCQM WITH UNIQUE KEY fieldname.
+TYPES:   BEGIN OF SHRI5M32Z4R2IEPO5IXU7N75DDTCQM,
             row_int        TYPE zexcel_cell_row,
             row_int_start  TYPE zexcel_cell_row,
             columnname     TYPE fieldname,
-         END OF SHRIS5ZPAUXVKEPN5HWE45KZXH6B4U,
+         END OF SHRI5M32Z4R2IEPO5IXU7N75DDTCQM,
 
-         tt_subtotal_rows TYPE HASHED TABLE OF SHRIS5ZPAUXVKEPN5HWE45KZXH6B4U WITH UNIQUE KEY row_int.
+         tt_subtotal_rows TYPE HASHED TABLE OF SHRI5M32Z4R2IEPO5IXU7N75DDTCQM WITH UNIQUE KEY row_int.
 
-TYPES:   BEGIN OF SHRIS5ZPAUXVKEPN5HWE45KZXH7B4U,
-            type         TYPE SHRIS5ZPAUXVKEPN5HWE45KZXHZB4U,
+TYPES:   BEGIN OF SHRI5M32Z4R2IEPO5IXU7N75DDUCQM,
+            type         TYPE SHRI5M32Z4R2IEPO5IXU7N75DDOCQM,
             alignment    TYPE zexcel_alignment,
             inttype      TYPE abap_typekind,
             decimals     TYPE int1,
             style        TYPE REF TO Lcl_excel_style,
             guid         TYPE zexcel_cell_style,
-         END OF SHRIS5ZPAUXVKEPN5HWE45KZXH7B4U,
+         END OF SHRI5M32Z4R2IEPO5IXU7N75DDUCQM,
 
-         tt_styles TYPE HASHED TABLE OF SHRIS5ZPAUXVKEPN5HWE45KZXH7B4U  WITH UNIQUE KEY type alignment inttype decimals.
+         tt_styles TYPE HASHED TABLE OF SHRI5M32Z4R2IEPO5IXU7N75DDUCQM  WITH UNIQUE KEY type alignment inttype decimals.
 
-TYPES:   BEGIN OF SHRIS5ZPAUXVKEPN5HWE45KZXIAB4U,
+TYPES:   BEGIN OF SHRI5M32Z4R2IEPO5IXU7N75DDVCQM,
             guid_old  TYPE zexcel_cell_style,
             fontcolor TYPE zexcel_style_color_argb,
             fillcolor TYPE zexcel_style_color_argb,
             style_new TYPE REF TO Lcl_excel_style,
-         END OF SHRIS5ZPAUXVKEPN5HWE45KZXIAB4U,
+         END OF SHRI5M32Z4R2IEPO5IXU7N75DDVCQM,
 
-         tt_color_styles TYPE HASHED TABLE OF SHRIS5ZPAUXVKEPN5HWE45KZXIAB4U  WITH UNIQUE KEY guid_old fontcolor fillcolor.
+         tt_color_styles TYPE HASHED TABLE OF SHRI5M32Z4R2IEPO5IXU7N75DDVCQM  WITH UNIQUE KEY guid_old fontcolor fillcolor.
 
 *"* class LCL_EXCEL_CONVERTER definition
 *"* public declarations
@@ -4198,7 +4200,7 @@ CLASS Lcl_excel_converter DEFINITION
         VALUE(r_function_number) TYPE int1 .
     METHODS get_style
       IMPORTING
-        !i_type        TYPE SHRIS5ZPAUXVKEPN5HWE45KZXHZB4U
+        !i_type        TYPE SHRI5M32Z4R2IEPO5IXU7N75DDOCQM
         !i_alignment   TYPE zexcel_alignment DEFAULT space
         !i_inttype     TYPE abap_typekind DEFAULT space
         !i_decimals    TYPE int1 DEFAULT 0
@@ -4237,15 +4239,15 @@ endclass. "LCL_EXCEL_CONVERTER definition
 *"* use this source file for any type declarations (class
 *"* definitions, interfaces or data types) you need for method
 *"* implementation or private method's signature
-TYPES: BEGIN OF SHRIS5ZPAUXVKEPN5HWE45KZXIBB4U,
+TYPES: BEGIN OF SHRI5M32Z4R2IEPO5IXU7N75DDWCQM,
            col       TYPE lvc_col,
            int       TYPE lvc_int,
            inv       TYPE lvc_inv,
            fontcolor TYPE zexcel_style_color_argb,
            fillcolor TYPE zexcel_style_color_argb,
-       END OF SHRIS5ZPAUXVKEPN5HWE45KZXIBB4U,
+       END OF SHRI5M32Z4R2IEPO5IXU7N75DDWCQM,
 
-       tt_col_converter TYPE HASHED TABLE OF SHRIS5ZPAUXVKEPN5HWE45KZXIBB4U WITH UNIQUE KEY col int inv.
+       tt_col_converter TYPE HASHED TABLE OF SHRI5M32Z4R2IEPO5IXU7N75DDWCQM WITH UNIQUE KEY col int inv.
 
 *"* class LCL_EXCEL_CONVERTER_ALV definition
 *"* public declarations
@@ -5606,7 +5608,7 @@ endclass. "LCL_EXCEL_RANGE definition
 *"* implementation or private method's signature
 
 *
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGQB4U DEFINITION ABSTRACT.
+CLASS SHRI5M32Z4R2IEPO5IXU7NULMM6CQM DEFINITION ABSTRACT.
   PUBLIC SECTION.
     METHODS read ABSTRACT
       IMPORTING i_filename       TYPE csequence
@@ -5730,6 +5732,13 @@ CLASS Lcl_excel_reader_2007 DEFINITION
       END OF t_shared_string .
     TYPES:
       t_shared_strings TYPE STANDARD TABLE OF t_shared_string WITH DEFAULT KEY .
+    TYPES:
+      BEGIN OF t_table,
+        id     TYPE string,
+        target TYPE string,
+      END OF t_table .
+    TYPES:
+      t_tables TYPE HASHED TABLE OF t_table WITH UNIQUE KEY id .
 
     DATA shared_strings TYPE t_shared_strings .
     DATA styles TYPE t_style_refs .
@@ -5892,6 +5901,15 @@ CLASS Lcl_excel_reader_2007 DEFINITION
         !io_worksheet      TYPE REF TO Lcl_excel_worksheet
       RAISING
         Lcx_excel .
+    "! <p class="shorttext synchronized" lang="en">Load worksheet tables</p>
+    METHODS load_worksheet_tables
+      IMPORTING
+        io_ixml_worksheet TYPE REF TO if_ixml_document
+        io_worksheet      TYPE REF TO Lcl_excel_worksheet
+        iv_dirname        TYPE string
+        it_tables         TYPE t_tables
+      RAISING
+        Lcx_excel .
     CLASS-METHODS resolve_path
       IMPORTING
         !ip_path         TYPE string
@@ -5943,7 +5961,7 @@ CLASS Lcl_excel_reader_2007 DEFINITION
 *include Lcl_excel_reader_2007=========ci.
   PRIVATE SECTION.
 
-    DATA zip TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXGQB4U .
+    DATA zip TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMM6CQM .
     DATA: gid TYPE i.
 
     METHODS create_zip_archive
@@ -5951,7 +5969,7 @@ CLASS Lcl_excel_reader_2007 DEFINITION
         !i_xlsx_binary       TYPE xstring
         !i_use_alternate_zip TYPE seoclsname OPTIONAL
       RETURNING
-        VALUE(e_zip)         TYPE REF TO SHRIS5ZPAUXVKEPN5HWE45KZXGQB4U
+        VALUE(e_zip)         TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
       RAISING
         Lcx_excel .
     METHODS read_from_applserver
@@ -7237,6 +7255,7 @@ CLASS Lcl_excel_worksheet DEFINITION
         VALUE(iv_default_descr) TYPE c OPTIONAL
         !iv_no_line_if_empty    TYPE abap_bool DEFAULT abap_false
         !ip_conv_exit_length    TYPE abap_bool DEFAULT abap_false
+        !ip_conv_curr_amt_ext   TYPE abap_bool DEFAULT abap_false
       EXPORTING
         !es_table_settings      TYPE zexcel_s_table_settings
       RAISING
@@ -7564,6 +7583,7 @@ CLASS Lcl_excel_worksheet DEFINITION
         !ip_hyperlink         TYPE REF TO Lcl_excel_hyperlink OPTIONAL
         !ip_data_type         TYPE zexcel_cell_data_type OPTIONAL
         !ip_abap_type         TYPE abap_typekind OPTIONAL
+        !ip_currency          TYPE waers_curc OPTIONAL
         !it_rtf               TYPE zexcel_t_rtf OPTIONAL
         !ip_column_formula_id TYPE mty_s_column_formula-id OPTIONAL
         !ip_conv_exit_length  TYPE abap_bool DEFAULT abap_false
@@ -7866,15 +7886,15 @@ CLASS Lcl_excel_worksheet DEFINITION
         iv_default_descr TYPE c
         it_field_catalog TYPE zexcel_t_fieldcatalog
       RETURNING
-        VALUE(result) TYPE zexcel_t_fieldcatalog.
+        VALUE(result)    TYPE zexcel_t_fieldcatalog.
     METHODS normalize_columnrow_parameter
       IMPORTING
-        ip_columnrow  TYPE csequence OPTIONAL
-        ip_column     TYPE simple OPTIONAL
-        ip_row        TYPE zexcel_cell_row OPTIONAL
+        ip_columnrow TYPE csequence OPTIONAL
+        ip_column    TYPE simple OPTIONAL
+        ip_row       TYPE zexcel_cell_row OPTIONAL
       EXPORTING
-        ep_column     TYPE zexcel_cell_column
-        ep_row        TYPE zexcel_cell_row
+        ep_column    TYPE zexcel_cell_column
+        ep_row       TYPE zexcel_cell_row
       RAISING
         Lcx_excel.
     METHODS normalize_range_parameter
@@ -7903,7 +7923,7 @@ CLASS Lcl_excel_worksheet DEFINITION
       RAISING
         Lcx_excel .
 endclass. "LCL_EXCEL_WORKSHEET definition
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U DEFINITION DEFERRED.
+CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM DEFINITION DEFERRED.
 *class-pool .
 *"* class pool for class LCL_EXCEL_WRITER_2007
 
@@ -7921,7 +7941,7 @@ CLASS Lcl_excel_writer_2007 DEFINITION
 *public
   CREATE PUBLIC
 FRIENDS
-SHRIS5ZPAUXVKEPN5HWE45KZXHRB4U
+SHRI5M32Z4R2IEPO5IXU7N75DDGCQM
 
 
 
@@ -8407,7 +8427,7 @@ endclass. "LCL_EXCEL_FILL_TEMPLATE definition
 *"* components in the private section
 
 * Signal for "Not found"
-CLASS SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U DEFINITION INHERITING FROM cx_static_check.
+CLASS SHRI5M32Z4R2IEPO5IXU7NULMNFCQM DEFINITION INHERITING FROM cx_static_check.
   PUBLIC SECTION.
     DATA error TYPE string.
     METHODS constructor
@@ -8476,14 +8496,14 @@ CLASS Lcl_excel_reader_huge_file DEFINITION
         !iv_element_name TYPE string
         !io_reader       TYPE REF TO if_sxml_reader
       RAISING
-        SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U .
+        SHRI5M32Z4R2IEPO5IXU7NULMNFCQM .
     METHODS fill_cell_from_attributes
       IMPORTING
         !io_reader     TYPE REF TO if_sxml_reader
       RETURNING
         VALUE(es_cell) TYPE t_cell
       RAISING
-        SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U
+        SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
         Lcx_excel.
     METHODS read_shared_strings
       IMPORTING
@@ -8509,20 +8529,20 @@ CLASS Lcl_excel_reader_huge_file DEFINITION
       RETURNING
         VALUE(ev_value) TYPE string
       RAISING
-        SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U .
+        SHRI5M32Z4R2IEPO5IXU7NULMNFCQM .
     METHODS get_style
       IMPORTING
         !iv_index            TYPE any
       RETURNING
         VALUE(ev_style_guid) TYPE zexcel_cell_style
       RAISING
-        SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U .
+        SHRI5M32Z4R2IEPO5IXU7NULMNFCQM .
     METHODS read_worksheet_data
       IMPORTING
         !io_reader    TYPE REF TO if_sxml_reader
         !io_worksheet TYPE REF TO Lcl_excel_worksheet
       RAISING
-        SHRIS5ZPAUXVKEPN5HWE45KZXGXB4U
+        SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
         Lcx_excel .
     METHODS get_sxml_reader
       IMPORTING

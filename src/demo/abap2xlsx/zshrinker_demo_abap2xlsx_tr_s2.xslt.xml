@@ -5,7 +5,7 @@
    <ATTRIBUTES>
     <XSLTDESC>ZSHRINKER_DEMO_ABAP2XLSX_TR_S2</XSLTDESC>
     <LANGU>E</LANGU>
-    <DESCRIPT>Demo - Copy of ZEXCEL_TR_SHEET with few changes</DESCRIPT>
+    <DESCRIPT>Demo - Result of shrinking abap2xlsx</DESCRIPT>
    </ATTRIBUTES>
   </asx:values>
  </asx:abap>

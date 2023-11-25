@@ -36,5 +36,3 @@ AT SELECTION-SCREEN.
     CATCH cx_root INTO DATA(lx_root).
       MESSAGE lx_root TYPE 'E'.
   ENDTRY.
-
-*INCLUDE zshrinker_demo_abap2xlsx_imp.

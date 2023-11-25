@@ -912,3 +912,28 @@ CLASS lcl_abap_statement_at_cursor IMPLEMENTATION.
   ENDMETHOD.
 
 ENDCLASS.
+
+
+CLASS lcl_uuid IMPLEMENTATION.
+
+  METHOD class_constructor.
+
+    uuid_generator = cl_uuid_factory=>create_system_uuid( ).
+
+  ENDMETHOD.
+
+
+  METHOD get_c26.
+
+    result = uuid_generator->create_uuid_c26( ).
+
+  ENDMETHOD.
+
+
+  METHOD get_x16.
+
+    result = uuid_generator->create_uuid_x16( ).
+
+  ENDMETHOD.
+
+ENDCLASS.

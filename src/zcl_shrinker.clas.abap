@@ -188,7 +188,7 @@ CLASS zcl_shrinker DEFINITION
         domname  TYPE dd04l-domname,
         reftype  TYPE dd04l-reftype.
         INCLUDE TYPE ty_ddic_elementary_type AS elem_info.
-    TYPES: END OF ty_ddic_data_element.
+      TYPES: END OF ty_ddic_data_element.
     TYPES ty_ddic_data_elements TYPE STANDARD TABLE OF ty_ddic_data_element WITH EMPTY KEY.
     TYPES:
       BEGIN OF ty_ddic_structure,
@@ -205,7 +205,7 @@ CLASS zcl_shrinker DEFINITION
         comptype  TYPE dd03l-comptype,
         reftype   TYPE dd03l-reftype.
         INCLUDE TYPE ty_ddic_elementary_type AS elem_info.
-    TYPES: END OF ty_ddic_structure_component.
+      TYPES: END OF ty_ddic_structure_component.
     TYPES ty_ddic_structure_components TYPE STANDARD TABLE OF ty_ddic_structure_component WITH EMPTY KEY.
     TYPES:
       BEGIN OF ty_ddic_table_type,
@@ -218,7 +218,7 @@ CLASS zcl_shrinker DEFINITION
         ttypkind   TYPE dd40l-ttypkind,
         accessmode TYPE dd40l-accessmode.
         INCLUDE TYPE ty_ddic_elementary_type AS elem_info.
-    TYPES: END OF ty_ddic_table_type.
+      TYPES: END OF ty_ddic_table_type.
     TYPES ty_ddic_table_types TYPE STANDARD TABLE OF ty_ddic_table_type WITH EMPTY KEY.
     TYPES:
       BEGIN OF ty_ddic_table_type_sec_key,
@@ -414,7 +414,7 @@ CLASS zcl_shrinker DEFINITION
         VALUE(result)  TYPE string.
 
     METHODS on_program_generated
-      FOR EVENT program_generated OF lcl_program_load
+        FOR EVENT program_generated OF lcl_program_load
       IMPORTING
         progname.
 
@@ -456,7 +456,9 @@ CLASS zcl_shrinker DEFINITION
         range_of_obj_name TYPE ty_range_of_obj_name
         range_of_obj_type TYPE ty_range_of_obj_type
       RETURNING
-        VALUE(result)     TYPE ty_miscellaneous.
+        VALUE(result)     TYPE ty_miscellaneous
+      RAISING
+        zcx_shrinker.
 
     METHODS select_ddic_objects
       IMPORTING
@@ -1366,10 +1368,10 @@ CLASS zcl_shrinker IMPLEMENTATION.
                                             get_abap_for_ddic_elem_info( type_name = auxiliary_type_name
                                                                          ref_to    = xsdbool( table_type-reftype IS NOT INITIAL )
                                                                          elem_info = table_type-elem_info ) )
-            last_secondary_key_name = REDUCE #( INIT t = ``
-                                                 FOR <sec_key> IN sec_keys
-                                                 WHERE ( typename = table_type-typename )
-                                                 NEXT t = <sec_key>-seckeyname )
+            last_secondary_key_name = REDUCE string( INIT t = ``
+                                                     FOR <sec_key> IN sec_keys
+                                                     WHERE ( typename = table_type-typename )
+                                                     NEXT t = <sec_key>-seckeyname )
         IN
         ( LINES OF COND #( WHEN auxiliary_type_abap_line IS NOT INITIAL THEN auxiliary_type_abap_line ) )
         ( |TYPES { table_type-typename
@@ -1833,13 +1835,7 @@ CLASS zcl_shrinker IMPLEMENTATION.
 
   METHOD get_random_replacement_name.
 
-    STATICS uuid_generator TYPE REF TO if_system_uuid.
-
-    IF uuid_generator IS NOT BOUND.
-      uuid_generator = cl_uuid_factory=>create_system_uuid( ).
-    ENDIF.
-
-    result = 'SHRI' && uuid_generator->create_uuid_c26( ).
+    result = 'SHRI' && lcl_uuid=>get_c26( ).
 
   ENDMETHOD.
 
@@ -1847,11 +1843,12 @@ CLASS zcl_shrinker IMPLEMENTATION.
   METHOD get_table_type_key_components.
 
     result = concat_lines_of( sep   = ` `
-                              table = REDUCE #( INIT a = VALUE string_table( )
-                                                FOR <key_component> IN key_components
-                                                WHERE ( typename   = typename
-                                                    AND seckeyname = keyname )
-                                                NEXT a = VALUE #( BASE a ( |{ <key_component>-keyfield }| ) ) ) ).
+                              table = REDUCE string_table(
+                                        INIT a = VALUE string_table( )
+                                        FOR <key_component> IN key_components
+                                        WHERE ( typename   = typename
+                                            AND seckeyname = keyname )
+                                        NEXT a = VALUE #( BASE a ( |{ <key_component>-keyfield }| ) ) ) ).
 
   ENDMETHOD.
 
@@ -1860,8 +1857,6 @@ CLASS zcl_shrinker IMPLEMENTATION.
 
     DATA(abap_statement) = get_abap_statement_at_cursor( it_source = abap_source_code
                                                          i_linenr  = line_index ).
-*    DATA(abap_statement) = lcl_abap_statement_at_cursor=>get( it_source = abap_source_code
-*                                                              i_linenr  = line_index ).
     IF abap_statement-stokes IS INITIAL.
       result = VALUE #(
           first_line_index = line_index
@@ -1880,26 +1875,9 @@ CLASS zcl_shrinker IMPLEMENTATION.
           first_line_index = abap_statement-stokes[ 1 ]-row
           last_line_index  = abap_statement-stokes[ tabix_last_stokes ]-row
           whole_text       = whole_text
-*          concat_lines_of( sep = |\r\n| table = VALUE string_table(
-*                              ( LINES OF abap_source_code FROM abap_statement-stokes[ 1 ]-row TO abap_statement-stokes[ lines( abap_statement-stokes ) ]-row ) ) )
-*                              FOR <token> IN abap_statement-stokes
-*                              ( <token>-str ) ) )
           offset           = abap_statement-stokes[ 1 ]-col
           length           = strlen( whole_text ) - abap_statement-stokes[ 1 ]-col ).
     ENDIF.
-
-*    result-first_line_index = line_index.
-*    result-last_line_index = line_index.
-*    result-whole_text  = ``.
-*    WHILE result-last_line_index <= lines( abap_source_code ).
-*      result-whole_text = result-whole_text
-*                        && abap_source_code[ result-last_line_index ]
-*                        && ` `.
-*      IF abap_source_code[ result-last_line_index ] CA '.'.
-*        EXIT.
-*      ENDIF.
-*      result-last_line_index = result-last_line_index + 1.
-*    ENDWHILE.
 
   ENDMETHOD.
 
@@ -1910,11 +1888,9 @@ CLASS zcl_shrinker IMPLEMENTATION.
     " Recalculate WBCROSSGT
     "=================================================
 
-*    LOOP AT main_programs REFERENCE INTO DATA(main_program).
     DATA(wb_crossreference) = NEW cl_wb_crossreference( p_name    = progname
                                                         p_include = '' ).
     wb_crossreference->index_actualize( IMPORTING p_error = DATA(error) ).
-*    COMMIT WORK.
 
   ENDMETHOD.
 
@@ -2050,17 +2026,6 @@ CLASS zcl_shrinker IMPLEMENTATION.
                   AND local_friends = test_class->local_friends.
         ENDIF.
       ENDLOOP.
-
-*      " Remove implementation lines without definition (deleted above)
-*      LOOP AT test_classes REFERENCE INTO class_2
-*          WHERE is_definition = abap_false.
-*        IF NOT line_exists( test_classes[ name          = class_2->name
-*                                          is_definition = abap_true ] ).
-*          DELETE test_classes
-*                WHERE name          = class_2->name
-*                  AND is_definition = class_2->is_definition.
-*        ENDIF.
-*      ENDLOOP.
 
       "====================================
       " Replace test classes from local friends (CLASS ... DEFINITION ... LOCAL FRIENDS lcl_1 ... ltc_1 ltc_2 ...)
@@ -2235,7 +2200,6 @@ CLASS zcl_shrinker IMPLEMENTATION.
                                     case  = abap_false ).
           REPLACE SECTION OFFSET match->offset LENGTH match->length OF line->* WITH new_name.
         ENDIF.
-*        ENDIF.
 
         ASSERT 1 = 1. " debug helper
       ENDLOOP.
@@ -2246,38 +2210,30 @@ CLASS zcl_shrinker IMPLEMENTATION.
 
   METHOD select_ddic_objects.
 
-*    SELECT FROM dd01l
-*            INNER JOIN tadir
-*              ON tadir~obj_name = dd01l~domname
-*            FIELDS dd01l~domname, dd01l~datatype, dd01l~leng, dd01l~decimals
-*            WHERE tadir~object = 'DOMA'
-*              AND tadir~devclass IN @package_range
-*            INTO TABLE @result-domains.
-
-    SELECT FROM dd04l
+    SELECT dd04l~rollname, dd04l~domname, dd04l~reftype, dd04l~datatype, dd04l~leng, dd04l~decimals
+            FROM dd04l
             INNER JOIN tadir
               ON tadir~obj_name = dd04l~rollname
-            FIELDS dd04l~rollname, dd04l~domname, dd04l~reftype, dd04l~datatype, dd04l~leng, dd04l~decimals
             WHERE tadir~object = 'DTEL'
               AND tadir~devclass IN @package_range
               AND tadir~obj_name IN @range_of_obj_name
               AND dd04l~as4local = 'A'
             INTO TABLE @result-data_elements.
 
-    SELECT FROM dd02l
+    SELECT dd02l~tabname, dd02l~tabclass
+            FROM dd02l
             INNER JOIN tadir
               ON tadir~obj_name = dd02l~tabname
-            FIELDS dd02l~tabname, dd02l~tabclass
             WHERE tadir~object = 'TABL'
               AND tadir~devclass IN @package_range
               AND tadir~obj_name IN @range_of_obj_name
               AND dd02l~as4local = 'A'
             INTO TABLE @result-structures.
 
-    SELECT FROM dd03l
+    SELECT dd03l~tabname, dd03l~fieldname, dd03l~rollname, dd03l~precfield, dd03l~comptype, dd03l~reftype, dd03l~datatype, dd03l~leng, dd03l~decimals
+            FROM dd03l
             INNER JOIN tadir
               ON tadir~obj_name = dd03l~tabname
-            FIELDS dd03l~tabname, dd03l~fieldname, dd03l~rollname, dd03l~precfield, dd03l~comptype, dd03l~reftype, dd03l~datatype, dd03l~leng, dd03l~decimals
             WHERE tadir~object = 'TABL'
               AND tadir~devclass IN @package_range
               AND tadir~obj_name IN @range_of_obj_name
@@ -2286,30 +2242,30 @@ CLASS zcl_shrinker IMPLEMENTATION.
               AND dd03l~depth = 0        " skip components added via "component TYPE structure"
             INTO TABLE @result-structure_components.
 
-    SELECT FROM dd40l
+    SELECT dd40l~typename, dd40l~rowkind, dd40l~reftype, dd40l~rowtype, dd40l~keydef, dd40l~keykind, dd40l~ttypkind, dd40l~accessmode, dd40l~datatype, dd40l~leng, dd40l~decimals
+            FROM dd40l
             INNER JOIN tadir
               ON tadir~obj_name = dd40l~typename
-            FIELDS dd40l~typename, dd40l~rowkind, dd40l~reftype, dd40l~rowtype, dd40l~keydef, dd40l~keykind, dd40l~ttypkind, dd40l~accessmode, dd40l~datatype, dd40l~leng, dd40l~decimals
             WHERE tadir~object = 'TTYP'
               AND tadir~devclass IN @package_range
               AND tadir~obj_name IN @range_of_obj_name
               AND dd40l~as4local = 'A'
             INTO TABLE @result-table_types.
 
-    SELECT FROM dd42s
+    SELECT dd42s~typename, dd42s~seckeyname, dd42s~keyfdpos, dd42s~keyfield
+            FROM dd42s
             INNER JOIN tadir
               ON tadir~obj_name = dd42s~typename
-            FIELDS dd42s~typename, dd42s~seckeyname, dd42s~keyfdpos, dd42s~keyfield
             WHERE tadir~object = 'TTYP'
               AND tadir~devclass IN @package_range
               AND tadir~obj_name IN @range_of_obj_name
               AND dd42s~as4local = 'A'
             INTO TABLE @result-table_type_key_components.
 
-    SELECT FROM dd43l
+    SELECT dd43l~typename, dd43l~seckeyname, dd43l~seckeyunique, dd43l~accessmode, dd43l~kind
+            FROM dd43l
             INNER JOIN tadir
               ON tadir~obj_name = dd43l~typename
-            FIELDS dd43l~typename, dd43l~seckeyname, dd43l~seckeyunique, dd43l~accessmode, dd43l~kind
             WHERE tadir~object = 'TTYP'
               AND tadir~devclass IN @package_range
               AND tadir~obj_name IN @range_of_obj_name
@@ -2320,6 +2276,15 @@ CLASS zcl_shrinker IMPLEMENTATION.
 
 
   METHOD select_miscellaneous.
+    TYPES:
+      BEGIN OF ty_tadir_main_program,
+        pgmid             TYPE tadir-pgmid,
+        object            TYPE tadir-object,
+        obj_name          TYPE tadir-obj_name,
+        devclass          TYPE tadir-devclass,
+        main_program_name TYPE syrepid,
+      END OF ty_tadir_main_program.
+    TYPES ty_tadir_main_programs TYPE STANDARD TABLE OF ty_tadir_main_program WITH EMPTY KEY.
 
     IF objects IS INITIAL.
       SELECT pgmid, object, obj_name
@@ -2346,39 +2311,112 @@ CLASS zcl_shrinker IMPLEMENTATION.
     "=================================================
     " Make sure D010INC and WBCROSSGT are up-to-date
     "=================================================
-    SELECT FROM tadir
-        FIELDS tadir~pgmid,
-               tadir~object,
-               tadir~obj_name,
-               tadir~devclass,
-               CAST( CASE
-               WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
-                    AND left( tadir~obj_name, 1 ) = '/'
-                    THEN concat( '/', replace( substring( tadir~obj_name, 2, 39 ), '/', '/SAPL' ) )
-               WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
-                    AND left( tadir~obj_name, 1 ) <> '/'
-                    THEN concat( 'SAPL', tadir~obj_name )
-               WHEN tadir~object = 'CLAS'
-                    THEN concat( rpad( tadir~obj_name, 30, '=' ), 'CP' )
-               WHEN tadir~object = 'INTF'
-                    THEN concat( rpad( tadir~obj_name, 30, '=' ), 'IP' )
-               WHEN tadir~object = 'CNTX'
-                    THEN concat( 'CONTEXT_X_', tadir~obj_name )
-               ELSE " PROG
-                    tadir~obj_name
-               END AS CHAR( 40 ) ) AS master
+    DATA(tadir_main_programs) = VALUE ty_tadir_main_programs( ).
+    SELECT tadir~pgmid,
+           tadir~object,
+           tadir~obj_name,
+           tadir~devclass
+*           CAST( CASE
+*           WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
+*                AND left( tadir~obj_name, 1 ) = '/'
+*                THEN concat( '/', replace( substring( tadir~obj_name, 2, 39 ), '/', '/SAPL' ) )
+*           WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
+*                AND left( tadir~obj_name, 1 ) <> '/'
+*                THEN concat( 'SAPL', tadir~obj_name )
+*           WHEN tadir~object = 'CLAS'
+*                THEN concat( rpad( tadir~obj_name, 30, '=' ), 'CP' )
+*           WHEN tadir~object = 'INTF'
+*                THEN concat( rpad( tadir~obj_name, 30, '=' ), 'IP' )
+*           WHEN tadir~object = 'CNTX'
+*                THEN concat( 'CONTEXT_X_', tadir~obj_name )
+*           ELSE " PROG
+*                tadir~obj_name
+*           END AS CHAR( 40 ) ) AS main_program_name
+        FROM tadir
         WHERE tadir~devclass IN @package_range
           AND tadir~object   IN ('CLAS','CNTX','FUGR','FUGS','INTF','PROG')
           AND tadir~object   IN @range_of_obj_type
           AND tadir~obj_name IN @range_of_obj_name
-    INTO TABLE @DATA(main_programs).
+        INTO TABLE @tadir_main_programs.
+
+    LOOP AT tadir_main_programs REFERENCE INTO DATA(tadir_main_program).
+      tadir_main_program->main_program_name = COND #(
+             WHEN ( tadir_main_program->object = 'FUGR' OR tadir_main_program->object = 'FUGS' )
+                      AND tadir_main_program->obj_name(1) = '/' THEN
+                  '/' && replace( val  = substring( val = tadir_main_program->obj_name
+                                                    off = 2 )
+                                  sub  = '/'
+                                  with = '/SAPL' )
+             WHEN ( tadir_main_program->object = 'FUGR' OR tadir_main_program->object = 'FUGS' )
+                      AND tadir_main_program->obj_name(1) <> '/' THEN
+                  'SAPL' && tadir_main_program->obj_name
+             WHEN tadir_main_program->object = 'CLAS' THEN
+                  |{ tadir_main_program->obj_name WIDTH = 30 PAD = '=' }|
+                  && 'CP'
+             WHEN tadir_main_program->object = 'INTF' THEN
+                  |{ tadir_main_program->obj_name WIDTH = 30 PAD = '=' }|
+                  && 'IP'
+             WHEN tadir_main_program->object = 'CNTX' THEN
+                  'CONTEXT_X_' && tadir_main_program->obj_name
+             ELSE " PROG
+                  tadir_main_program->obj_name ).
+    ENDLOOP.
+
+    TYPES ty_table_zshrinker_gtt_mp TYPE STANDARD TABLE OF zshrinker_gtt_mp WITH EMPTY KEY.
+    TYPES ty_table_zshrinker_gtt_in TYPE STANDARD TABLE OF zshrinker_gtt_in WITH EMPTY KEY.
+
+    DATA(uuid) = lcl_uuid=>get_x16( ).
+    CALL FUNCTION 'ENQUEUE_EZSHRINKER_UUID'
+      EXPORTING
+*       mode_zshrinker_gtt_ec = 'E'              " Lock mode for table ZSHRINKER_GTT_EC
+        uuid           = uuid
+*       x_uuid         = space            " Fill argument 01 with initial value?
+*       _scope         = '2'
+*       _wait          = space
+*       _collect       = ' '              " Initially only collect lock
+      EXCEPTIONS
+        foreign_lock   = 1                " Object already locked
+        system_failure = 2                " Internal error from enqueue server
+        OTHERS         = 3.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'UUID &1 cannot be locked (RC &2)' msgv1 = |{ uuid }| msgv2 = |{ sy-subrc }|.
+*   WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+    ENDIF.
+
+    DATA(table_zshrinker_gtt_mp) = VALUE ty_table_zshrinker_gtt_mp(
+                            FOR <tadir_main_program> IN tadir_main_programs
+                            ( uuid              = uuid
+                              pgmid             = <tadir_main_program>-pgmid
+                              object            = <tadir_main_program>-object
+                              obj_name          = <tadir_main_program>-obj_name
+                              devclass          = <tadir_main_program>-devclass
+                              main_program_name = <tadir_main_program>-main_program_name ) ).
+    INSERT zshrinker_gtt_mp FROM TABLE @table_zshrinker_gtt_mp.
+
+
+    DATA(table_zshrinker_gtt_in) = VALUE ty_table_zshrinker_gtt_in(
+                            FOR <tadir_main_program> IN tadir_main_programs
+                            WHERE ( object = 'CLAS'
+                                 OR object = 'INTF' )
+                            FOR <suffix> IN SWITCH string_table( <tadir_main_program>-object
+                                WHEN 'CLAS' THEN VALUE #(
+                                    ( `CU` ) ( `CI` ) ( `CO` ) ( `CCIMP` ) ( `CCDEF` ) ( `CCAU` ) ( `CCMAC` ) )
+                                WHEN 'INTF' THEN VALUE #(
+                                    ( `IU` ) ) )
+                            ( uuid              = uuid
+                              pgmid             = <tadir_main_program>-pgmid
+                              object            = <tadir_main_program>-object
+                              obj_name          = <tadir_main_program>-obj_name
+                              include           = |{ <tadir_main_program>-obj_name WIDTH = 30 PAD = '=' }{ <suffix> }| ) ).
+    INSERT zshrinker_gtt_in FROM TABLE @table_zshrinker_gtt_in.
+
 
     DATA(lo_prog) = NEW lcl_program_load( ).
 
-    lo_prog->select_prog( it_rng_prog = VALUE #( FOR <main_program> IN main_programs
+    lo_prog->select_prog( it_rng_prog = VALUE #( FOR <tadir_main_program> IN tadir_main_programs
                                                  ( sign   = 'I'
                                                    option = 'EQ'
-                                                   low    = <main_program>-master ) ) ).
+                                                   low    = <tadir_main_program>-main_program_name ) ) ).
 
     lo_prog->filter_prog( generatd = abap_false ).
 
@@ -2386,18 +2424,6 @@ CLASS zcl_shrinker IMPLEMENTATION.
     SET HANDLER on_program_generated FOR lo_prog.
 
     lo_prog->gen_progs( i_commit_frequency = 10 ).
-
-
-*    "=================================================
-*    " Recalculate WBCROSSGT of all programs
-*    "=================================================
-*
-*    LOOP AT main_programs REFERENCE INTO DATA(main_program).
-*      DATA(wb_crossreference) = NEW cl_wb_crossreference( p_name    = main_program->master
-*                                                          p_include = '' ).
-*      wb_crossreference->index_actualize( IMPORTING p_error = DATA(error) ).
-*    ENDLOOP.
-*    COMMIT WORK.
 
 
     " CLSNAME               RELTYPE  REFCLSNAME
@@ -2410,79 +2436,16 @@ CLASS zcl_shrinker IMPLEMENTATION.
     " At statement "CLASS zcl_excel_graph_bars DEFINITION INHERITING FROM zcl_excel_graph", this syntax error MESSAGEG)F:
     " "Components of classes declared using "CLASS ZCL_EXCEL_GRAPH DEFINITION DEFERRED" can only be accessed after the class is defined (CLASS ZCL_EXCEL_GRAPH DEFINITION)."
 
-    SELECT FROM seometarel
+    SELECT seometarel~clsname, seometarel~reltype, seometarel~refclsname
+            FROM seometarel
             INNER JOIN tadir
               ON tadir~obj_name = seometarel~clsname
-            FIELDS seometarel~clsname, seometarel~reltype, seometarel~refclsname
             WHERE tadir~object   IN ('CLAS','INTF')
               AND tadir~object   IN @range_of_obj_type
               AND tadir~devclass IN @package_range
               AND tadir~obj_name IN @range_of_obj_name
             INTO TABLE @result-oo_relationships.
 
-
-
-
-
-*    WITH
-*    +exception_class AS (
-*    SELECT FROM seoclassdf
-*        INNER JOIN tadir
-*            ON tadir~pgmid  = 'R3TR'
-*           AND tadir~object = 'CLAS'
-*           AND tadir~obj_name = seoclassdf~clsname
-*        FIELDS seoclassdf~clsname AS name
-*        WHERE seoclassdf~category = '40'
-*          AND tadir~devclass IN @package_range
-*          AND tadir~object   IN @range_of_obj_type
-*          AND tadir~obj_name IN @range_of_obj_name
-*    ),
-*    +tadir_master AS (
-*    SELECT FROM tadir
-*        FIELDS tadir~pgmid,
-*               tadir~object,
-*               tadir~obj_name,
-*               tadir~devclass,
-*               CASE
-*               WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
-*                    AND left( tadir~obj_name, 1 ) = '/'
-*                    THEN concat( '/', replace( substring( tadir~obj_name, 2, 39 ), '/', '/SAPL' ) )
-*               WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
-*                    AND left( tadir~obj_name, 1 ) <> '/'
-*                    THEN concat( 'SAPL', tadir~obj_name )
-*               WHEN tadir~object = 'CLAS'
-*                    THEN concat( rpad( tadir~obj_name, 30, '=' ), 'CP' )
-*               WHEN tadir~object = 'INTF'
-*                    THEN concat( rpad( tadir~obj_name, 30, '=' ), 'IP' )
-*               WHEN tadir~object = 'CNTX'
-*                    THEN concat( 'CONTEXT_X_', tadir~obj_name )
-*               ELSE " PROG
-*                    tadir~obj_name
-*               END AS master
-*        WHERE tadir~devclass IN @package_range
-*          AND tadir~object   IN ('CLAS','CNTX','FUGR','FUGS','INTF','PROG')
-*          AND tadir~object   IN @range_of_obj_type
-*          AND tadir~obj_name IN @range_of_obj_name
-*    )
-*    SELECT
-*        FROM wbcrossgt
-*        INNER JOIN +exception_class
-*            ON +exception_class~name = wbcrossgt~name
-*        INNER JOIN d010inc
-*            ON d010inc~include = wbcrossgt~include
-*        INNER JOIN +tadir_master
-*            ON +tadir_master~master = d010inc~master
-*        FIELDS DISTINCT
-*            +tadir_master~object   AS using_object_type,
-*            +tadir_master~obj_name AS using_object_name,
-*            'CLAS'                 AS used_object_type,
-*            +exception_class~name  AS used_object_name
-*        WHERE wbcrossgt~otype        =  'TY'
-*          AND +tadir_master~devclass IN @package_range
-*          AND +tadir_master~object   IN @range_of_obj_type
-*          AND +tadir_master~obj_name IN @range_of_obj_name
-*          AND +tadir_master~obj_name <> +exception_class~name " remove meaningless link CLAS ZCX_EXCEL ZCX_EXCEL
-*INTO TABLE @DATA(xx).
 
     " The definition of exception classes must be positioned before any class definition containing RAISING of this exception class,
     " because the compiler checks that the mentioned class is an exception class, otherwise syntax error:
@@ -2526,28 +2489,6 @@ CLASS zcl_shrinker IMPLEMENTATION.
     "    =====  =========================================   ==================================
     "    TY     ZIF_ABAPGIT_AJSON_FILTER\TY:TY_FILTER_TAB   ZCL_ABAPGIT_AJSON_FILTER_LIB==CCAU
 
-*    SELECT FROM wbcrossgt
-*            CROSS JOIN tadir
-*        FIELDS DISTINCT
-*            tadir~object   AS using_object_type,
-*            tadir~obj_name AS using_object_name,
-*            'CLIF'         AS used_object_type, " CLAS or INTF ?
-*            wbcrossgt~name AS used_object_name  " DA     ZCL_EXCEL_DRAWING\DA:TYPE_IMAGE   ZCL_EXCEL=====================CU
-*        WHERE ( concat( rpad( tadir~obj_name, 30, '=' ), 'CU' ) = wbcrossgt~include
-*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CI' ) = wbcrossgt~include
-*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CO' ) = wbcrossgt~include
-*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCIMP' ) = wbcrossgt~include
-*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCDEF' ) = wbcrossgt~include
-*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCAU' ) = wbcrossgt~include
-*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCMAC' ) = wbcrossgt~include
-*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'IU' ) = wbcrossgt~include )
-*          AND tadir~object   IN ('CLAS','INTF')
-*          AND tadir~object   IN @range_of_obj_type
-*          AND tadir~devclass IN @package_range
-*          AND tadir~obj_name IN @range_of_obj_name
-*          AND wbcrossgt~name LIKE '%\%'
-*into table @data(itab).
-*ASSERT 1 = 1. " debug helper
 
     " The following SELECT will result in, which must be interpreted as declare first ZCX_EXCEL,
     " then ZCL_EXCEL and ZIF_EXCEL_CONVERTER in any order:
@@ -2563,78 +2504,68 @@ CLASS zcl_shrinker IMPLEMENTATION.
     "    OTYPE  NAME       INCLUDE
     "    =====  =========  ==================================
     "    TY     CX_ROOT    ZCX_EXCEL=====================CU
-    WITH
-    +exception_class AS (
-    SELECT FROM seoclassdf
+*    WITH
+*    +exception_class AS (
+    SELECT seoclassdf~clsname AS name
+        FROM seoclassdf
         INNER JOIN tadir
             ON tadir~pgmid  = 'R3TR'
            AND tadir~object = 'CLAS'
            AND tadir~obj_name = seoclassdf~clsname
-        FIELDS seoclassdf~clsname AS name
         WHERE seoclassdf~category = '40'
           AND tadir~devclass IN @package_range
           AND tadir~object   IN @range_of_obj_type
           AND tadir~obj_name IN @range_of_obj_name
-*    +class_include_cu AS (
-*    SELECT FROM tadir
-*        FIELDS tadir~obj_name AS class_name,
-*               concat( rpad( tadir~obj_name, 30, '=' ), 'CU' ) AS cu_include_name
-*        WHERE tadir~devclass IN @package_range
-*          AND tadir~object = 'CLAS'
-*          AND TADIR~object   IN @range_of_obj_type
-*          AND tadir~obj_name IN @range_of_obj_name
+        INTO TABLE @DATA(table_seoclassdf_ec).
+
+    TYPES ty_table_zshrinker_gtt_ec TYPE STANDARD TABLE OF zshrinker_gtt_ec WITH EMPTY KEY.
+    TYPES: BEGIN OF ty_used_exception_class,
+             using_object_type TYPE zshrinker_gtt_mp-object,
+             using_object_name TYPE zshrinker_gtt_mp-obj_name,
+             used_object_type  TYPE c LENGTH 4,
+             used_object_name  TYPE zshrinker_gtt_ec-exception_class_name,
+           END OF ty_used_exception_class.
+    TYPES ty_used_exception_classes TYPE STANDARD TABLE OF ty_used_exception_class WITH EMPTY KEY.
+
+    DATA(table_zshrinker_gtt_ec) = VALUE ty_table_zshrinker_gtt_ec(
+                            FOR <seoclassdf_ec> IN table_seoclassdf_ec
+                            ( uuid                 = uuid
+                              exception_class_name = <seoclassdf_ec>-name ) ).
+    INSERT zshrinker_gtt_ec FROM TABLE @table_zshrinker_gtt_ec.
 *    ),
-*    +exception_class AS (
-*    SELECT FROM wbcrossgt
-*        INNER JOIN +class_include_cu
-*            ON +class_include_cu~cu_include_name = wbcrossgt~include
-*        FIELDS +class_include_cu~cu_include_name AS name
-*        WHERE wbcrossgt~otype = 'TY'
-*          AND wbcrossgt~name  = 'CX_ROOT'
-**        INNER JOIN tadir
-**            ON rpad( tadir~obj_name, 30, '=' ) = wbcrossgt~include
-**           AND SUBSTRING( tadir~obj_name, 31, 2 ) IN ('CU','CO','CI')
-**        FIELDS tadir~obj_name AS name
-**        WHERE wbcrossgt~otype = 'TY'
-**          AND wbcrossgt~name  = 'CX_ROOT'
-**          and tadir~devclass IN @package_range
-**          AND tadir~object = 'CLAS'
-**          AND TADIR~object   IN @range_of_obj_type
-**          AND tadir~obj_name IN @range_of_obj_name
-    ),
-    " TADIR              D010INC-MASTER
-    "==================  ==================================
-    " R3TR PROG XXXXX    XXXXX
-    " R3TR FUGR XXXXX    SAPLXXXXX
-    " R3TR FUGR /XX/XXX  /XX/SAPLXXX
-    " R3TR CLAS XXXXX    XXXXX=========================CP
-    +tadir_master AS (
-    SELECT FROM tadir
-        FIELDS tadir~pgmid,
-               tadir~object,
-               tadir~obj_name,
-               tadir~devclass,
-               CASE
-               WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
-                    AND left( tadir~obj_name, 1 ) = '/'
-                    THEN concat( '/', replace( substring( tadir~obj_name, 2, 39 ), '/', '/SAPL' ) )
-               WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
-                    AND left( tadir~obj_name, 1 ) <> '/'
-                    THEN concat( 'SAPL', tadir~obj_name )
-               WHEN tadir~object = 'CLAS'
-                    THEN concat( rpad( tadir~obj_name, 30, '=' ), 'CP' )
-               WHEN tadir~object = 'INTF'
-                    THEN concat( rpad( tadir~obj_name, 30, '=' ), 'IP' )
-               WHEN tadir~object = 'CNTX'
-                    THEN concat( 'CONTEXT_X_', tadir~obj_name )
-               ELSE " PROG
-                    tadir~obj_name
-               END AS master
-        WHERE tadir~devclass IN @package_range
-          AND tadir~object   IN ('CLAS','CNTX','FUGR','FUGS','INTF','PROG')
-          AND tadir~object   IN @range_of_obj_type
-          AND tadir~obj_name IN @range_of_obj_name
-    )
+*    " TADIR              D010INC-MASTER
+*    "==================  ==================================
+*    " R3TR PROG XXXXX    XXXXX
+*    " R3TR FUGR XXXXX    SAPLXXXXX
+*    " R3TR FUGR /XX/XXX  /XX/SAPLXXX
+*    " R3TR CLAS XXXXX    XXXXX=========================CP
+**    +tadir_master AS (
+*    SELECT tadir~pgmid,
+*           tadir~object,
+*           tadir~obj_name,
+*           tadir~devclass,
+*           CASE
+*           WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
+*                AND left( tadir~obj_name, 1 ) = '/'
+*                THEN concat( '/', replace( substring( tadir~obj_name, 2, 39 ), '/', '/SAPL' ) )
+*           WHEN ( tadir~object = 'FUGR' OR tadir~object = 'FUGS' )
+*                AND left( tadir~obj_name, 1 ) <> '/'
+*                THEN concat( 'SAPL', tadir~obj_name )
+*           WHEN tadir~object = 'CLAS'
+*                THEN concat( rpad( tadir~obj_name, 30, '=' ), 'CP' )
+*           WHEN tadir~object = 'INTF'
+*                THEN concat( rpad( tadir~obj_name, 30, '=' ), 'IP' )
+*           WHEN tadir~object = 'CNTX'
+*                THEN concat( 'CONTEXT_X_', tadir~obj_name )
+*           ELSE " PROG
+*                tadir~obj_name
+*           END AS master
+*        FROM tadir
+*        WHERE tadir~devclass IN @package_range
+*          AND tadir~object   IN ('CLAS','CNTX','FUGR','FUGS','INTF','PROG')
+*          AND tadir~object   IN @range_of_obj_type
+*          AND tadir~obj_name IN @range_of_obj_name
+*    )
 
     " 1) The ones due to "METHODS ... RAISING ...", here for ZCL_EXCEL and ZIF_EXCEL_WRITER which are using ZCX_EXCEL:
     "    (wbcrossgt below)
@@ -2643,60 +2574,109 @@ CLASS zcl_shrinker IMPLEMENTATION.
     "    TY     ZCX_EXCEL  ZCL_EXCEL=====================CU
     "    TY     ZCX_EXCEL  ZIF_EXCEL_WRITER==============IU
     "    TY     ZCX_EXCEL  ZCL_EXCEL_WRITER_CSV==========CI
-    SELECT
+*    SELECT DISTINCT
+*            +tadir_master~object   AS using_object_type,
+*            +tadir_master~obj_name AS using_object_name,
+*            'CLAS'                 AS used_object_type,
+*            +exception_class~name  AS used_object_name
+*        FROM wbcrossgt
+*        INNER JOIN +exception_class
+*            ON +exception_class~name = wbcrossgt~name
+*        INNER JOIN d010inc
+*            ON d010inc~include = wbcrossgt~include
+*        INNER JOIN +tadir_master
+*            ON +tadir_master~master = d010inc~master
+*        WHERE wbcrossgt~otype        =  'TY'
+*          AND +tadir_master~devclass IN @package_range
+*          AND +tadir_master~object   IN @range_of_obj_type
+*          AND +tadir_master~obj_name IN @range_of_obj_name
+*          AND +tadir_master~obj_name <> +exception_class~name " remove meaningless link CLAS ZCX_EXCEL ZCX_EXCEL
+*    UNION
+    DATA(used_exception_classes) = VALUE ty_used_exception_classes( ).
+
+    SELECT DISTINCT
+            zshrinker_gtt_mp~object               AS using_object_type,
+            zshrinker_gtt_mp~obj_name             AS using_object_name,
+            'CLAS'                                AS used_object_type,
+            zshrinker_gtt_ec~exception_class_name AS used_object_name
         FROM wbcrossgt
-        INNER JOIN +exception_class
-            ON +exception_class~name = wbcrossgt~name
+        INNER JOIN zshrinker_gtt_ec
+            ON zshrinker_gtt_ec~exception_class_name = wbcrossgt~name
         INNER JOIN d010inc
             ON d010inc~include = wbcrossgt~include
-        INNER JOIN +tadir_master
-            ON +tadir_master~master = d010inc~master
-        FIELDS DISTINCT
-            +tadir_master~object   AS using_object_type,
-            +tadir_master~obj_name AS using_object_name,
-            'CLAS'                 AS used_object_type,
-            +exception_class~name  AS used_object_name
-        WHERE wbcrossgt~otype        =  'TY'
-          AND +tadir_master~devclass IN @package_range
-          AND +tadir_master~object   IN @range_of_obj_type
-          AND +tadir_master~obj_name IN @range_of_obj_name
-          AND +tadir_master~obj_name <> +exception_class~name " remove meaningless link CLAS ZCX_EXCEL ZCX_EXCEL
-    UNION
-    SELECT FROM wbcrossgt
-            CROSS JOIN tadir
-        FIELDS DISTINCT
-            tadir~object   AS using_object_type,
-            tadir~obj_name AS using_object_name,
-            'CLIF'         AS used_object_type, " CLAS or INTF ?
-            wbcrossgt~name AS used_object_name  " DA     ZCL_EXCEL_DRAWING\DA:TYPE_IMAGE   ZCL_EXCEL=====================CU
-        WHERE ( concat( rpad( tadir~obj_name, 30, '=' ), 'CU'    ) = wbcrossgt~include
-             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CI'    ) = wbcrossgt~include
-             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CO'    ) = wbcrossgt~include
-             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCIMP' ) = wbcrossgt~include
-             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCDEF' ) = wbcrossgt~include
-             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCAU'  ) = wbcrossgt~include
-             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCMAC' ) = wbcrossgt~include
-             OR concat( rpad( tadir~obj_name, 30, '=' ), 'IU'    ) = wbcrossgt~include )
-          AND tadir~object   =  'CLAS'
-          AND tadir~object   IN @range_of_obj_type
-          AND tadir~devclass IN @package_range
-          AND tadir~obj_name IN @range_of_obj_name
-          AND wbcrossgt~name LIKE '%\%'
-    UNION
-    SELECT FROM wbcrossgt
-            CROSS JOIN tadir
-        FIELDS DISTINCT
-            tadir~object   AS using_object_type,
-            tadir~obj_name AS using_object_name,
-            'CLIF'         AS used_object_type, " CLAS or INTF ?
-            wbcrossgt~name AS used_object_name  " DA     ZIF_WWWWWW\DA:TYPE_IMAGE   ZIF_XXXXX=====================IU
-        WHERE concat( rpad( tadir~obj_name, 30, '=' ), 'IU' ) = wbcrossgt~include
-          AND tadir~object   =  'INTF'
-          AND tadir~object   IN @range_of_obj_type
-          AND tadir~devclass IN @package_range
-          AND tadir~obj_name IN @range_of_obj_name
-          AND wbcrossgt~name LIKE '%\%'
-    INTO TABLE @result-used_exception_classes.
+        INNER JOIN zshrinker_gtt_mp
+            ON zshrinker_gtt_mp~main_program_name = d010inc~master
+        WHERE wbcrossgt~otype           =  'TY'
+          AND zshrinker_gtt_mp~devclass IN @package_range
+          AND zshrinker_gtt_mp~object   IN @range_of_obj_type
+          AND zshrinker_gtt_mp~obj_name IN @range_of_obj_name
+          AND zshrinker_gtt_mp~obj_name <> zshrinker_gtt_ec~exception_class_name " remove meaningless link CLAS ZCX_EXCEL ZCX_EXCEL
+        APPENDING TABLE @used_exception_classes.
+
+    " WBCROSSGT:
+    "    OTYPE  NAME                             INCLUDE
+    "    =====  ===============================  ==================================
+    "    DA     ZCL_EXCEL_DRAWING\DA:TYPE_IMAGE  ZCL_EXCEL=====================CU
+    SELECT DISTINCT
+            zshrinker_gtt_in~object   AS using_object_type,
+            zshrinker_gtt_in~obj_name AS using_object_name,
+            'CLIF'                    AS used_object_type, " CLAS or INTF ?
+            wbcrossgt~name            AS used_object_name
+        FROM wbcrossgt
+            INNER JOIN zshrinker_gtt_in
+                ON zshrinker_gtt_in~include = wbcrossgt~include
+        WHERE zshrinker_gtt_in~uuid   =    @uuid
+          AND zshrinker_gtt_in~object IN   ('CLAS','INTF')
+          AND wbcrossgt~name          LIKE '%\%'
+        APPENDING TABLE @used_exception_classes.
+*    SELECT DISTINCT
+*            tadir~object   AS using_object_type,
+*            tadir~obj_name AS using_object_name,
+*            'CLIF'         AS used_object_type, " CLAS or INTF ?
+*            wbcrossgt~name AS used_object_name  " DA     ZCL_EXCEL_DRAWING\DA:TYPE_IMAGE   ZCL_EXCEL=====================CU
+*        FROM wbcrossgt
+*            CROSS JOIN tadir
+*        WHERE ( concat( rpad( tadir~obj_name, 30, '=' ), 'CU'    ) = wbcrossgt~include
+*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CI'    ) = wbcrossgt~include
+*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CO'    ) = wbcrossgt~include
+*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCIMP' ) = wbcrossgt~include
+*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCDEF' ) = wbcrossgt~include
+*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCAU'  ) = wbcrossgt~include
+*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'CCMAC' ) = wbcrossgt~include
+*             OR concat( rpad( tadir~obj_name, 30, '=' ), 'IU'    ) = wbcrossgt~include )
+*          AND tadir~object   =  'CLAS'
+*          AND tadir~object   IN @range_of_obj_type
+*          AND tadir~devclass IN @package_range
+*          AND tadir~obj_name IN @range_of_obj_name
+*          AND wbcrossgt~name LIKE '%\%'
+*    UNION
+*    SELECT DISTINCT
+*            tadir~object   AS using_object_type,
+*            tadir~obj_name AS using_object_name,
+*            'CLIF'         AS used_object_type, " CLAS or INTF ?
+*            wbcrossgt~name AS used_object_name  " DA     ZIF_WWWWWW\DA:TYPE_IMAGE   ZIF_XXXXX=====================IU
+*        FROM wbcrossgt
+*            CROSS JOIN tadir
+*        WHERE concat( rpad( tadir~obj_name, 30, '=' ), 'IU' ) = wbcrossgt~include
+*          AND tadir~object   =  'INTF'
+*          AND tadir~object   IN @range_of_obj_type
+*          AND tadir~devclass IN @package_range
+*          AND tadir~obj_name IN @range_of_obj_name
+*          AND wbcrossgt~name LIKE '%\%'
+*    INTO TABLE @result-used_exception_classes.
+
+    SORT used_exception_classes BY table_line.
+    DELETE ADJACENT DUPLICATES FROM used_exception_classes COMPARING table_line.
+
+    result-used_exception_classes = used_exception_classes.
+
+    CALL FUNCTION 'DEQUEUE_EZSHRINKER_UUID'
+      EXPORTING
+        uuid = uuid.
+
+    DELETE FROM zshrinker_gtt_ec WHERE uuid = @uuid.
+    DELETE FROM zshrinker_gtt_mp WHERE uuid = @uuid.
+    DELETE FROM zshrinker_gtt_in WHERE uuid = @uuid.
 
     " At this point, USED_EXCEPTION_CLASSES contains:
     "
@@ -2741,13 +2721,12 @@ CLASS zcl_shrinker IMPLEMENTATION.
     " ====================  =========
     " ZCL_EXCEL             X
     " ZCL_EXCEL_AUTOFILTER  X
-    SELECT
+    SELECT seoclassdf~clsname, seoclass~clstype, seoclassdf~clsccincl, seoclassdf~category
         FROM seoclassdf
             INNER JOIN seoclass
               ON seoclass~clsname = seoclassdf~clsname
             INNER JOIN tadir
               ON tadir~obj_name = seoclassdf~clsname
-        FIELDS seoclassdf~clsname, seoclass~clstype, seoclassdf~clsccincl, seoclassdf~category
         WHERE tadir~object   IN ('CLAS','INTF')
           AND tadir~object   IN @range_of_obj_type
           AND tadir~devclass IN @package_range
@@ -2760,11 +2739,10 @@ CLASS zcl_shrinker IMPLEMENTATION.
     " ZCL_EXCEL  00000
     " ZCL_EXCEL  00001       ADD_NEW_AUTOFILTER
     " ZCL_EXCEL  00002       ADD_NEW_COMMENT
-    SELECT
+    SELECT tmdir~classname, tmdir~methodindx, tmdir~methodname
         FROM tmdir
             INNER JOIN tadir
               ON tadir~obj_name = tmdir~classname
-        FIELDS tmdir~classname, tmdir~methodindx, tmdir~methodname
         WHERE tadir~object   IN ('CLAS','INTF')
           AND tadir~object   IN @range_of_obj_type
           AND tadir~devclass IN @package_range

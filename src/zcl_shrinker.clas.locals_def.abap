@@ -204,3 +204,24 @@ CLASS lcl_abap_statement_at_cursor DEFINITION
         VALUE(result)         TYPE zif_shrinker_abap_scan=>ty_scan_result.
 
 ENDCLASS.
+
+
+class lcl_uuid definition.
+
+  PUBLIC SECTION.
+
+
+    CLASS-DATA uuid_generator TYPE REF TO if_system_uuid.
+
+
+  class-methods class_constructor.
+
+  class-methods get_c26
+  RETURNING
+  VALUE(result) type sysuuid_c26.
+
+  class-methods get_x16
+  RETURNING
+  VALUE(result) type sysuuid_x16.
+
+endclass.
