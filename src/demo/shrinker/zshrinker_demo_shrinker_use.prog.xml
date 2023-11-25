@@ -3,16 +3,18 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZSHRINKER_DEMO_SHRINKER_IMP</NAME>
-    <SUBC>I</SUBC>
-    <RLOAD>E</RLOAD>
+    <NAME>ZSHRINKER_DEMO_SHRINKER_USE</NAME>
+    <DBAPL>S</DBAPL>
+    <SUBC>1</SUBC>
+    <FIXPT>X</FIXPT>
+    <LDBNAME>D$S</LDBNAME>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>Shrinker class implementations</ENTRY>
-     <LENGTH>30</LENGTH>
+     <ENTRY>Use of the shrinked version of Shrinker</ENTRY>
+     <LENGTH>39</LENGTH>
     </item>
    </TPOOL>
   </asx:values>

@@ -451,7 +451,7 @@ CLASS lcl_app IMPLEMENTATION.
           MATCH LINE DATA(line_index)
           IGNORING CASE ##REGEX_POSIX.
       IF sy-subrc = 0.
-        DATA(types_t_relationship) = zcl_shrinker=>get_whole_abap_statement(
+        DATA(types_t_relationship) = zcl_shrinker_abap_scan=>get_whole_abap_statement(
             line_index       = line_index
             abap_source_code = reader_2007_ccimp->abap_source_code ).
         DELETE reader_2007_ccimp->abap_source_code

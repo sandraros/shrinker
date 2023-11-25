@@ -2,11 +2,6 @@
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
-CLASS ltc_raw_scan_lines_around DEFINITION DEFERRED.
-CLASS ltc_scan_abap_statement DEFINITION DEFERRED.
-CLASS ltc_scan_abap_parse_line DEFINITION DEFERRED.
-
-
 *----------------------------------------------------------------------*
 *       CLASS lcl_program_load DEFINITION
 *----------------------------------------------------------------------*
@@ -87,121 +82,6 @@ CLASS lcl_program_load DEFINITION.
   PRIVATE SECTION.
 
     DATA kit_load_status TYPE ty_t_load_status.
-
-ENDCLASS.
-
-
-CLASS lcl_abap_statement_at_cursor DEFINITION
-    FRIENDS ltc_raw_scan_lines_around
-            ltc_scan_abap_statement
-            ltc_scan_abap_parse_line.
-
-  PUBLIC SECTION.
-
-    "! Return the statement at cursor position. If the cursor is before the colon of a chained
-    "! statement, it will return several statements (all the ones of the chained statement).
-    CLASS-METHODS get
-      IMPORTING
-        it_source       TYPE zif_shrinker_abap_code_adapter=>ty_abap_source_code
-        VALUE(i_linenr) TYPE numeric
-        VALUE(i_offset) TYPE numeric DEFAULT 0
-      RETURNING
-        VALUE(result)   TYPE zif_shrinker_abap_scan=>ty_scan_result.
-
-  PRIVATE SECTION.
-
-    TYPES:
-      "! Scan information about one "pseudo-statement" (line scan)
-      BEGIN OF ts_pseudo_sstmnt,
-        "! Index of the first token of this statement in the token table (NB: the first token in the token table has index 1).
-        "! It may be zero if the pseudo-statement has no token at all (empty line, dot alone, etc.)
-        from       TYPE stmnt_from,
-        "! Index of the last token of this statement in the token table (NB: the first token in the token table has index 1)
-        to         TYPE stmnt_to,
-        "! Statement number in the LEVEL source unit (NB: the first statement in the LEVEL source unit has index 1)
-        number     TYPE stmnt_nr,
-        "! Row of the chained statement colon in the LEVEL source unit (>= 1 if TERMINATOR = ',' / 1 = first row, otherwise 0)
-        colonrow   TYPE stmnt_crow,
-        "! Row of terminator in the LEVEL source unit (>= 1 if TERMINATOR <> SPACE / 1 = first row, otherwise 0)
-        trow       TYPE stmnt_trow,
-        "! Column of the chained statement colon (>= 0 if TERMINATOR = ',' - 0 = first column, otherwise 0)
-        coloncol   TYPE stmnt_ccol,
-        "! Column of terminator (>= 0 if TERMINATOR <> SPACE - 0 = first column, otherwise 0)
-        tcol       TYPE stmnt_tcol,
-        "! Number of tokens before the colon (with chain statements >= 1, otherwise 0)
-        prefixlen  TYPE stmnt_plen,
-        "! Terminator character (period if not a chained statement, comma if it's a chained statement)
-        "! or empty for native SQL statements and internal macro definitions
-        terminator TYPE stmnt_term,
-        zz_1st_row TYPE i,
-        zz_1st_col TYPE i,
-      END OF ts_pseudo_sstmnt.
-    TYPES:
-      "! A pseudo-token may also contain comma, dot and colon.
-      BEGIN OF ty_pseudo_token,
-        str  TYPE string,
-        row  TYPE token_row,
-        col  TYPE token_col,
-        "! The possible values are defined in the structured constant C_PSEUDO_TOKEN.
-        type TYPE token_type,
-      END OF ty_pseudo_token.
-    TYPES ty_pseudo_tokens TYPE STANDARD TABLE OF ty_pseudo_token WITH EMPTY KEY.
-    TYPES:
-      BEGIN OF ty_line_scan,
-        linenr        TYPE i,
-        pseudo_tokens TYPE ty_pseudo_tokens,
-      END OF ty_line_scan.
-    TYPES ty_ref_line_scan TYPE REF TO ty_line_scan.
-    TYPES:
-      BEGIN OF ty_parsed_line_statement,
-        parsed_linenr   TYPE i,
-        ref_parsed_line TYPE ty_ref_line_scan,
-        tabix_sstmnt    TYPE sytabix,
-      END OF ty_parsed_line_statement.
-    TYPES:
-      BEGIN OF ty_raw_scan_lines_around,
-        pseudo_tokens TYPE ty_pseudo_tokens,
-      END OF ty_raw_scan_lines_around.
-
-    CONSTANTS type LIKE zif_shrinker_abap_scan=>type VALUE zif_shrinker_abap_scan=>type.
-
-    CLASS-METHODS parse_line
-      IMPORTING
-        i_line        TYPE csequence
-        i_linenr      TYPE numeric DEFAULT 0
-      RETURNING
-        VALUE(result) TYPE ty_line_scan.
-
-    "!
-    "! @parameter it_source | X
-    "! @parameter i_linenr | X
-    "! @parameter i_offset | X
-    "! @parameter result | NB: because RESULT contains references to self-contained data, to avoid these references to be FREED, it was required to:
-    "!                          <ul>
-    "!                          <li>EITHER define it as a data reference, i.e. create it via CREATE DATA,</li>
-    "!                          <li>OR not pass it by value, i.e. use EXPORTING instead of RETURNING.</li>
-    "!                          </ul>
-    CLASS-METHODS raw_scan_lines_around
-      IMPORTING
-        it_source       TYPE zif_shrinker_abap_code_adapter=>ty_abap_source_code
-        VALUE(i_linenr) TYPE numeric
-        VALUE(i_offset) TYPE numeric DEFAULT 0
-      EXPORTING
-        result          TYPE ty_raw_scan_lines_around.
-
-    "! Input is raw lines around the cursor, output is only one statement or several if cursor is before the colon ":" of a chained statement.
-    "! @parameter raw_scan_lines_around | Raw lines, may contain several statements
-    "! @parameter i_linenr | Cursor row
-    "! @parameter i_offset | Cursor column
-    "! @parameter result | In general only one statement is returned
-    CLASS-METHODS rework_raw_scan_lines
-      IMPORTING
-        raw_scan_lines_around TYPE ty_raw_scan_lines_around
-        i_linenr              TYPE numeric
-        i_offset              TYPE numeric
-        remove_comments       TYPE abap_bool DEFAULT abap_true
-      RETURNING
-        VALUE(result)         TYPE zif_shrinker_abap_scan=>ty_scan_result.
 
 ENDCLASS.
 

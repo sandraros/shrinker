@@ -21,18 +21,18 @@
 
 *"* test class
 *include Lcl_excel=====================ccau.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM DEFINITION DEFERRED.
-*CLASS Lcl_excel DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ33IFEQ DEFINITION DEFERRED.
+*CLASS Lcl_excel DEFINITION LOCAL FRIENDS SHRICOLKHOHYH4PO5IXYSODJ33IFEQ.
 
 *----------------------------------------------------------------------*
-*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM DEFINITION
+*       CLASS SHRICOLKHOHYH4PO5IXYSODJ33IFEQ DEFINITION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
 
 
 *----------------------------------------------------------------------*
-*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMMWCQM IMPLEMENTATION
+*       CLASS SHRICOLKHOHYH4PO5IXYSODJ33IFEQ IMPLEMENTATION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
@@ -1234,18 +1234,18 @@ endclass. "LCL_EXCEL_COMMENTS implementation
 
 *"* test class
 *include Lcl_excel_common==============ccau.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM DEFINITION DEFERRED.
-*CLASS Lcl_excel_common DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ33MFEQ DEFINITION DEFERRED.
+*CLASS Lcl_excel_common DEFINITION LOCAL FRIENDS SHRICOLKHOHYH4PO5IXYSODJ33MFEQ.
 
 *----------------------------------------------------------------------*
-*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM DEFINITION
+*       CLASS SHRICOLKHOHYH4PO5IXYSODJ33MFEQ DEFINITION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
 
 
 *----------------------------------------------------------------------*
-*       CLASS SHRI5M32Z4R2IEPO5IXU7NULMM2CQM IMPLEMENTATION
+*       CLASS SHRICOLKHOHYH4PO5IXYSODJ33MFEQ IMPLEMENTATION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
@@ -5294,30 +5294,30 @@ endclass. "LCL_EXCEL_RANGES implementation
 *"* local helper classes
 
 *
-  CLASS SHRI5M32Z4R2IEPO5IXU7NULMM7CQM DEFINITION
-      INHERITING FROM SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
+  CLASS SHRICOLKHOHYH4PO5IXYSODJ33RFEQ DEFINITION
+      INHERITING FROM SHRICOLKHOHYH4PO5IXYSODJ33QFEQ
       CREATE PRIVATE.
     PUBLIC SECTION.
       CLASS-METHODS create
         IMPORTING i_data TYPE xstring
-        RETURNING VALUE(r_zip) TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
+        RETURNING VALUE(r_zip) TYPE REF TO SHRICOLKHOHYH4PO5IXYSODJ33QFEQ
         RAISING Lcx_excel.
       METHODS read REDEFINITION.
     PRIVATE SECTION.
       DATA: abap_zip TYPE REF TO cl_abap_zip.
       METHODS constructor IMPORTING i_data TYPE xstring
                           RAISING Lcx_excel.
-  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMM7CQM DEFINITION
+  ENDCLASS.                    "SHRICOLKHOHYH4PO5IXYSODJ33RFEQ DEFINITION
 
 *
-  CLASS SHRI5M32Z4R2IEPO5IXU7NULMNACQM DEFINITION
-    INHERITING FROM SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
+  CLASS SHRICOLKHOHYH4PO5IXYSODJ33SFEQ DEFINITION
+    INHERITING FROM SHRICOLKHOHYH4PO5IXYSODJ33QFEQ
     CREATE PRIVATE.
     PUBLIC SECTION.
       CLASS-METHODS create
         IMPORTING i_data TYPE xstring
                   i_alternate_zip_class TYPE seoclsname
-        RETURNING VALUE(r_zip) TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMM6CQM
+        RETURNING VALUE(r_zip) TYPE REF TO SHRICOLKHOHYH4PO5IXYSODJ33QFEQ
         RAISING Lcx_excel.
       METHODS read REDEFINITION.
     PRIVATE SECTION.
@@ -5326,12 +5326,12 @@ endclass. "LCL_EXCEL_RANGES implementation
         IMPORTING i_data TYPE xstring
                   i_alternate_zip_class TYPE seoclsname
         RAISING Lcx_excel.
-  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMNACQM DEFINITION
+  ENDCLASS.                    "SHRICOLKHOHYH4PO5IXYSODJ33SFEQ DEFINITION
 
 *
-  CLASS SHRI5M32Z4R2IEPO5IXU7NULMM7CQM IMPLEMENTATION.
+  CLASS SHRICOLKHOHYH4PO5IXYSODJ33RFEQ IMPLEMENTATION.
     METHOD create.
-      CREATE OBJECT r_zip TYPE SHRI5M32Z4R2IEPO5IXU7NULMM7CQM
+      CREATE OBJECT r_zip TYPE SHRICOLKHOHYH4PO5IXYSODJ33RFEQ
         EXPORTING
           i_data = i_data.
     ENDMETHOD.                    "create
@@ -5372,12 +5372,12 @@ endclass. "LCL_EXCEL_RANGES implementation
       ENDIF.
 
     ENDMETHOD.                    "read
-  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMM7CQM IMPLEMENTATION
+  ENDCLASS.                    "SHRICOLKHOHYH4PO5IXYSODJ33RFEQ IMPLEMENTATION
 
 *
-  CLASS SHRI5M32Z4R2IEPO5IXU7NULMNACQM IMPLEMENTATION.
+  CLASS SHRICOLKHOHYH4PO5IXYSODJ33SFEQ IMPLEMENTATION.
     METHOD create.
-      CREATE OBJECT r_zip TYPE SHRI5M32Z4R2IEPO5IXU7NULMNACQM
+      CREATE OBJECT r_zip TYPE SHRICOLKHOHYH4PO5IXYSODJ33SFEQ
         EXPORTING
           i_alternate_zip_class = i_alternate_zip_class
           i_data                = i_data.
@@ -5434,15 +5434,15 @@ endclass. "LCL_EXCEL_RANGES implementation
       ENDIF.
 
     ENDMETHOD.                    "read
-  ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMNACQM IMPLEMENTATION
+  ENDCLASS.                    "SHRICOLKHOHYH4PO5IXYSODJ33SFEQ IMPLEMENTATION
 
 *"* test class
 *include Lcl_excel_reader_2007=========ccau.
 *"* use this source file for your ABAP unit test classes
 
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNDCQM DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ33VFEQ DEFINITION DEFERRED.
 *CLASS Lcl_excel_reader_2007 DEFINITION LOCAL FRIENDS
-*    SHRI5M32Z4R2IEPO5IXU7NULMNDCQM.
+*    SHRICOLKHOHYH4PO5IXYSODJ33VFEQ.
 
 
 
@@ -5454,9 +5454,9 @@ class LCL_EXCEL_READER_2007 implementation.
   METHOD create_zip_archive.
     CASE i_use_alternate_zip.
       WHEN space.
-        e_zip = SHRI5M32Z4R2IEPO5IXU7NULMM7CQM=>create( i_xlsx_binary ).
+        e_zip = SHRICOLKHOHYH4PO5IXYSODJ33RFEQ=>create( i_xlsx_binary ).
       WHEN OTHERS.
-        e_zip = SHRI5M32Z4R2IEPO5IXU7NULMNACQM=>create( i_data                = i_xlsx_binary
+        e_zip = SHRICOLKHOHYH4PO5IXYSODJ33SFEQ=>create( i_data                = i_xlsx_binary
                                                    i_alternate_zip_class = i_use_alternate_zip ).
     ENDCASE.
   ENDMETHOD.
@@ -9452,7 +9452,7 @@ endclass. "LCL_EXCEL_READER_2007 implementation
 *"* declarations
 
 * Signal "not found"
-CLASS SHRI5M32Z4R2IEPO5IXU7NULMNFCQM IMPLEMENTATION.
+CLASS SHRICOLKHOHYH4PO5IXYSODJ33XFEQ IMPLEMENTATION.
   METHOD constructor.
     super->constructor( textid = textid previous = previous ).
     me->error = error.
@@ -9460,13 +9460,13 @@ CLASS SHRI5M32Z4R2IEPO5IXU7NULMNFCQM IMPLEMENTATION.
   METHOD if_message~get_text.
     result = error.
   ENDMETHOD.                    "if_message~get_text
-ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7NULMNFCQM IMPLEMENTATION
+ENDCLASS.                    "SHRICOLKHOHYH4PO5IXYSODJ33XFEQ IMPLEMENTATION
 
 *"* test class
 *include Lcl_excel_reader_huge_file====ccau.
 *"* use this source file for your ABAP unit test classes
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNHCQM DEFINITION DEFERRED.
-*CLASS Lcl_excel_reader_huge_file DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7NULMNHCQM.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ33ZFEQ DEFINITION DEFERRED.
+*CLASS Lcl_excel_reader_huge_file DEFINITION LOCAL FRIENDS SHRICOLKHOHYH4PO5IXYSODJ33ZFEQ.
 
 *
 
@@ -9514,7 +9514,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
     READ TABLE shared_strings ASSIGNING <ls_shared_string> INDEX lv_tabix.
     IF sy-subrc NE 0.
       CONCATENATE 'Entry ' iv_index ' not found in Shared String Table' INTO lv_error.
-      RAISE EXCEPTION TYPE SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
+      RAISE EXCEPTION TYPE SHRICOLKHOHYH4PO5IXYSODJ33XFEQ
         EXPORTING
           error = lv_error.
     ENDIF.
@@ -9531,7 +9531,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
       READ TABLE styles INTO lo_style INDEX lv_tabix.
       IF sy-subrc NE 0.
         CONCATENATE 'Entry ' iv_index ' not found in Style Table' INTO lv_error.
-        RAISE EXCEPTION TYPE SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
+        RAISE EXCEPTION TYPE SHRICOLKHOHYH4PO5IXYSODJ33XFEQ
           EXPORTING
             error = lv_error.
       ELSE.
@@ -9570,7 +9570,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
   METHOD load_worksheet.
 
     DATA: lo_reader TYPE REF TO if_sxml_reader.
-    DATA: lx_not_found TYPE REF TO SHRI5M32Z4R2IEPO5IXU7NULMNFCQM.
+    DATA: lx_not_found TYPE REF TO SHRICOLKHOHYH4PO5IXYSODJ33XFEQ.
 
     lo_reader = get_sxml_reader( ip_path ).
 
@@ -9579,7 +9579,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
         read_worksheet_data( io_reader    = lo_reader
                              io_worksheet = io_worksheet ).
 
-      CATCH SHRI5M32Z4R2IEPO5IXU7NULMNFCQM INTO lx_not_found.
+      CATCH SHRICOLKHOHYH4PO5IXYSODJ33XFEQ INTO lx_not_found.
         Lcx_excel=>raise_text( lx_not_found->error ).
     ENDTRY.
   ENDMETHOD.
@@ -9668,7 +9668,7 @@ class LCL_EXCEL_READER_HUGE_FILE implementation.
       io_reader->next_node( ).
       IF io_reader->node_type = c_end_of_stream.
         CONCATENATE 'XML error: Didn''t find element <' iv_element_name '>' INTO lv_error.
-        RAISE EXCEPTION TYPE SHRI5M32Z4R2IEPO5IXU7NULMNFCQM
+        RAISE EXCEPTION TYPE SHRICOLKHOHYH4PO5IXYSODJ33XFEQ
           EXPORTING
             error = lv_error.
       ENDIF.
@@ -14071,23 +14071,23 @@ endclass. "LCL_EXCEL_THEME_OBJECTDEFAULTS implementation
 
 *"* test class
 *include Lcl_excel_worksheet===========ccau.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNNCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNSCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNTCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNOCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNUCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNPCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNQCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7NULMNVCQM DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ337FEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY6JFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY6KFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ34AFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY6LFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ34BFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSODJ34CFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY6MFEQ DEFINITION DEFERRED.
 *CLASS Lcl_excel_worksheet DEFINITION LOCAL FRIENDS
-*    SHRI5M32Z4R2IEPO5IXU7NULMNNCQM
-*    SHRI5M32Z4R2IEPO5IXU7NULMNSCQM
-*    SHRI5M32Z4R2IEPO5IXU7NULMNTCQM
-*    SHRI5M32Z4R2IEPO5IXU7NULMNOCQM
-*    SHRI5M32Z4R2IEPO5IXU7NULMNQCQM
-*    SHRI5M32Z4R2IEPO5IXU7NULMNUCQM
-*    SHRI5M32Z4R2IEPO5IXU7NULMNPCQM
-*    SHRI5M32Z4R2IEPO5IXU7NULMNVCQM.
+*    SHRICOLKHOHYH4PO5IXYSODJ337FEQ
+*    SHRICOLKHOHYH4PO5IXYSORDY6JFEQ
+*    SHRICOLKHOHYH4PO5IXYSORDY6KFEQ
+*    SHRICOLKHOHYH4PO5IXYSODJ34AFEQ
+*    SHRICOLKHOHYH4PO5IXYSODJ34CFEQ
+*    SHRICOLKHOHYH4PO5IXYSORDY6LFEQ
+*    SHRICOLKHOHYH4PO5IXYSODJ34BFEQ
+*    SHRICOLKHOHYH4PO5IXYSORDY6MFEQ.
 
 
 
@@ -19559,9 +19559,9 @@ endclass. "LCX_EXCEL implementation
 *"* use this source file for the definition and implementation of
 *"* local helper classes, interface definitions and type
 *"* declarations
-*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM DEFINITION DEFERRED.
-*CLASS Lcl_excel_writer_2007 DEFINITION LOCAL FRIENDS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM.
-CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM DEFINITION CREATE PUBLIC .
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY6WFEQ DEFINITION DEFERRED.
+*CLASS Lcl_excel_writer_2007 DEFINITION LOCAL FRIENDS SHRICOLKHOHYH4PO5IXYSORDY6WFEQ.
+CLASS SHRICOLKHOHYH4PO5IXYSORDY6WFEQ DEFINITION CREATE PUBLIC .
 
   PUBLIC SECTION.
     METHODS create IMPORTING io_worksheet         TYPE REF TO Lcl_excel_worksheet
@@ -19752,7 +19752,7 @@ CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM DEFINITION CREATE PUBLIC .
       add_ignored_errors.
 ENDCLASS.
 
-CLASS SHRI5M32Z4R2IEPO5IXU7N75DDGCQM IMPLEMENTATION.
+CLASS SHRICOLKHOHYH4PO5IXYSORDY6WFEQ IMPLEMENTATION.
   METHOD create.
     o_excel_ref    = io_excel_writer_2007.
     o_worksheet    = io_worksheet.
@@ -21381,13 +21381,13 @@ ENDCLASS.
 *include Lcl_excel_writer_2007=========ccau.
 *"* use this source file for your ABAP unit test classes
 
-*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDICQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDJCQM DEFINITION DEFERRED.
-*CLASS SHRI5M32Z4R2IEPO5IXU7N75DDKCQM DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY6YFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY6ZFEQ DEFINITION DEFERRED.
+*CLASS SHRICOLKHOHYH4PO5IXYSORDY62FEQ DEFINITION DEFERRED.
 *CLASS Lcl_excel_writer_2007 DEFINITION LOCAL FRIENDS
-*    SHRI5M32Z4R2IEPO5IXU7N75DDICQM
-*    SHRI5M32Z4R2IEPO5IXU7N75DDJCQM
-*    SHRI5M32Z4R2IEPO5IXU7N75DDKCQM.
+*    SHRICOLKHOHYH4PO5IXYSORDY6YFEQ
+*    SHRICOLKHOHYH4PO5IXYSORDY6ZFEQ
+*    SHRICOLKHOHYH4PO5IXYSORDY62FEQ.
 
 
 
@@ -24795,7 +24795,7 @@ class LCL_EXCEL_WRITER_2007 implementation.
 
     DATA: lo_document        TYPE REF TO if_ixml_document,
           lo_element_root    TYPE REF TO if_ixml_element,
-          lo_create_xl_sheet TYPE REF TO SHRI5M32Z4R2IEPO5IXU7N75DDGCQM.
+          lo_create_xl_sheet TYPE REF TO SHRICOLKHOHYH4PO5IXYSORDY6WFEQ.
 
 
 
@@ -27771,7 +27771,7 @@ class LCL_EXCEL_CONVERTER implementation.
 
   ENDMETHOD.
   METHOD class_constructor.
-    DATA: ls_objects TYPE SHRI5M32Z4R2IEPO5IXU7N75DDRCQM.
+    DATA: ls_objects TYPE SHRICOLKHOHYH4PO5IXYSORDY7BFEQ.
     DATA: ls_option TYPE zexcel_s_converter_option,
           l_uname   TYPE sy-uname.
 
@@ -27881,7 +27881,7 @@ class LCL_EXCEL_CONVERTER implementation.
 
   ENDMETHOD.
   METHOD create_color_style.
-    DATA: ls_styles TYPE SHRI5M32Z4R2IEPO5IXU7N75DDUCQM.
+    DATA: ls_styles TYPE SHRICOLKHOHYH4PO5IXYSORDY7EFEQ.
     DATA: lo_style TYPE REF TO Lcl_excel_style.
 
     READ TABLE wt_styles INTO ls_styles WITH KEY guid = i_style.
@@ -28212,7 +28212,7 @@ class LCL_EXCEL_CONVERTER implementation.
   ENDMETHOD.
   METHOD execute_converter.
     DATA: lo_if               TYPE REF TO Lif_excel_converter,
-          ls_types            TYPE SHRI5M32Z4R2IEPO5IXU7N75DDRCQM,
+          ls_types            TYPE SHRICOLKHOHYH4PO5IXYSORDY7BFEQ,
           lo_addit            TYPE REF TO cl_abap_classdescr,
           lo_addit_superclass TYPE REF TO cl_abap_classdescr.
 
@@ -28271,7 +28271,7 @@ class LCL_EXCEL_CONVERTER implementation.
       ls_impkey                 TYPE seor_implementing_key,
       ls_classkey               TYPE seoclskey,
       lr_implementation         TYPE REF TO Lif_excel_converter,
-      ls_object                 TYPE SHRI5M32Z4R2IEPO5IXU7N75DDRCQM,
+      ls_object                 TYPE SHRICOLKHOHYH4PO5IXYSORDY7BFEQ,
       lr_classdescr             TYPE REF TO cl_abap_classdescr.
 
     ls_classkey-clsname = 'LIF_EXCEL_CONVERTER'.
@@ -28312,7 +28312,7 @@ class LCL_EXCEL_CONVERTER implementation.
   ENDMETHOD.
   METHOD get_color_style.
     DATA: ls_colors       TYPE zexcel_s_converter_col,
-          ls_color_styles TYPE SHRI5M32Z4R2IEPO5IXU7N75DDVCQM,
+          ls_color_styles TYPE SHRICOLKHOHYH4PO5IXYSORDY7FFEQ,
           lo_style        TYPE REF TO Lcl_excel_style.
 
     r_style = i_style. " Default we change nothing
@@ -28435,7 +28435,7 @@ class LCL_EXCEL_CONVERTER implementation.
 
   ENDMETHOD.
   METHOD get_style.
-    DATA: ls_styles TYPE SHRI5M32Z4R2IEPO5IXU7N75DDUCQM,
+    DATA: ls_styles TYPE SHRICOLKHOHYH4PO5IXYSORDY7EFEQ,
           lo_style  TYPE REF TO Lcl_excel_style.
 
     CLEAR r_style.
@@ -28636,8 +28636,8 @@ class LCL_EXCEL_CONVERTER implementation.
           l_formula         TYPE zexcel_cell_formula,
           l_style           TYPE zexcel_cell_style,
           l_text            TYPE string,
-          ls_sort_values    TYPE SHRI5M32Z4R2IEPO5IXU7N75DDSCQM,
-          ls_subtotal_rows  TYPE SHRI5M32Z4R2IEPO5IXU7N75DDTCQM,
+          ls_sort_values    TYPE SHRICOLKHOHYH4PO5IXYSORDY7CFEQ,
+          ls_subtotal_rows  TYPE SHRICOLKHOHYH4PO5IXYSORDY7DFEQ,
           l_sort_level      TYPE int4,
           l_hidden          TYPE int4,
           l_line            TYPE i,
@@ -28651,7 +28651,7 @@ class LCL_EXCEL_CONVERTER implementation.
                    <fs_sfcat>   TYPE zexcel_s_converter_fcat,
                    <fs_fldval>  TYPE any,
                    <fs_sortval> TYPE any,
-                   <fs_sortv>   TYPE SHRI5M32Z4R2IEPO5IXU7N75DDSCQM.
+                   <fs_sortv>   TYPE SHRICOLKHOHYH4PO5IXYSORDY7CFEQ.
 
     ASSIGN wo_data->* TO <fs_tab> .
 
@@ -29170,7 +29170,7 @@ class LCL_EXCEL_CONVERTER_ALV implementation.
   ENDMETHOD.
   METHOD class_constructor.
 * let's fill the color conversion routines.
-    DATA: ls_color TYPE SHRI5M32Z4R2IEPO5IXU7N75DDWCQM.
+    DATA: ls_color TYPE SHRICOLKHOHYH4PO5IXYSORDY7GFEQ.
 * 0 all combination the same
     ls_color-col       = 0.
     ls_color-int       = 0.
@@ -29377,7 +29377,7 @@ class LCL_EXCEL_CONVERTER_ALV implementation.
   ENDMETHOD.
   METHOD get_color.
     DATA: ls_con_col TYPE zexcel_s_converter_col,
-          ls_color   TYPE SHRI5M32Z4R2IEPO5IXU7N75DDWCQM,
+          ls_color   TYPE SHRICOLKHOHYH4PO5IXYSORDY7GFEQ,
           l_line     TYPE i,
           l_color(4) TYPE c.
     FIELD-SYMBOLS: <fs_tab>  TYPE STANDARD TABLE,
@@ -30318,12 +30318,12 @@ endclass. "LCL_EXCEL_CONVERTER_SALV_TABLE implementation
 *>>>>>>> LCL_EXCEL_OLE <<<<<<<*
 
 *--------------------------------------------------------------------*
-* CLASS SHRI5M32Z4R2IEPO5IXU7N75DD2CQM
+* CLASS SHRICOLKHOHYH4PO5IXYSORDY7KFEQ
 *--------------------------------------------------------------------*
 * to get protected attribute and method of cl_gui_alv_grid
 * use for method bind_ALV
 *--------------------------------------------------------------------*
-CLASS SHRI5M32Z4R2IEPO5IXU7N75DD2CQM DEFINITION INHERITING FROM cl_gui_alv_grid.
+CLASS SHRICOLKHOHYH4PO5IXYSORDY7KFEQ DEFINITION INHERITING FROM cl_gui_alv_grid.
 
   PUBLIC SECTION.
 * get ALV grid data
@@ -30333,7 +30333,7 @@ CLASS SHRI5M32Z4R2IEPO5IXU7N75DD2CQM DEFINITION INHERITING FROM cl_gui_alv_grid.
       EXPORTING
         et_table  TYPE REF TO data.           " dta table
 
-ENDCLASS.                    "SHRI5M32Z4R2IEPO5IXU7N75DD2CQM DEFINITION
+ENDCLASS.                    "SHRICOLKHOHYH4PO5IXYSORDY7KFEQ DEFINITION
 
 *"* class LCL_EXCEL_OLE definition
 *"* public declarations
@@ -30399,9 +30399,9 @@ endclass. "LCL_EXCEL_OLE definition
 *"* declarations
 
 *&---------------------------------------------------------------------*
-*&       Class (Implementation)  SHRI5M32Z4R2IEPO5IXU7N75DDZCQM
+*&       Class (Implementation)  SHRICOLKHOHYH4PO5IXYSORDY7JFEQ
 *&---------------------------------------------------------------------*
-CLASS SHRI5M32Z4R2IEPO5IXU7N75DDZCQM IMPLEMENTATION.
+CLASS SHRICOLKHOHYH4PO5IXYSORDY7JFEQ IMPLEMENTATION.
   METHOD constructor.
 *                IMPORTING object_name TYPE c
 *                          method_name TYPE c.
@@ -30486,12 +30486,12 @@ CLASS SHRI5M32Z4R2IEPO5IXU7N75DDZCQM IMPLEMENTATION.
     message_id = me->message_id.
     message_number = me->message_nr.
   ENDMETHOD.                    "i_oi_error~get_message
-ENDCLASS.               "SHRI5M32Z4R2IEPO5IXU7N75DDZCQM
+ENDCLASS.               "SHRICOLKHOHYH4PO5IXYSORDY7JFEQ
 
 *&---------------------------------------------------------------------*
 *&       Class (Implementation)  CL_GRID_ACCESSION
 *&---------------------------------------------------------------------*
-CLASS SHRI5M32Z4R2IEPO5IXU7N75DD2CQM IMPLEMENTATION.
+CLASS SHRICOLKHOHYH4PO5IXYSORDY7KFEQ IMPLEMENTATION.
 
   METHOD get_alv_attributes.
     CREATE DATA et_table LIKE io_grid->mt_outtab.
@@ -30556,7 +30556,7 @@ class LCL_EXCEL_OLE implementation.
     DATA: l_tabname             TYPE  kkblo_tabname.
 
 * local object
-    DATA: lo_grid               TYPE REF TO SHRI5M32Z4R2IEPO5IXU7N75DD2CQM.
+    DATA: lo_grid               TYPE REF TO SHRICOLKHOHYH4PO5IXYSORDY7KFEQ.
 
 * data table get from ALV
     DATA: lt_alv                  TYPE REF TO data.
@@ -30673,7 +30673,7 @@ class LCL_EXCEL_OLE implementation.
 
     DATA: sema_type         TYPE  c.
 
-    DATA l_error           TYPE REF TO SHRI5M32Z4R2IEPO5IXU7N75DDZCQM.
+    DATA l_error           TYPE REF TO SHRICOLKHOHYH4PO5IXYSORDY7JFEQ.
     DATA count              TYPE i.
     DATA datac              TYPE i.
     DATA datareal TYPE i. " exporting column number
