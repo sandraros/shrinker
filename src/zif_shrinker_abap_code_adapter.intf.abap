@@ -1,7 +1,7 @@
 INTERFACE zif_shrinker_abap_code_adapter
   PUBLIC .
 
-  TYPES ty_abap_source_code TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+  TYPES ty_abap_source_code TYPE zcl_shrinker_abap_scan=>ty_abap_source_code.
   TYPES ty_extension_code TYPE c LENGTH 10.
   TYPES:
     BEGIN OF ty_oo_include,
@@ -35,6 +35,7 @@ INTERFACE zif_shrinker_abap_code_adapter
       abap_source_code TYPE ty_abap_source_code,
     END OF ty_source_unit.
   TYPES ty_source_units TYPE STANDARD TABLE OF ty_source_unit WITH EMPTY KEY.
+
 
   METHODS adapt_source_code
     CHANGING

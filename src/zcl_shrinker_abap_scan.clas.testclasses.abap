@@ -103,13 +103,12 @@ CLASS ltc_scan_abap_statement DEFINITION
     METHODS c_w_lon_lf_w_ma_lf_w_dot FOR TESTING RAISING cx_static_check.
     "! Make sure a previous statement is completely ignored
     METHODS dot_lf_c_w FOR TESTING RAISING cx_static_check.
-*    METHODS ecmt_lf_w_dot FOR TESTING RAISING cx_static_check.
     METHODS w_dot_c_w_dot_w_dot FOR TESTING RAISING cx_static_check.
     METHODS w_dot_w_lf_w_lf_w_dot_w_dot FOR TESTING RAISING cx_static_check.
     "! If the cursor is after the colon, only the lines till the next comma or dot after the cursor should be returned.
     METHODS w_lon_lf_w_ma_lf_c_w_dot FOR TESTING RAISING cx_static_check.
 
-    TYPES ty_scan_result TYPE zif_shrinker_abap_scan=>ty_scan_result.
+    TYPES ty_scan_result TYPE zcl_shrinker_abap_scan=>ty_scan_result.
     CONSTANTS type LIKE lcl_abap_statement_at_cursor=>type VALUE lcl_abap_statement_at_cursor=>type.
     DATA scan_result TYPE ty_scan_result.
 

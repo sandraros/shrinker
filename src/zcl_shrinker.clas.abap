@@ -116,7 +116,7 @@ CLASS zcl_shrinker DEFINITION
         VALUE(i_linenr) TYPE numeric
         VALUE(i_offset) TYPE numeric DEFAULT 0
       RETURNING
-        VALUE(result)   TYPE zif_shrinker_abap_scan=>ty_scan_result.
+        VALUE(result)   TYPE zcl_shrinker_abap_scan=>ty_scan_result.
 
     "! <p class="shorttext synchronized" lang="en"></p>
     "!
@@ -333,7 +333,7 @@ private section.
         cu_co_ci               TYPE abap_bool,
         is_test_class          TYPE abap_bool,
         is_deferred            TYPE abap_bool,
-        statement_tokens       TYPE zif_shrinker_abap_scan=>ty_ut_stokes,
+        statement_tokens       TYPE zcl_shrinker_abap_scan=>ty_ut_stokes,
         "! True if FRIENDS, LOCAL FRIENDS or GLOBAL FRIENDS
         any_friends            TYPE abap_bool,
         "! 'LOCAL', 'GLOBAL' or empty (word before FRIENDS)
@@ -1245,7 +1245,7 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
         TYPES:
           BEGIN OF ty_include_statement,
             row    TYPE i,
-            stokes TYPE zif_shrinker_abap_scan=>ty_ut_stokes,
+            stokes TYPE zcl_shrinker_abap_scan=>ty_ut_stokes,
           END OF ty_include_statement.
         TYPES ty_include_statements TYPE STANDARD TABLE OF ty_include_statement WITH EMPTY KEY.
         TYPES:
@@ -1554,7 +1554,7 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
               IF tabix_friends >= 2
                     AND abap_statement-stokes[ tabix_friends - 1 ]-str = 'GLOBAL'.
                 DATA(at_least_one_friend_remains) = abap_false.
-                DATA(tokens_to_remove) = VALUE zif_shrinker_abap_scan=>ty_ut_stokes( ).
+                DATA(tokens_to_remove) = VALUE zcl_shrinker_abap_scan=>ty_ut_stokes( ).
                 LOOP AT abap_statement-stokes REFERENCE INTO DATA(token)
                     FROM tabix_friends + 1.
                   IF line_exists( miscellaneous-class_descriptions[ name     = token->str
@@ -1983,7 +1983,7 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
   METHOD remove_test_classes.
     DATA class_2 TYPE REF TO ty_scanned_class.
     DATA: abap_line TYPE REF TO string,
-          friend    TYPE REF TO zif_shrinker_abap_scan=>ty_stokes.
+          friend    TYPE REF TO zcl_shrinker_abap_scan=>ty_stokes.
 
     LOOP AT abap_source_code REFERENCE INTO DATA(class).
 
@@ -2043,7 +2043,7 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
                                         ELSE
                                             REF #( class->implementation ) ).
 
-        DATA(friends_to_remove) = VALUE zif_shrinker_abap_scan=>ty_ut_stokes( ).
+        DATA(friends_to_remove) = VALUE zcl_shrinker_abap_scan=>ty_ut_stokes( ).
         LOOP AT class_2->statement_tokens REFERENCE INTO friend
             FROM class_2->tabix_first_friend.
           IF line_exists( test_classes[ name = friend->str ] ).

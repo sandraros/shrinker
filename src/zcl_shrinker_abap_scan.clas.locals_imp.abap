@@ -169,7 +169,7 @@ CLASS lcl_abap_statement_at_cursor IMPLEMENTATION.
           l_length2        TYPE i,
           l_state          TYPE i,
           l_delimiter      TYPE c LENGTH 1,
-          ls_current_token TYPE zif_shrinker_abap_scan=>ty_stokes,
+          ls_current_token TYPE zcl_shrinker_abap_scan=>ty_stokes,
           l_is_in_token    TYPE abap_bool,
           l_end_of_line    TYPE abap_bool,
           l_end_of_token   TYPE abap_bool,
@@ -799,10 +799,10 @@ CLASS lcl_abap_statement_at_cursor IMPLEMENTATION.
       EXIT.
     ENDLOOP.
 
-    DATA(line_sstmnt) = VALUE zif_shrinker_abap_scan=>ty_sstmnt( ).
-    DATA(sstmnt) = VALUE zif_shrinker_abap_scan=>ty_ut_sstmnt( ).
-    DATA(line_stokes) = VALUE zif_shrinker_abap_scan=>ty_stokes( ).
-    DATA(stokes) = VALUE zif_shrinker_abap_scan=>ty_ut_stokes( ).
+    DATA(line_sstmnt) = VALUE zcl_shrinker_abap_scan=>ty_sstmnt( ).
+    DATA(sstmnt) = VALUE zcl_shrinker_abap_scan=>ty_ut_sstmnt( ).
+    DATA(line_stokes) = VALUE zcl_shrinker_abap_scan=>ty_stokes( ).
+    DATA(stokes) = VALUE zcl_shrinker_abap_scan=>ty_ut_stokes( ).
 
     DATA(tabix_colon) = line_index( pseudo_tokens[ str = ':' ] ).
 
@@ -841,7 +841,7 @@ CLASS lcl_abap_statement_at_cursor IMPLEMENTATION.
           prefixlen = lines( stokes ).
           DATA(stokes_before_colon) = stokes.
         WHEN ',' OR '.'.
-          line_sstmnt = VALUE zif_shrinker_abap_scan=>ty_sstmnt(
+          line_sstmnt = VALUE zcl_shrinker_abap_scan=>ty_sstmnt(
               level      = 0
               struc      = 0
               from       = from_token
@@ -895,7 +895,7 @@ CLASS lcl_abap_statement_at_cursor IMPLEMENTATION.
           from_token = lines( stokes ) + 1.
           DATA(stokes_buffer) = stokes_before_colon.
         WHEN OTHERS.
-          line_stokes = VALUE zif_shrinker_abap_scan=>ty_stokes(
+          line_stokes = VALUE zcl_shrinker_abap_scan=>ty_stokes(
               str  = pseudo_token->str
               row  = pseudo_token->row
               col  = pseudo_token->col

@@ -102,11 +102,11 @@ CLASS lcl_abap_statement_at_cursor DEFINITION
     "! statement, it will return several statements (all the ones of the chained statement).
     CLASS-METHODS get
       IMPORTING
-        it_source       TYPE zif_shrinker_abap_code_adapter=>ty_abap_source_code
+        it_source       TYPE zcl_shrinker_abap_scan=>ty_abap_source_code
         VALUE(i_linenr) TYPE numeric
         VALUE(i_offset) TYPE numeric DEFAULT 0
       RETURNING
-        VALUE(result)   TYPE zif_shrinker_abap_scan=>ty_scan_result.
+        VALUE(result)   TYPE zcl_shrinker_abap_scan=>ty_scan_result.
 
   PRIVATE SECTION.
 
@@ -163,7 +163,7 @@ CLASS lcl_abap_statement_at_cursor DEFINITION
         pseudo_tokens TYPE ty_pseudo_tokens,
       END OF ty_raw_scan_lines_around.
 
-    CONSTANTS type LIKE zif_shrinker_abap_scan=>type VALUE zif_shrinker_abap_scan=>type.
+    CONSTANTS type LIKE zcl_shrinker_abap_scan=>type VALUE zcl_shrinker_abap_scan=>type.
 
     CLASS-METHODS parse_line
       IMPORTING
@@ -183,7 +183,7 @@ CLASS lcl_abap_statement_at_cursor DEFINITION
     "!                          </ul>
     CLASS-METHODS raw_scan_lines_around
       IMPORTING
-        it_source       TYPE zif_shrinker_abap_code_adapter=>ty_abap_source_code
+        it_source       TYPE zcl_shrinker_abap_scan=>ty_abap_source_code
         VALUE(i_linenr) TYPE numeric
         VALUE(i_offset) TYPE numeric DEFAULT 0
       EXPORTING
@@ -201,7 +201,7 @@ CLASS lcl_abap_statement_at_cursor DEFINITION
         i_offset              TYPE numeric
         remove_comments       TYPE abap_bool DEFAULT abap_true
       RETURNING
-        VALUE(result)         TYPE zif_shrinker_abap_scan=>ty_scan_result.
+        VALUE(result)         TYPE zcl_shrinker_abap_scan=>ty_scan_result.
 
 ENDCLASS.
 
