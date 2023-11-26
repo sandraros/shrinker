@@ -11144,160 +11144,6 @@ INTERFACE Lif_abapgit_persist_user
       Lcx_abapgit_exception.
 
 ENDINTERFACE.
-*"* class pool for interface ZIF_ABAPGIT_POPUPS
-
-INTERFACE Lif_abapgit_popups
-   .
-
-
-  TYPES ty_rows TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
-
-  TYPES:
-    BEGIN OF ty_alv_column,
-      name      TYPE string,
-      text      TYPE string,
-      length    TYPE lvc_outlen,
-      show_icon TYPE abap_bool,
-      center    TYPE abap_bool,
-    END OF ty_alv_column,
-    ty_alv_column_tt TYPE TABLE OF ty_alv_column WITH DEFAULT KEY.
-
-  TYPES:
-    BEGIN OF ty_popup_position,
-      start_column LIKE  sy-cucol,
-      start_row    LIKE  sy-curow,
-      end_column   LIKE  sy-cucol,
-      end_row      LIKE  sy-curow,
-    END OF ty_popup_position.
-
-  CONSTANTS c_new_branch_label TYPE string VALUE '+ create new ...' ##NO_TEXT.
-
-  METHODS popup_search_help
-    IMPORTING
-      !iv_tab_field   TYPE string
-    RETURNING
-      VALUE(rv_value) TYPE ddshretval-fieldval
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS popup_folder_logic
-    RETURNING
-      VALUE(rv_folder_logic) TYPE string
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS create_branch_popup
-    IMPORTING
-      !iv_source_branch_name TYPE string
-    EXPORTING
-      !ev_name               TYPE string
-      !ev_cancel             TYPE abap_bool
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS branch_list_popup
-    IMPORTING
-      !iv_url             TYPE string
-      !iv_default_branch  TYPE string OPTIONAL
-      !iv_show_new_option TYPE abap_bool OPTIONAL
-      !iv_hide_branch     TYPE Lif_abapgit_persistence=>ty_repo-branch_name OPTIONAL
-      !iv_hide_head       TYPE abap_bool OPTIONAL
-    RETURNING
-      VALUE(rs_branch)    TYPE Lif_abapgit_git_definitions=>ty_git_branch
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS tag_list_popup
-    IMPORTING
-      !iv_url       TYPE string
-    RETURNING
-      VALUE(rs_tag) TYPE Lif_abapgit_git_definitions=>ty_git_tag
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS commit_list_popup
-    IMPORTING
-      !iv_repo_url     TYPE string
-      !iv_branch_name  TYPE string OPTIONAL
-    RETURNING
-      VALUE(rs_commit) TYPE Lif_abapgit_git_definitions=>ty_commit
-    RAISING
-      Lcx_abapgit_exception .
-  TYPES ty_char1 TYPE c LENGTH 1.
-  TYPES ty_icon TYPE c LENGTH 30.
-  METHODS popup_to_confirm
-    IMPORTING
-      !iv_titlebar              TYPE clike
-      !iv_text_question         TYPE clike
-      !iv_text_button_1         TYPE clike DEFAULT 'Yes'
-      !iv_icon_button_1         TYPE ty_icon DEFAULT space
-      !iv_text_button_2         TYPE clike DEFAULT 'No'
-      !iv_icon_button_2         TYPE ty_icon DEFAULT space
-      !iv_default_button        TYPE ty_char1 DEFAULT '1'
-      !iv_display_cancel_button TYPE ty_char1 DEFAULT abap_true
-      !iv_popup_type            TYPE clike DEFAULT 'ICON_MESSAGE_QUESTION'
-    RETURNING
-      VALUE(rv_answer)          TYPE ty_char1
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS popup_to_create_package
-    EXPORTING
-      !es_package_data TYPE scompkdtln
-      !ev_create       TYPE abap_bool
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS popup_to_create_transp_branch
-    IMPORTING
-      !iv_trkorr                 TYPE trkorr
-    RETURNING
-      VALUE(rs_transport_branch) TYPE Lif_abapgit_definitions=>ty_transport_to_branch
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS popup_to_select_transport
-    RETURNING
-      VALUE(rv_trkorr) TYPE trkorr .
-  METHODS popup_to_select_from_list
-    IMPORTING
-      !it_list               TYPE STANDARD TABLE
-      !iv_title              TYPE lvc_title DEFAULT space
-      !iv_header_text        TYPE csequence DEFAULT space
-      !iv_start_column       TYPE i DEFAULT 10
-      !iv_end_column         TYPE i DEFAULT 125
-      !iv_start_line         TYPE i DEFAULT 10
-      !iv_end_line           TYPE i DEFAULT 30
-      !iv_striped_pattern    TYPE abap_bool DEFAULT abap_false
-      !iv_optimize_col_width TYPE abap_bool DEFAULT abap_true
-      !iv_selection_mode     TYPE salv_de_constant DEFAULT if_salv_c_selection_mode=>multiple
-      !iv_select_column_text TYPE csequence DEFAULT space
-      !it_columns_to_display TYPE ty_alv_column_tt
-      !it_preselected_rows   TYPE ty_rows OPTIONAL
-    EXPORTING
-      VALUE(et_list)         TYPE STANDARD TABLE
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS popup_transport_request
-    IMPORTING
-      !is_transport_type        TYPE Lif_abapgit_definitions=>ty_transport_type OPTIONAL
-      !iv_use_default_transport TYPE abap_bool DEFAULT abap_false
-      PREFERRED PARAMETER is_transport_type
-    RETURNING
-      VALUE(rv_transport)       TYPE trkorr
-    RAISING
-      Lcx_abapgit_exception .
-  METHODS popup_select_tr_requests
-    IMPORTING is_selection        TYPE trwbo_selection
-              iv_title            TYPE trwbo_title
-              iv_username_pattern TYPE any DEFAULT sy-uname
-    RETURNING VALUE(rt_r_trkorr)  TYPE Lif_abapgit_definitions=>ty_trrngtrkor_tt
-    RAISING   Lcx_abapgit_exception.
-  METHODS popup_select_wb_tc_tr_and_tsk
-    RETURNING VALUE(rt_r_trkorr) TYPE Lif_abapgit_definitions=>ty_trrngtrkor_tt
-    RAISING   Lcx_abapgit_exception.
-  METHODS popup_to_select_labels
-    IMPORTING iv_labels        TYPE string OPTIONAL
-    RETURNING VALUE(rv_labels) TYPE string
-    RAISING   Lcx_abapgit_exception.
-  METHODS choose_code_insp_check_variant
-    RETURNING VALUE(rv_check_variant) TYPE sci_chkv
-    RAISING
-      Lcx_abapgit_exception.
-
-ENDINTERFACE.
 *"* class pool for interface ZIF_ABAPGIT_REPO
 
 INTERFACE Lif_abapgit_repo
@@ -11652,12 +11498,22 @@ INTERFACE Lif_abapgit_sap_package
   TYPES:
     ty_devclass_tt TYPE STANDARD TABLE OF devclass WITH DEFAULT KEY .
 
+  TYPES: BEGIN OF ty_create,
+           devclass  TYPE devclass,
+           dlvunit   TYPE tdevc-dlvunit,
+           component TYPE c LENGTH 20,
+           ctext     TYPE c LENGTH 60,
+           parentcl  TYPE devclass,
+           pdevclass TYPE c LENGTH 4,
+           as4user   TYPE usnam,
+         END OF ty_create.
+
   METHODS validate_name
     RAISING
       Lcx_abapgit_exception .
   METHODS create
     IMPORTING
-      !is_package TYPE scompkdtln
+      !is_package TYPE ty_create
     RAISING
       Lcx_abapgit_exception .
   METHODS create_local
@@ -12203,7 +12059,7 @@ endclass. "ZCL_ABAPGIT_AJSON_FILTER_LIB definition
 
 *"* local type definitions
 *include zcl_abapgit_ajson_mapping=====ccdef.
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVDSFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BD7R4A DEFINITION.
 
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
@@ -12219,7 +12075,7 @@ CLASS SHRITEFUH64VYIPO5IWUYB3KWVDSFY DEFINITION.
 
 ENDCLASS.
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVESFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BEAR4A DEFINITION.
 
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
@@ -12237,7 +12093,7 @@ CLASS SHRITEFUH64VYIPO5IWUYB3KWVESFY DEFINITION.
 
 ENDCLASS.
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVFSFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BEBR4A DEFINITION.
 
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
@@ -12254,7 +12110,7 @@ CLASS SHRITEFUH64VYIPO5IWUYB3KWVFSFY DEFINITION.
 ENDCLASS.
 
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVGSFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BECR4A DEFINITION.
 
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
@@ -12271,7 +12127,7 @@ CLASS SHRITEFUH64VYIPO5IWUYB3KWVGSFY DEFINITION.
 ENDCLASS.
 
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVHSFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BEDR4A DEFINITION.
 
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
@@ -12289,7 +12145,7 @@ CLASS SHRITEFUH64VYIPO5IWUYB3KWVHSFY DEFINITION.
 
 ENDCLASS.
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVISFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BEER4A DEFINITION.
 
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
@@ -12305,12 +12161,12 @@ CLASS SHRITEFUH64VYIPO5IWUYB3KWVISFY DEFINITION.
 
 ENDCLASS.
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVJSFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BEFR4A DEFINITION.
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
 ENDCLASS.
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWVKSFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BEGR4A DEFINITION.
   PUBLIC SECTION.
     INTERFACES Lif_abapgit_ajson_mapping.
     METHODS constructor
@@ -13071,7 +12927,7 @@ endclass. "ZCL_ABAPGIT_GIT_ADD_PATCH definition
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KWX7SFY DEFINITION FINAL.
+CLASS SHRITEFUH64VYIPN5I4UHL45BG3R4A DEFINITION FINAL.
   PUBLIC SECTION.
     TYPES: ty_hex TYPE x LENGTH 1.
 
@@ -13221,7 +13077,7 @@ CLASS Lcl_abapgit_git_pack DEFINITION
         Lcx_abapgit_exception .
     CLASS-METHODS delta_header
       IMPORTING
-        !io_stream       TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KWX7SFY
+        !io_stream       TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BG3R4A
       RETURNING
         VALUE(rv_header) TYPE i .
     CLASS-METHODS sort_tree
@@ -21435,7 +21291,7 @@ endclass. "ZCL_ABAPGIT_OBJECT_PERS definition
 
 *"* local type definitions
 *include zcl_abapgit_object_pinf=======ccdef.
-INTERFACE SHRITEFUH64VYIPO5IWUYB3KW5FSFY.
+INTERFACE SHRITEFUH64VYIPN5I4UHL45BMBR4A.
   TYPES ty_tpak_package_interf_elem_tt TYPE STANDARD TABLE OF tpak_package_interf_elem_ref WITH DEFAULT KEY.
 
   METHODS:
@@ -21502,11 +21358,11 @@ INTERFACE SHRITEFUH64VYIPO5IWUYB3KW5FSFY.
 
 ENDINTERFACE.
 
-CLASS SHRITEFUH64VYIPO5IWUYB3KW5GSFY DEFINITION.
+CLASS SHRITEFUH64VYIPN5I4UHL45BMCR4A DEFINITION.
 
   PUBLIC SECTION.
     INTERFACES:
-      SHRITEFUH64VYIPO5IWUYB3KW5FSFY.
+      SHRITEFUH64VYIPN5I4UHL45BMBR4A.
 
     METHODS:
       constructor
@@ -21546,38 +21402,38 @@ CLASS Lcl_abapgit_object_pinf DEFINITION  INHERITING FROM Lcl_abapgit_objects_su
         !is_pinf            TYPE ty_pinf
         !iv_package         TYPE devclass
       RETURNING
-        VALUE(ri_interface) TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KW5FSFY
+        VALUE(ri_interface) TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BMBR4A
       RAISING
         Lcx_abapgit_exception .
     METHODS delete_elements
       IMPORTING
-        !ii_interface TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KW5FSFY
+        !ii_interface TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BMBR4A
       RAISING
         Lcx_abapgit_exception .
     METHODS update_attributes
       IMPORTING
         !iv_package   TYPE devclass
         !is_pinf      TYPE ty_pinf
-        !ii_interface TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KW5FSFY
+        !ii_interface TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BMBR4A
       RAISING
         Lcx_abapgit_exception .
     METHODS update_elements
       IMPORTING
         !iv_package   TYPE devclass
         !is_pinf      TYPE ty_pinf
-        !ii_interface TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KW5FSFY
+        !ii_interface TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BMBR4A
       RAISING
         Lcx_abapgit_exception .
     METHODS load
       IMPORTING
         iv_name             TYPE scomifnam
       RETURNING
-        VALUE(ri_interface) TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KW5FSFY.
+        VALUE(ri_interface) TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BMBR4A.
     METHODS create_facade
       IMPORTING
         ii_interface     TYPE REF TO if_package_interface
       RETURNING
-        VALUE(ri_facade) TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KW5FSFY.
+        VALUE(ri_facade) TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BMBR4A.
 
 endclass. "ZCL_ABAPGIT_OBJECT_PINF definition
 *class-pool .
@@ -25549,92 +25405,6 @@ CLASS Lcl_abapgit_persist_background DEFINITION
         VALUE(rv_string) TYPE string .
 endclass. "ZCL_ABAPGIT_PERSIST_BACKGROUND definition
 *class-pool .
-*"* class pool for class ZCL_ABAPGIT_POPUPS
-
-*"* local type definitions
-*include zcl_abapgit_popups============ccdef.
-*"* use this source file for any type of declarations (class
-*"* definitions, interfaces or type declarations) you need for
-*"* components in the private section
-
-
-*"* class ZCL_ABAPGIT_POPUPS definition
-*"* public declarations
-*include zcl_abapgit_popups============cu.
-CLASS Lcl_abapgit_popups DEFINITION
-*public
-  FINAL
-  CREATE PRIVATE
-  friends Lcl_abapgit_ui_factory .
-
-  PUBLIC SECTION.
-
-    INTERFACES Lif_abapgit_popups .
-
-    CLASS-METHODS center
-      IMPORTING
-        !iv_width          TYPE i
-        !iv_height         TYPE i
-      RETURNING
-        VALUE(rs_position) TYPE Lif_abapgit_popups=>ty_popup_position.
-
-*"* protected declarations
-*include zcl_abapgit_popups============co.
-  PROTECTED SECTION.
-*"* private declarations
-*include zcl_abapgit_popups============ci.
-  PRIVATE SECTION.
-
-    TYPES:
-      ty_lt_fields TYPE STANDARD TABLE OF sval WITH DEFAULT KEY .
-
-    TYPES:
-      BEGIN OF ty_commit_value_tab,
-        commit   TYPE Lif_abapgit_git_definitions=>ty_sha1,
-        message  TYPE c LENGTH 100,
-        datetime TYPE c LENGTH 20,
-      END OF ty_commit_value_tab.
-    TYPES:
-      ty_commit_value_tab_tt TYPE STANDARD TABLE OF ty_commit_value_tab WITH DEFAULT KEY.
-
-    CONSTANTS c_answer_cancel      TYPE c LENGTH 1 VALUE 'A' ##NO_TEXT.
-
-    DATA ms_position TYPE Lif_abapgit_popups=>ty_popup_position.
-    TYPES ty_sval_tt TYPE STANDARD TABLE OF sval WITH DEFAULT KEY.
-
-    METHODS add_field
-      IMPORTING
-        !iv_tabname    TYPE sval-tabname
-        !iv_fieldname  TYPE sval-fieldname
-        !iv_fieldtext  TYPE sval-fieldtext
-        !iv_value      TYPE clike DEFAULT ''
-        !iv_field_attr TYPE sval-field_attr DEFAULT ''
-        !iv_obligatory TYPE spo_obl OPTIONAL
-      CHANGING
-        !ct_fields     TYPE ty_sval_tt .
-    METHODS _popup_3_get_values
-      IMPORTING
-        !iv_popup_title    TYPE string
-        !iv_no_value_check TYPE abap_bool DEFAULT abap_false
-      EXPORTING
-        !ev_value_1        TYPE spo_value
-        !ev_value_2        TYPE spo_value
-        !ev_value_3        TYPE spo_value
-      CHANGING
-        !ct_fields         TYPE ty_lt_fields
-      RAISING
-        Lcx_abapgit_exception .
-    METHODS commit_list_build
-      IMPORTING
-        !iv_repo_url    TYPE string
-        !iv_branch_name TYPE string
-      EXPORTING
-        !et_value_tab   TYPE ty_commit_value_tab_tt
-        !et_commits     TYPE Lif_abapgit_git_definitions=>ty_commit_tt
-      RAISING
-        Lcx_abapgit_exception.
-endclass. "ZCL_ABAPGIT_POPUPS definition
-*class-pool .
 *"* class pool for class ZCL_ABAPGIT_PO_FILE
 
 *"* local type definitions
@@ -27559,47 +27329,6 @@ CLASS Lcl_abapgit_transport_objects DEFINITION
     DATA mt_transport_objects TYPE Lif_abapgit_definitions=>ty_tadir_tt .
 endclass. "ZCL_ABAPGIT_TRANSPORT_OBJECTS definition
 *class-pool .
-*"* class pool for class ZCL_ABAPGIT_UI_INJECTOR
-
-*"* local type definitions
-*include zcl_abapgit_ui_injector=======ccdef.
-*"* use this source file for any type of declarations (class
-*"* definitions, interfaces or type declarations) you need for
-*"* components in the private section
-
-
-*"* class ZCL_ABAPGIT_UI_INJECTOR definition
-*"* public declarations
-*include zcl_abapgit_ui_injector=======cu.
-CLASS Lcl_abapgit_ui_injector DEFINITION
-*public
-  CREATE PRIVATE .
-
-  PUBLIC SECTION.
-
-    CLASS-METHODS set_popups
-      IMPORTING
-        !ii_popups TYPE REF TO Lif_abapgit_popups .
-    CLASS-METHODS set_frontend_services
-      IMPORTING
-        !ii_fe_serv TYPE REF TO Lif_abapgit_frontend_services .
-    CLASS-METHODS set_gui_services
-      IMPORTING
-        !ii_gui_services TYPE REF TO Lif_abapgit_gui_services .
-    CLASS-METHODS get_dummy_gui_services
-      RETURNING
-        VALUE(ri_gui_services) TYPE REF TO Lif_abapgit_gui_services .
-    CLASS-METHODS set_html_viewer
-      IMPORTING
-        !ii_html_viewer TYPE REF TO Lif_abapgit_html_viewer .
-*"* protected declarations
-*include zcl_abapgit_ui_injector=======co.
-  PROTECTED SECTION.
-*"* private declarations
-*include zcl_abapgit_ui_injector=======ci.
-  PRIVATE SECTION.
-endclass. "ZCL_ABAPGIT_UI_INJECTOR definition
-*class-pool .
 *"* class pool for class ZCL_ABAPGIT_VERSION
 
 *"* local type definitions
@@ -28353,6 +28082,160 @@ INTERFACE Lif_abapgit_gui_jumper
     IMPORTING
       !iv_language TYPE spras
       !iv_key      TYPE Lif_abapgit_persistence=>ty_value
+    RAISING
+      Lcx_abapgit_exception.
+
+ENDINTERFACE.
+*"* class pool for interface ZIF_ABAPGIT_POPUPS
+
+INTERFACE Lif_abapgit_popups
+   .
+
+
+  TYPES ty_rows TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
+
+  TYPES:
+    BEGIN OF ty_alv_column,
+      name      TYPE string,
+      text      TYPE string,
+      length    TYPE lvc_outlen,
+      show_icon TYPE abap_bool,
+      center    TYPE abap_bool,
+    END OF ty_alv_column,
+    ty_alv_column_tt TYPE TABLE OF ty_alv_column WITH DEFAULT KEY.
+
+  TYPES:
+    BEGIN OF ty_popup_position,
+      start_column LIKE  sy-cucol,
+      start_row    LIKE  sy-curow,
+      end_column   LIKE  sy-cucol,
+      end_row      LIKE  sy-curow,
+    END OF ty_popup_position.
+
+  CONSTANTS c_new_branch_label TYPE string VALUE '+ create new ...' ##NO_TEXT.
+
+  METHODS popup_search_help
+    IMPORTING
+      !iv_tab_field   TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE ddshretval-fieldval
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS popup_folder_logic
+    RETURNING
+      VALUE(rv_folder_logic) TYPE string
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS create_branch_popup
+    IMPORTING
+      !iv_source_branch_name TYPE string
+    EXPORTING
+      !ev_name               TYPE string
+      !ev_cancel             TYPE abap_bool
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS branch_list_popup
+    IMPORTING
+      !iv_url             TYPE string
+      !iv_default_branch  TYPE string OPTIONAL
+      !iv_show_new_option TYPE abap_bool OPTIONAL
+      !iv_hide_branch     TYPE Lif_abapgit_persistence=>ty_repo-branch_name OPTIONAL
+      !iv_hide_head       TYPE abap_bool OPTIONAL
+    RETURNING
+      VALUE(rs_branch)    TYPE Lif_abapgit_git_definitions=>ty_git_branch
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS tag_list_popup
+    IMPORTING
+      !iv_url       TYPE string
+    RETURNING
+      VALUE(rs_tag) TYPE Lif_abapgit_git_definitions=>ty_git_tag
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS commit_list_popup
+    IMPORTING
+      !iv_repo_url     TYPE string
+      !iv_branch_name  TYPE string OPTIONAL
+    RETURNING
+      VALUE(rs_commit) TYPE Lif_abapgit_git_definitions=>ty_commit
+    RAISING
+      Lcx_abapgit_exception .
+  TYPES ty_char1 TYPE c LENGTH 1.
+  TYPES ty_icon TYPE c LENGTH 30.
+  METHODS popup_to_confirm
+    IMPORTING
+      !iv_titlebar              TYPE clike
+      !iv_text_question         TYPE clike
+      !iv_text_button_1         TYPE clike DEFAULT 'Yes'
+      !iv_icon_button_1         TYPE ty_icon DEFAULT space
+      !iv_text_button_2         TYPE clike DEFAULT 'No'
+      !iv_icon_button_2         TYPE ty_icon DEFAULT space
+      !iv_default_button        TYPE ty_char1 DEFAULT '1'
+      !iv_display_cancel_button TYPE ty_char1 DEFAULT abap_true
+      !iv_popup_type            TYPE clike DEFAULT 'ICON_MESSAGE_QUESTION'
+    RETURNING
+      VALUE(rv_answer)          TYPE ty_char1
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS popup_to_create_package
+    EXPORTING
+      !es_package_data TYPE Lif_abapgit_sap_package=>ty_create
+      !ev_create       TYPE abap_bool
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS popup_to_create_transp_branch
+    IMPORTING
+      !iv_trkorr                 TYPE trkorr
+    RETURNING
+      VALUE(rs_transport_branch) TYPE Lif_abapgit_definitions=>ty_transport_to_branch
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS popup_to_select_transport
+    RETURNING
+      VALUE(rv_trkorr) TYPE trkorr .
+  METHODS popup_to_select_from_list
+    IMPORTING
+      !it_list               TYPE STANDARD TABLE
+      !iv_title              TYPE lvc_title DEFAULT space
+      !iv_header_text        TYPE csequence DEFAULT space
+      !iv_start_column       TYPE i DEFAULT 10
+      !iv_end_column         TYPE i DEFAULT 125
+      !iv_start_line         TYPE i DEFAULT 10
+      !iv_end_line           TYPE i DEFAULT 30
+      !iv_striped_pattern    TYPE abap_bool DEFAULT abap_false
+      !iv_optimize_col_width TYPE abap_bool DEFAULT abap_true
+      !iv_selection_mode     TYPE salv_de_constant DEFAULT if_salv_c_selection_mode=>multiple
+      !iv_select_column_text TYPE csequence DEFAULT space
+      !it_columns_to_display TYPE ty_alv_column_tt
+      !it_preselected_rows   TYPE ty_rows OPTIONAL
+    EXPORTING
+      VALUE(et_list)         TYPE STANDARD TABLE
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS popup_transport_request
+    IMPORTING
+      !is_transport_type        TYPE Lif_abapgit_definitions=>ty_transport_type OPTIONAL
+      !iv_use_default_transport TYPE abap_bool DEFAULT abap_false
+      PREFERRED PARAMETER is_transport_type
+    RETURNING
+      VALUE(rv_transport)       TYPE trkorr
+    RAISING
+      Lcx_abapgit_exception .
+  METHODS popup_select_tr_requests
+    IMPORTING is_selection        TYPE trwbo_selection
+              iv_title            TYPE trwbo_title
+              iv_username_pattern TYPE any DEFAULT sy-uname
+    RETURNING VALUE(rt_r_trkorr)  TYPE Lif_abapgit_definitions=>ty_trrngtrkor_tt
+    RAISING   Lcx_abapgit_exception.
+  METHODS popup_select_wb_tc_tr_and_tsk
+    RETURNING VALUE(rt_r_trkorr) TYPE Lif_abapgit_definitions=>ty_trrngtrkor_tt
+    RAISING   Lcx_abapgit_exception.
+  METHODS popup_to_select_labels
+    IMPORTING iv_labels        TYPE string OPTIONAL
+    RETURNING VALUE(rv_labels) TYPE string
+    RAISING   Lcx_abapgit_exception.
+  METHODS choose_code_insp_check_variant
+    RETURNING VALUE(rv_check_variant) TYPE sci_chkv
     RAISING
       Lcx_abapgit_exception.
 
@@ -29880,16 +29763,16 @@ endclass. "ZCL_ABAPGIT_GUI_PAGE_DIFF definition
 *"* components in the private section
 
 TYPES:
-  BEGIN OF SHRITEFUH64VYIPO5IWUYB3KWZRSFY,
+  BEGIN OF SHRITEFUH64VYIPN5I4UHL45BINR4A,
     path        TYPE string,
     filename    TYPE string,
     remote_sha1 TYPE Lif_abapgit_git_definitions=>ty_sha1,
     local_sha1  TYPE Lif_abapgit_git_definitions=>ty_sha1,
-  END OF SHRITEFUH64VYIPO5IWUYB3KWZRSFY.
+  END OF SHRITEFUH64VYIPN5I4UHL45BINR4A.
 TYPES:
-  SHRITEFUH64VYIPO5IWUYB3KWZTSFY TYPE HASHED TABLE OF SHRITEFUH64VYIPO5IWUYB3KWZRSFY WITH UNIQUE KEY path filename.
+  SHRITEFUH64VYIPN5I4UHL45BIPR4A TYPE HASHED TABLE OF SHRITEFUH64VYIPN5I4UHL45BINR4A WITH UNIQUE KEY path filename.
 
-TYPES: BEGIN OF SHRITEFUH64VYIPO5IWUYB3KWZUSFY,
+TYPES: BEGIN OF SHRITEFUH64VYIPN5I4UHL45BIQR4A,
          BEGIN OF repo,
            name    TYPE string,
            key     TYPE Lif_abapgit_persistence=>ty_repo-key,
@@ -29910,10 +29793,10 @@ TYPES: BEGIN OF SHRITEFUH64VYIPO5IWUYB3KWZUSFY,
            title  TYPE string,
          END OF transport,
          full_match      TYPE abap_bool,
-         changed_files   TYPE SHRITEFUH64VYIPO5IWUYB3KWZTSFY,
+         changed_files   TYPE SHRITEFUH64VYIPN5I4UHL45BIPR4A,
          changed_objects TYPE Lif_abapgit_definitions=>ty_items_ts,
-       END OF SHRITEFUH64VYIPO5IWUYB3KWZUSFY.
-TYPES SHRITEFUH64VYIPO5IWUYB3KWZVSFY TYPE STANDARD TABLE OF SHRITEFUH64VYIPO5IWUYB3KWZUSFY WITH DEFAULT KEY.
+       END OF SHRITEFUH64VYIPN5I4UHL45BIQR4A.
+TYPES SHRITEFUH64VYIPN5I4UHL45BIRR4A TYPE STANDARD TABLE OF SHRITEFUH64VYIPN5I4UHL45BIQR4A WITH DEFAULT KEY.
 
 *"* class ZCL_ABAPGIT_GUI_PAGE_FLOW definition
 *"* public declarations
@@ -29953,7 +29836,7 @@ CLASS Lcl_abapgit_gui_page_flow DEFINITION
         pull    TYPE string VALUE 'pull',
         stage   TYPE string VALUE 'stage',
       END OF c_action .
-    DATA mt_features TYPE SHRITEFUH64VYIPO5IWUYB3KWZVSFY .
+    DATA mt_features TYPE SHRITEFUH64VYIPN5I4UHL45BIRR4A .
 
     METHODS refresh
       RAISING
@@ -29967,7 +29850,7 @@ CLASS Lcl_abapgit_gui_page_flow DEFINITION
     METHODS render_table
       IMPORTING
         !iv_index      TYPE i
-        !is_feature    TYPE SHRITEFUH64VYIPO5IWUYB3KWZUSFY
+        !is_feature    TYPE SHRITEFUH64VYIPN5I4UHL45BIQR4A
       RETURNING
         VALUE(ri_html) TYPE REF TO Lif_abapgit_html .
 endclass. "ZCL_ABAPGIT_GUI_PAGE_FLOW definition
@@ -30204,85 +30087,6 @@ CLASS Lcl_abapgit_gui_page_stage DEFINITION
       RAISING
         Lcx_abapgit_exception .
 endclass. "ZCL_ABAPGIT_GUI_PAGE_STAGE definition
-*class-pool .
-*"* class pool for class ZCL_ABAPGIT_HTML_FORM_UTILS
-
-*"* local type definitions
-*include zcl_abapgit_html_form_utils===ccdef.
-*"* use this source file for any type of declarations (class
-*"* definitions, interfaces or type declarations) you need for
-*"* components in the private section
-
-
-*"* class ZCL_ABAPGIT_HTML_FORM_UTILS definition
-*"* public declarations
-*include zcl_abapgit_html_form_utils===cu.
-CLASS Lcl_abapgit_html_form_utils DEFINITION
-*public
-  FINAL
-  CREATE PUBLIC .
-
-  PUBLIC SECTION.
-
-    CLASS-METHODS create
-      IMPORTING
-        !io_form            TYPE REF TO Lcl_abapgit_html_form
-      RETURNING
-        VALUE(ro_form_util) TYPE REF TO Lcl_abapgit_html_form_utils .
-    CLASS-METHODS is_dirty
-      IMPORTING
-        !io_form_data    TYPE REF TO Lcl_abapgit_string_map
-        !io_compare_with TYPE REF TO Lcl_abapgit_string_map
-      RETURNING
-        VALUE(rv_dirty)  TYPE abap_bool .
-
-    METHODS constructor
-      IMPORTING
-        !io_form TYPE REF TO Lcl_abapgit_html_form .
-    METHODS normalize
-      IMPORTING
-        !io_form_data       TYPE REF TO Lcl_abapgit_string_map
-      RETURNING
-        VALUE(ro_form_data) TYPE REF TO Lcl_abapgit_string_map
-      RAISING
-        Lcx_abapgit_exception .
-    METHODS validate
-      IMPORTING
-        !io_form_data            TYPE REF TO Lcl_abapgit_string_map
-      RETURNING
-        VALUE(ro_validation_log) TYPE REF TO Lcl_abapgit_string_map
-      RAISING
-        Lcx_abapgit_exception .
-    METHODS is_empty
-      IMPORTING
-        !io_form_data   TYPE REF TO Lcl_abapgit_string_map
-      RETURNING
-        VALUE(rv_empty) TYPE abap_bool
-      RAISING
-        Lcx_abapgit_exception .
-    METHODS set_data
-      IMPORTING
-        !io_form_data TYPE REF TO Lcl_abapgit_string_map .
-    METHODS exit
-      IMPORTING
-        !io_form_data    TYPE REF TO Lcl_abapgit_string_map
-        !io_compare_with TYPE REF TO Lcl_abapgit_string_map
-      RETURNING
-        VALUE(rv_state)  TYPE i
-      RAISING
-        Lcx_abapgit_exception .
-
-*"* protected declarations
-*include zcl_abapgit_html_form_utils===co.
-  PROTECTED SECTION.
-*"* private declarations
-*include zcl_abapgit_html_form_utils===ci.
-  PRIVATE SECTION.
-
-    DATA mo_form      TYPE REF TO Lcl_abapgit_html_form .
-    DATA mo_form_data TYPE REF TO Lcl_abapgit_string_map .
-
-endclass. "ZCL_ABAPGIT_HTML_FORM_UTILS definition
 *class-pool .
 *"* class pool for class ZCL_ABAPGIT_ITEM_GRAPH
 
@@ -31398,7 +31202,7 @@ endclass. "ZCL_ABAPGIT_OBJECT_FUGR definition
 
 *"* local type definitions
 *include zcl_abapgit_object_pdts=======ccdef.
-INTERFACE SHRITEFUH64VYIPO5IWUYB3KW4WSFY.
+INTERFACE SHRITEFUH64VYIPN5I4UHL45BLSR4A.
 
   TYPES: BEGIN OF ty_task_data,
            short_text                 TYPE hr_mcshort,
@@ -31458,7 +31262,7 @@ CLASS Lcl_abapgit_object_pdts DEFINITION
 
     DATA mv_objid TYPE hrobjid.
 
-    METHODS get_container_xml IMPORTING ii_task                 TYPE REF TO SHRITEFUH64VYIPO5IWUYB3KW4WSFY
+    METHODS get_container_xml IMPORTING ii_task                 TYPE REF TO SHRITEFUH64VYIPN5I4UHL45BLSR4A
                               RETURNING VALUE(ri_first_element) TYPE REF TO if_ixml_element
                               RAISING   Lcx_abapgit_exception.
 
@@ -31684,6 +31488,92 @@ CLASS Lcl_abapgit_persist_migrate DEFINITION  CREATE PUBLIC.
 
 endclass. "ZCL_ABAPGIT_PERSIST_MIGRATE definition
 *class-pool .
+*"* class pool for class ZCL_ABAPGIT_POPUPS
+
+*"* local type definitions
+*include zcl_abapgit_popups============ccdef.
+*"* use this source file for any type of declarations (class
+*"* definitions, interfaces or type declarations) you need for
+*"* components in the private section
+
+
+*"* class ZCL_ABAPGIT_POPUPS definition
+*"* public declarations
+*include zcl_abapgit_popups============cu.
+CLASS Lcl_abapgit_popups DEFINITION
+*public
+  FINAL
+  CREATE PRIVATE
+  friends Lcl_abapgit_ui_factory .
+
+  PUBLIC SECTION.
+
+    INTERFACES Lif_abapgit_popups .
+
+    CLASS-METHODS center
+      IMPORTING
+        !iv_width          TYPE i
+        !iv_height         TYPE i
+      RETURNING
+        VALUE(rs_position) TYPE Lif_abapgit_popups=>ty_popup_position.
+
+*"* protected declarations
+*include zcl_abapgit_popups============co.
+  PROTECTED SECTION.
+*"* private declarations
+*include zcl_abapgit_popups============ci.
+  PRIVATE SECTION.
+
+    TYPES:
+      ty_lt_fields TYPE STANDARD TABLE OF sval WITH DEFAULT KEY .
+
+    TYPES:
+      BEGIN OF ty_commit_value_tab,
+        commit   TYPE Lif_abapgit_git_definitions=>ty_sha1,
+        message  TYPE c LENGTH 100,
+        datetime TYPE c LENGTH 20,
+      END OF ty_commit_value_tab.
+    TYPES:
+      ty_commit_value_tab_tt TYPE STANDARD TABLE OF ty_commit_value_tab WITH DEFAULT KEY.
+
+    CONSTANTS c_answer_cancel      TYPE c LENGTH 1 VALUE 'A' ##NO_TEXT.
+
+    DATA ms_position TYPE Lif_abapgit_popups=>ty_popup_position.
+    TYPES ty_sval_tt TYPE STANDARD TABLE OF sval WITH DEFAULT KEY.
+
+    METHODS add_field
+      IMPORTING
+        !iv_tabname    TYPE sval-tabname
+        !iv_fieldname  TYPE sval-fieldname
+        !iv_fieldtext  TYPE sval-fieldtext
+        !iv_value      TYPE clike DEFAULT ''
+        !iv_field_attr TYPE sval-field_attr DEFAULT ''
+        !iv_obligatory TYPE spo_obl OPTIONAL
+      CHANGING
+        !ct_fields     TYPE ty_sval_tt .
+    METHODS _popup_3_get_values
+      IMPORTING
+        !iv_popup_title    TYPE string
+        !iv_no_value_check TYPE abap_bool DEFAULT abap_false
+      EXPORTING
+        !ev_value_1        TYPE spo_value
+        !ev_value_2        TYPE spo_value
+        !ev_value_3        TYPE spo_value
+      CHANGING
+        !ct_fields         TYPE ty_lt_fields
+      RAISING
+        Lcx_abapgit_exception .
+    METHODS commit_list_build
+      IMPORTING
+        !iv_repo_url    TYPE string
+        !iv_branch_name TYPE string
+      EXPORTING
+        !et_value_tab   TYPE ty_commit_value_tab_tt
+        !et_commits     TYPE Lif_abapgit_git_definitions=>ty_commit_tt
+      RAISING
+        Lcx_abapgit_exception.
+endclass. "ZCL_ABAPGIT_POPUPS definition
+*class-pool .
 *"* class pool for class ZCL_ABAPGIT_REPO_CHECKSUMS
 
 *"* local type definitions
@@ -31896,144 +31786,6 @@ CLASS Lcl_abapgit_repo_status DEFINITION
 
 endclass. "ZCL_ABAPGIT_REPO_STATUS definition
 *class-pool .
-*"* class pool for class ZCL_ABAPGIT_SERVICES_REPO
-
-*"* local type definitions
-*include zcl_abapgit_services_repo=====ccdef.
-*"* use this source file for any type of declarations (class
-*"* definitions, interfaces or type declarations) you need for
-*"* components in the private section
-
-
-*"* class ZCL_ABAPGIT_SERVICES_REPO definition
-*"* public declarations
-*include zcl_abapgit_services_repo=====cu.
-CLASS Lcl_abapgit_services_repo DEFINITION
-*public
-  FINAL
-  CREATE PUBLIC .
-
-  PUBLIC SECTION.
-
-    CLASS-METHODS new_online
-      IMPORTING
-        !is_repo_params TYPE Lif_abapgit_services_repo=>ty_repo_params
-      RETURNING
-        VALUE(ro_repo)  TYPE REF TO Lcl_abapgit_repo_online
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS refresh
-      IMPORTING
-        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS remove
-      IMPORTING
-        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS purge
-      IMPORTING
-        !iv_key       TYPE Lif_abapgit_persistence=>ty_repo-key
-        !iv_keep_repo TYPE abap_bool DEFAULT abap_false
-      RETURNING
-        VALUE(ri_log) TYPE REF TO Lif_abapgit_log
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS new_offline
-      IMPORTING
-        !is_repo_params TYPE Lif_abapgit_services_repo=>ty_repo_params
-      RETURNING
-        VALUE(ro_repo)  TYPE REF TO Lcl_abapgit_repo_offline
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS refresh_local_checksums
-      IMPORTING
-        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS toggle_favorite
-      IMPORTING
-        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS transport_to_branch
-      IMPORTING
-        !iv_repository_key TYPE Lif_abapgit_persistence=>ty_value
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS gui_deserialize
-      IMPORTING
-        !io_repo TYPE REF TO Lcl_abapgit_repo
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS activate_objects
-      IMPORTING
-        !iv_key       TYPE Lif_abapgit_persistence=>ty_repo-key
-      RETURNING
-        VALUE(ri_log) TYPE REF TO Lif_abapgit_log
-      RAISING
-        Lcx_abapgit_exception.
-    CLASS-METHODS create_package
-      IMPORTING
-        !iv_prefill_package TYPE devclass OPTIONAL
-      RETURNING
-        VALUE(rv_package)   TYPE devclass
-      RAISING
-        Lcx_abapgit_exception.
-*"* protected declarations
-*include zcl_abapgit_services_repo=====co.
-  PROTECTED SECTION.
-*"* private declarations
-*include zcl_abapgit_services_repo=====ci.
-  PRIVATE SECTION.
-    CLASS-METHODS check_package_exists
-      IMPORTING
-        !iv_package TYPE devclass
-        !it_remote  TYPE Lif_abapgit_git_definitions=>ty_files_tt
-      RAISING
-        Lcx_abapgit_exception.
-
-    CLASS-METHODS delete_unnecessary_objects
-      IMPORTING
-        !io_repo   TYPE REF TO Lcl_abapgit_repo
-        !ii_log    TYPE REF TO Lif_abapgit_log
-        !is_checks TYPE Lif_abapgit_definitions=>ty_deserialize_checks
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS popup_decisions
-      IMPORTING
-        !io_repo   TYPE REF TO Lcl_abapgit_repo
-      CHANGING
-        !cs_checks TYPE Lif_abapgit_definitions=>ty_deserialize_checks
-      RAISING
-        Lcx_abapgit_cancel
-        Lcx_abapgit_exception .
-    CLASS-METHODS popup_objects_overwrite
-      CHANGING
-        !ct_overwrite TYPE Lif_abapgit_definitions=>ty_overwrite_tt
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS popup_package_overwrite
-      CHANGING
-        !ct_overwrite TYPE Lif_abapgit_definitions=>ty_overwrite_tt
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS check_package
-      IMPORTING
-        !is_repo_params TYPE Lif_abapgit_services_repo=>ty_repo_params
-      RAISING
-        Lcx_abapgit_exception .
-    CLASS-METHODS raise_error_if_package_exists
-      IMPORTING
-        iv_devclass TYPE scompkdtln-devclass
-      RAISING
-        Lcx_abapgit_exception.
-    CLASS-METHODS check_for_restart
-      IMPORTING
-        !io_repo TYPE REF TO Lif_abapgit_repo.
-endclass. "ZCL_ABAPGIT_SERVICES_REPO definition
-*class-pool .
 *"* class pool for class ZCL_ABAPGIT_TRANSPORT_MASS
 
 *"* local type definitions
@@ -32063,6 +31815,47 @@ CLASS Lcl_abapgit_transport_mass DEFINITION
   PRIVATE SECTION.
 
 endclass. "ZCL_ABAPGIT_TRANSPORT_MASS definition
+*class-pool .
+*"* class pool for class ZCL_ABAPGIT_UI_INJECTOR
+
+*"* local type definitions
+*include zcl_abapgit_ui_injector=======ccdef.
+*"* use this source file for any type of declarations (class
+*"* definitions, interfaces or type declarations) you need for
+*"* components in the private section
+
+
+*"* class ZCL_ABAPGIT_UI_INJECTOR definition
+*"* public declarations
+*include zcl_abapgit_ui_injector=======cu.
+CLASS Lcl_abapgit_ui_injector DEFINITION
+*public
+  CREATE PRIVATE .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS set_popups
+      IMPORTING
+        !ii_popups TYPE REF TO Lif_abapgit_popups .
+    CLASS-METHODS set_frontend_services
+      IMPORTING
+        !ii_fe_serv TYPE REF TO Lif_abapgit_frontend_services .
+    CLASS-METHODS set_gui_services
+      IMPORTING
+        !ii_gui_services TYPE REF TO Lif_abapgit_gui_services .
+    CLASS-METHODS get_dummy_gui_services
+      RETURNING
+        VALUE(ri_gui_services) TYPE REF TO Lif_abapgit_gui_services .
+    CLASS-METHODS set_html_viewer
+      IMPORTING
+        !ii_html_viewer TYPE REF TO Lif_abapgit_html_viewer .
+*"* protected declarations
+*include zcl_abapgit_ui_injector=======co.
+  PROTECTED SECTION.
+*"* private declarations
+*include zcl_abapgit_ui_injector=======ci.
+  PRIVATE SECTION.
+endclass. "ZCL_ABAPGIT_UI_INJECTOR definition
 *class-pool .
 *"* class pool for class ZCL_ABAPGIT_XML_INPUT
 
@@ -32175,6 +31968,85 @@ CLASS Lcl_abapgit_abap_language_vers DEFINITION
         VALUE(rv_abap_language_version) TYPE string.
 
 endclass. "ZCL_ABAPGIT_ABAP_LANGUAGE_VERS definition
+*class-pool .
+*"* class pool for class ZCL_ABAPGIT_HTML_FORM_UTILS
+
+*"* local type definitions
+*include zcl_abapgit_html_form_utils===ccdef.
+*"* use this source file for any type of declarations (class
+*"* definitions, interfaces or type declarations) you need for
+*"* components in the private section
+
+
+*"* class ZCL_ABAPGIT_HTML_FORM_UTILS definition
+*"* public declarations
+*include zcl_abapgit_html_form_utils===cu.
+CLASS Lcl_abapgit_html_form_utils DEFINITION
+*public
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS create
+      IMPORTING
+        !io_form            TYPE REF TO Lcl_abapgit_html_form
+      RETURNING
+        VALUE(ro_form_util) TYPE REF TO Lcl_abapgit_html_form_utils .
+    CLASS-METHODS is_dirty
+      IMPORTING
+        !io_form_data    TYPE REF TO Lcl_abapgit_string_map
+        !io_compare_with TYPE REF TO Lcl_abapgit_string_map
+      RETURNING
+        VALUE(rv_dirty)  TYPE abap_bool .
+
+    METHODS constructor
+      IMPORTING
+        !io_form TYPE REF TO Lcl_abapgit_html_form .
+    METHODS normalize
+      IMPORTING
+        !io_form_data       TYPE REF TO Lcl_abapgit_string_map
+      RETURNING
+        VALUE(ro_form_data) TYPE REF TO Lcl_abapgit_string_map
+      RAISING
+        Lcx_abapgit_exception .
+    METHODS validate
+      IMPORTING
+        !io_form_data            TYPE REF TO Lcl_abapgit_string_map
+      RETURNING
+        VALUE(ro_validation_log) TYPE REF TO Lcl_abapgit_string_map
+      RAISING
+        Lcx_abapgit_exception .
+    METHODS is_empty
+      IMPORTING
+        !io_form_data   TYPE REF TO Lcl_abapgit_string_map
+      RETURNING
+        VALUE(rv_empty) TYPE abap_bool
+      RAISING
+        Lcx_abapgit_exception .
+    METHODS set_data
+      IMPORTING
+        !io_form_data TYPE REF TO Lcl_abapgit_string_map .
+    METHODS exit
+      IMPORTING
+        !io_form_data    TYPE REF TO Lcl_abapgit_string_map
+        !io_compare_with TYPE REF TO Lcl_abapgit_string_map
+      RETURNING
+        VALUE(rv_state)  TYPE i
+      RAISING
+        Lcx_abapgit_exception .
+
+*"* protected declarations
+*include zcl_abapgit_html_form_utils===co.
+  PROTECTED SECTION.
+*"* private declarations
+*include zcl_abapgit_html_form_utils===ci.
+  PRIVATE SECTION.
+
+    DATA mo_form      TYPE REF TO Lcl_abapgit_html_form .
+    DATA mo_form_data TYPE REF TO Lcl_abapgit_string_map .
+
+endclass. "ZCL_ABAPGIT_HTML_FORM_UTILS definition
 *class-pool .
 *"* class pool for class ZCL_ABAPGIT_OBJECT_INTF
 
@@ -32450,6 +32322,144 @@ CLASS Lcl_abapgit_serialize DEFINITION
         VALUE(rv_result) TYPE abap_bool.
 
 endclass. "ZCL_ABAPGIT_SERIALIZE definition
+*class-pool .
+*"* class pool for class ZCL_ABAPGIT_SERVICES_REPO
+
+*"* local type definitions
+*include zcl_abapgit_services_repo=====ccdef.
+*"* use this source file for any type of declarations (class
+*"* definitions, interfaces or type declarations) you need for
+*"* components in the private section
+
+
+*"* class ZCL_ABAPGIT_SERVICES_REPO definition
+*"* public declarations
+*include zcl_abapgit_services_repo=====cu.
+CLASS Lcl_abapgit_services_repo DEFINITION
+*public
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS new_online
+      IMPORTING
+        !is_repo_params TYPE Lif_abapgit_services_repo=>ty_repo_params
+      RETURNING
+        VALUE(ro_repo)  TYPE REF TO Lcl_abapgit_repo_online
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS refresh
+      IMPORTING
+        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS remove
+      IMPORTING
+        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS purge
+      IMPORTING
+        !iv_key       TYPE Lif_abapgit_persistence=>ty_repo-key
+        !iv_keep_repo TYPE abap_bool DEFAULT abap_false
+      RETURNING
+        VALUE(ri_log) TYPE REF TO Lif_abapgit_log
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS new_offline
+      IMPORTING
+        !is_repo_params TYPE Lif_abapgit_services_repo=>ty_repo_params
+      RETURNING
+        VALUE(ro_repo)  TYPE REF TO Lcl_abapgit_repo_offline
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS refresh_local_checksums
+      IMPORTING
+        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS toggle_favorite
+      IMPORTING
+        !iv_key TYPE Lif_abapgit_persistence=>ty_repo-key
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS transport_to_branch
+      IMPORTING
+        !iv_repository_key TYPE Lif_abapgit_persistence=>ty_value
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS gui_deserialize
+      IMPORTING
+        !io_repo TYPE REF TO Lcl_abapgit_repo
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS activate_objects
+      IMPORTING
+        !iv_key       TYPE Lif_abapgit_persistence=>ty_repo-key
+      RETURNING
+        VALUE(ri_log) TYPE REF TO Lif_abapgit_log
+      RAISING
+        Lcx_abapgit_exception.
+    CLASS-METHODS create_package
+      IMPORTING
+        !iv_prefill_package TYPE devclass OPTIONAL
+      RETURNING
+        VALUE(rv_package)   TYPE devclass
+      RAISING
+        Lcx_abapgit_exception.
+*"* protected declarations
+*include zcl_abapgit_services_repo=====co.
+  PROTECTED SECTION.
+*"* private declarations
+*include zcl_abapgit_services_repo=====ci.
+  PRIVATE SECTION.
+    CLASS-METHODS check_package_exists
+      IMPORTING
+        !iv_package TYPE devclass
+        !it_remote  TYPE Lif_abapgit_git_definitions=>ty_files_tt
+      RAISING
+        Lcx_abapgit_exception.
+
+    CLASS-METHODS delete_unnecessary_objects
+      IMPORTING
+        !io_repo   TYPE REF TO Lcl_abapgit_repo
+        !ii_log    TYPE REF TO Lif_abapgit_log
+        !is_checks TYPE Lif_abapgit_definitions=>ty_deserialize_checks
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS popup_decisions
+      IMPORTING
+        !io_repo   TYPE REF TO Lcl_abapgit_repo
+      CHANGING
+        !cs_checks TYPE Lif_abapgit_definitions=>ty_deserialize_checks
+      RAISING
+        Lcx_abapgit_cancel
+        Lcx_abapgit_exception .
+    CLASS-METHODS popup_objects_overwrite
+      CHANGING
+        !ct_overwrite TYPE Lif_abapgit_definitions=>ty_overwrite_tt
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS popup_package_overwrite
+      CHANGING
+        !ct_overwrite TYPE Lif_abapgit_definitions=>ty_overwrite_tt
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS check_package
+      IMPORTING
+        !is_repo_params TYPE Lif_abapgit_services_repo=>ty_repo_params
+      RAISING
+        Lcx_abapgit_exception .
+    CLASS-METHODS raise_error_if_package_exists
+      IMPORTING
+        iv_devclass TYPE devclass
+      RAISING
+        Lcx_abapgit_exception.
+    CLASS-METHODS check_for_restart
+      IMPORTING
+        !io_repo TYPE REF TO Lif_abapgit_repo.
+endclass. "ZCL_ABAPGIT_SERVICES_REPO definition
 
 ****************************************************
 INTERFACE lif_abapmerge_marker.

@@ -30,9 +30,18 @@ INTERFACE zif_shrinker_abap_code_adapter
       interfaces TYPE ty_interfaces,
     END OF ty_read_class_interface_includ.
   TYPES:
+    BEGIN OF ty_include_statement,
+      row      TYPE i,
+      stokes   TYPE zcl_shrinker_abap_scan=>ty_ut_stokes,
+      name     TYPE syrepid,
+      if_found TYPE abap_bool,
+    END OF ty_include_statement.
+  TYPES ty_include_statements TYPE STANDARD TABLE OF ty_include_statement WITH EMPTY KEY.
+  TYPES:
     BEGIN OF ty_source_unit,
-      name             TYPE syrepid,
-      abap_source_code TYPE ty_abap_source_code,
+      name               TYPE syrepid,
+      abap_source_code   TYPE ty_abap_source_code,
+      include_statements TYPE ty_include_statements,
     END OF ty_source_unit.
   TYPES ty_source_units TYPE STANDARD TABLE OF ty_source_unit WITH EMPTY KEY.
 
@@ -41,5 +50,9 @@ INTERFACE zif_shrinker_abap_code_adapter
     CHANGING
       classes_interfaces TYPE ty_read_class_interface_includ OPTIONAL
       other_source_units TYPE ty_source_units OPTIONAL.
+
+  METHODS adapt_source_code_before_rep_i
+    CHANGING
+      source_units TYPE ty_source_units.
 
 ENDINTERFACE.

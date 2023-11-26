@@ -84,7 +84,10 @@ CLASS lcl_app DEFINITION.
         zcx_shrinker.
 
   PRIVATE SECTION.
+
     CLASS-DATA shrinker_classes_interfaces TYPE REF TO zcl_shrinker.
+    DATA abap_of_zabapgit_oo TYPE zcl_shrinker=>ty_main_result.
+
 
     CLASS-METHODS get_mime_object
       IMPORTING
@@ -148,25 +151,29 @@ CLASS lcl_app IMPLEMENTATION.
       ENDIF.
     ENDIF.
 
-    SELECT SINGLE * FROM trdir WHERE name = @incl_def INTO @DATA(trdir_def).
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_def.
+    IF incl_def IS NOT INITIAL.
+      SELECT SINGLE * FROM trdir WHERE name = @incl_def INTO @DATA(trdir_def).
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_def.
+      ENDIF.
     ENDIF.
 
-    DO p_nb_imp TIMES.
-      DATA(incl_impx) = EXACT progname( |{ incl_imp }{ sy-index }| ).
-      SELECT SINGLE * FROM trdir WHERE name = @incl_impx INTO @DATA(trdir_imp).
-      IF sy-subrc <> 0.
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_impx.
-      ENDIF.
-    ENDDO.
+    IF incl_imp IS NOT INITIAL.
+      DO p_nb_imp TIMES.
+        DATA(incl_impx) = EXACT progname( |{ incl_imp }{ sy-index }| ).
+        SELECT SINGLE * FROM trdir WHERE name = @incl_impx INTO @DATA(trdir_imp).
+        IF sy-subrc <> 0.
+          RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = include_does_not_exist msgv1 = incl_impx.
+        ENDIF.
+      ENDDO.
+    ENDIF.
 
     "=================================
     " All classes and interfaces
     "=================================
     shrinker_classes_interfaces = zcl_shrinker=>create( me ).
 
-    DATA(abap_of_zabapgit_oo) = shrinker_classes_interfaces->get_one_abap_code(
+    abap_of_zabapgit_oo = shrinker_classes_interfaces->get_one_abap_code(
                                 package_range        = s_devc[]
                                 range_of_obj_type    = VALUE #( sign = 'I' option = 'EQ' ( low = 'CLAS' ) ( low = 'INTF' ) )
                                 global_replacements  = VALUE #(
@@ -205,10 +212,6 @@ CLASS lcl_app IMPLEMENTATION.
                         ( LINES OF abap_of_zabapgit_oo-def_abap_source_code )
                         ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code ) ) ).
 
-    IF syntax_check_oo-mess IS NOT INITIAL.
-      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check_oo-mess.
-    ENDIF.
-
     "=================================
     " ZABAPGIT
     "=================================
@@ -216,56 +219,66 @@ CLASS lcl_app IMPLEMENTATION.
     DATA(shrinker_zabapgit_standalone) = zcl_shrinker=>create( me ).
 
     DATA(abap_of_zabapgit_standalone) = shrinker_zabapgit_standalone->get_abap_for_program(
-            program_name        = 'ZABAPGIT'
+            object              = 'PROG'
+            obj_name            = 'ZABAPGIT'
             global_replacements = VALUE #( ( posix_regex = '\<Z(.._ABAPGIT\w*)' with = 'L$1' start_of_abap_word = abap_true member_interface_prefix = abap_true ) ) ).
 
     INSERT LINES OF header_lines
         INTO abap_of_zabapgit_standalone
         INDEX 1.
 
-    DATA(syntax_check) = shrinker_zabapgit_standalone->syntax_check( abap_of_zabapgit_standalone ).
-
-    IF syntax_check-mess IS NOT INITIAL.
-      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check-mess.
-    ENDIF.
+    DATA(syntax_check_standalone) = shrinker_zabapgit_standalone->syntax_check( abap_of_zabapgit_standalone ).
 
     "=================================
     " Replace code of includes and program
     "=================================
-    INSERT REPORT incl_def FROM abap_of_zabapgit_oo-def_abap_source_code DIRECTORY ENTRY trdir_def.
+    IF incl_def IS NOT INITIAL.
+      INSERT REPORT incl_def FROM abap_of_zabapgit_oo-def_abap_source_code DIRECTORY ENTRY trdir_def.
+    ENDIF.
 
-    " To write 5 includes
-    DATA(total_include_lines) = lines( abap_of_zabapgit_oo-imp_abap_source_code ) DIV p_nb_imp.
-    DATA(first_line) = 1.
-    DO p_nb_imp TIMES.
-      IF sy-index < p_nb_imp.
-        DATA(last_line) = first_line + total_include_lines - 1.
-      ELSE.
-        last_line = lines( abap_of_zabapgit_oo-imp_abap_source_code ).
-      ENDIF.
+    " Write includes containing class implementations
+    IF incl_imp IS NOT INITIAL.
 
-      " make sure to not split an ABAP statement in the middle.
-      WHILE last_line < lines( abap_of_zabapgit_oo-imp_abap_source_code )
-          AND abap_of_zabapgit_oo-imp_abap_source_code[ last_line ] NP '*.'.
-        ADD 1 TO last_line.
-      ENDWHILE.
+      DATA(total_include_lines) = lines( abap_of_zabapgit_oo-imp_abap_source_code ) DIV p_nb_imp.
+      DATA(first_line) = 1.
+      DO p_nb_imp TIMES.
+        IF sy-index < p_nb_imp.
+          DATA(last_line) = first_line + total_include_lines - 1.
+        ELSE.
+          last_line = lines( abap_of_zabapgit_oo-imp_abap_source_code ).
+        ENDIF.
 
-      DATA(abap_source_code) = VALUE zcl_shrinker=>ty_abap_source_code(
-                    ( LINES OF header_lines )
-                    ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code FROM first_line TO last_line ) ).
+        " make sure to not split an ABAP statement in the middle.
+        WHILE last_line < lines( abap_of_zabapgit_oo-imp_abap_source_code )
+            AND abap_of_zabapgit_oo-imp_abap_source_code[ last_line ] NP '*.'.
+          ADD 1 TO last_line.
+        ENDWHILE.
 
-      incl_impx = EXACT #( |{ incl_imp }{ sy-index }| ).
-      trdir_imp-name = incl_impx.
-      INSERT REPORT incl_impx FROM abap_source_code DIRECTORY ENTRY trdir_imp.
+        DATA(abap_source_code) = VALUE zcl_shrinker=>ty_abap_source_code(
+                      ( LINES OF header_lines )
+                      ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code FROM first_line TO last_line ) ).
 
-      first_line = last_line + 1.
-    ENDDO.
+        incl_impx = EXACT #( |{ incl_imp }{ sy-index }| ).
+        trdir_imp-name = incl_impx.
+        INSERT REPORT incl_impx FROM abap_source_code DIRECTORY ENTRY trdir_imp.
+
+        first_line = last_line + 1.
+      ENDDO.
+    ENDIF.
 
     IF standalo IS NOT INITIAL.
       INSERT REPORT standalo FROM abap_of_zabapgit_standalone DIRECTORY ENTRY trdir_standalo.
     ENDIF.
 
     COMMIT WORK.
+
+    IF syntax_check_oo-mess IS NOT INITIAL.
+      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check_oo-mess.
+    ENDIF.
+
+    IF syntax_check_standalone-mess IS NOT INITIAL.
+      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Syntax error &1'(002) msgv1 = syntax_check_standalone-mess.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -530,16 +543,26 @@ CLASS lcl_app IMPLEMENTATION.
 
     DATA(zabapgit) = REF #( other_source_units[ name = 'ZABAPGIT' ] OPTIONAL ).
     IF zabapgit IS BOUND.
-      INSERT LINES OF VALUE string_table(
-                ( |INCLUDE { incl_def }.| )
-                ( |INCLUDE { incl_imp }1.| )
-                ( |INCLUDE { incl_imp }2.| )
-                ( |INCLUDE { incl_imp }3.| )
-                ( |INCLUDE { incl_imp }4.| )
-                ( |INCLUDE { incl_imp }5.| )
-                ( `` ) )
-            INTO zabapgit->abap_source_code
-            INDEX 3.
+      IF incl_def IS NOT INITIAL
+            AND incl_imp IS NOT INITIAL.
+        INSERT LINES OF VALUE string_table(
+                  ( |INCLUDE { incl_def }.| )
+                  ( |INCLUDE { incl_imp }1.| )
+                  ( |INCLUDE { incl_imp }2.| )
+                  ( |INCLUDE { incl_imp }3.| )
+                  ( |INCLUDE { incl_imp }4.| )
+                  ( |INCLUDE { incl_imp }5.| )
+                  ( `` ) )
+              INTO zabapgit->abap_source_code
+              INDEX 3.
+      ELSE.
+        INSERT LINES OF VALUE string_table(
+                  ( LINES OF abap_of_zabapgit_oo-def_abap_source_code )
+                  ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code )
+                  ( `` ) )
+              INTO zabapgit->abap_source_code
+              INDEX 3.
+      ENDIF.
     ENDIF.
 
     DATA(zcl_abapgit_objects) = REF #( classes_interfaces-classes[ name = 'ZCL_ABAPGIT_OBJECTS' ]-includes[ method_name = 'CREATE_OBJECT' ] OPTIONAL ).
@@ -574,27 +597,9 @@ CLASS lcl_app IMPLEMENTATION.
 
   ENDMETHOD.
 
-ENDCLASS.
 
-
-CLASS ltc_main DEFINITION
-      FOR TESTING
-      DURATION SHORT
-      RISK LEVEL HARMLESS.
-  PRIVATE SECTION.
-    METHODS test FOR TESTING RAISING cx_static_check.
-ENDCLASS.
-
-
-CLASS ltc_main IMPLEMENTATION.
-  METHOD test.
-
-    s_devc[] = VALUE #( ( sign = 'I' option = 'CP' low = '$ABAPGIT*' ) ).
-    incl_def = 'ZSHRINKER_DEMO_ABAPGIT_DEF'.
-    incl_imp = 'ZSHRINKER_DEMO_ABAPGIT_IMP'.
-    standalo = 'ZSHRINKER_DEMO_ABAPGIT_STANDAL'.
-
-    lcl_app=>main( ).
+  METHOD zif_shrinker_abap_code_adapter~adapt_source_code_before_rep_i.
 
   ENDMETHOD.
+
 ENDCLASS.

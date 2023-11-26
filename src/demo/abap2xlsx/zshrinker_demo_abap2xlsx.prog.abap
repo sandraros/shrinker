@@ -470,6 +470,11 @@ CLASS lcl_app IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD zif_shrinker_abap_code_adapter~adapt_source_code_before_rep_i.
+
+  ENDMETHOD.
+
+
   METHOD zif_shrinker_user_exit_abapgit~is_to_be_deserialized.
 
     result = xsdbool( line_exists( shrinker_objects_to_recreate[ object   = object

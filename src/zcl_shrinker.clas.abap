@@ -100,9 +100,17 @@ CLASS zcl_shrinker DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_shrinker.
 
+    "! <p class="shorttext synchronized" lang="en"></p>
+    "!
+    "! @parameter object | <p class="shorttext synchronized" lang="en">PROG, FUGR, CLAS or INTF</p>
+    "! @parameter obj_name | <p class="shorttext synchronized" lang="en">Name of program, function group or class/interface pool</p>
+    "! @parameter global_replacements | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter result | <p class="shorttext synchronized" lang="en"></p>
+    "! @raising zcx_shrinker | <p class="shorttext synchronized" lang="en"></p>
     METHODS get_abap_for_program
       IMPORTING
-        program_name        TYPE syrepid
+        object              TYPE trobjtype
+        obj_name            TYPE sobj_name
         global_replacements TYPE ty_obj_renamings OPTIONAL
       RETURNING
         VALUE(result)       TYPE ty_abap_source_code
@@ -174,34 +182,34 @@ CLASS zcl_shrinker DEFINITION
         zcx_shrinker.
 
   PROTECTED SECTION.
-private section.
+  PRIVATE SECTION.
 
-  types:
-    ty_range_of_object_types TYPE RANGE OF tadir-object .
-  types:
-    BEGIN OF ty_ddic_elementary_type,
+    TYPES:
+      ty_range_of_object_types TYPE RANGE OF tadir-object .
+    TYPES:
+      BEGIN OF ty_ddic_elementary_type,
         datatype TYPE dd04l-datatype,
         leng     TYPE dd04l-leng,
         decimals TYPE dd04l-decimals,
       END OF ty_ddic_elementary_type .
-  types:
-    BEGIN OF ty_ddic_data_element,
+    TYPES:
+      BEGIN OF ty_ddic_data_element,
         rollname TYPE dd04l-rollname,
         domname  TYPE dd04l-domname,
         reftype  TYPE dd04l-reftype.
         INCLUDE TYPE ty_ddic_elementary_type AS elem_info.
-      TYPES: END OF ty_ddic_data_element .
-  types:
-    ty_ddic_data_elements TYPE STANDARD TABLE OF ty_ddic_data_element WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_ddic_structure,
+    TYPES: END OF ty_ddic_data_element .
+    TYPES:
+      ty_ddic_data_elements TYPE STANDARD TABLE OF ty_ddic_data_element WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_ddic_structure,
         tabname  TYPE dd02l-tabname,
         tabclass TYPE dd02l-tabclass,
       END OF ty_ddic_structure .
-  types:
-    ty_ddic_structures TYPE STANDARD TABLE OF ty_ddic_structure WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_ddic_structure_component,
+    TYPES:
+      ty_ddic_structures TYPE STANDARD TABLE OF ty_ddic_structure WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_ddic_structure_component,
         tabname   TYPE dd03l-tabname,
         fieldname TYPE dd03l-fieldname,
         rollname  TYPE dd03l-rollname,
@@ -209,11 +217,11 @@ private section.
         comptype  TYPE dd03l-comptype,
         reftype   TYPE dd03l-reftype.
         INCLUDE TYPE ty_ddic_elementary_type AS elem_info.
-      TYPES: END OF ty_ddic_structure_component .
-  types:
-    ty_ddic_structure_components TYPE STANDARD TABLE OF ty_ddic_structure_component WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_ddic_table_type,
+    TYPES: END OF ty_ddic_structure_component .
+    TYPES:
+      ty_ddic_structure_components TYPE STANDARD TABLE OF ty_ddic_structure_component WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_ddic_table_type,
         typename   TYPE dd40l-typename,
         rowkind    TYPE dd40l-rowkind,
         reftype    TYPE dd40l-reftype,
@@ -223,30 +231,30 @@ private section.
         ttypkind   TYPE dd40l-ttypkind,
         accessmode TYPE dd40l-accessmode.
         INCLUDE TYPE ty_ddic_elementary_type AS elem_info.
-      TYPES: END OF ty_ddic_table_type .
-  types:
-    ty_ddic_table_types TYPE STANDARD TABLE OF ty_ddic_table_type WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_ddic_table_type_sec_key,
+    TYPES: END OF ty_ddic_table_type .
+    TYPES:
+      ty_ddic_table_types TYPE STANDARD TABLE OF ty_ddic_table_type WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_ddic_table_type_sec_key,
         typename     TYPE dd43l-typename,
         seckeyname   TYPE dd43l-seckeyname,
         seckeyunique TYPE dd43l-seckeyunique,
         accessmode   TYPE dd43l-accessmode,
         kind         TYPE dd43l-kind,
       END OF ty_ddic_table_type_sec_key .
-  types:
-    ty_ddic_table_type_sec_keys TYPE STANDARD TABLE OF ty_ddic_table_type_sec_key WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_ddic_table_key_component,
+    TYPES:
+      ty_ddic_table_type_sec_keys TYPE STANDARD TABLE OF ty_ddic_table_type_sec_key WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_ddic_table_key_component,
         typename   TYPE dd42s-typename,
         seckeyname TYPE dd42s-seckeyname,
         keyfdpos   TYPE dd42s-keyfdpos,
         keyfield   TYPE dd42s-keyfield,
       END OF ty_ddic_table_key_component .
-  types:
-    ty_ddic_table_key_components TYPE STANDARD TABLE OF ty_ddic_table_key_component WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_ddic_all,
+    TYPES:
+      ty_ddic_table_key_components TYPE STANDARD TABLE OF ty_ddic_table_key_component WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_ddic_all,
         data_elements             TYPE ty_ddic_data_elements,
         structures                TYPE ty_ddic_structures,
         structure_components      TYPE ty_ddic_structure_components,
@@ -254,21 +262,21 @@ private section.
         table_type_key_components TYPE ty_ddic_table_key_components,
         table_type_sec_keys       TYPE ty_ddic_table_type_sec_keys,
       END OF ty_ddic_all .
-  types TY_EXTENSION_CODE type ZIF_SHRINKER_ABAP_CODE_ADAPTER=>TY_EXTENSION_CODE .
-  types TY_OO_INCLUDE type ZIF_SHRINKER_ABAP_CODE_ADAPTER=>TY_OO_INCLUDE .
-  types TY_CLASS type ZIF_SHRINKER_ABAP_CODE_ADAPTER=>TY_CLASS .
-  types TY_INTERFACE type ZIF_SHRINKER_ABAP_CODE_ADAPTER=>TY_INTERFACE .
-  types TY_READ_CLASS_INTERFACE_INCLUD type ZIF_SHRINKER_ABAP_CODE_ADAPTER=>TY_READ_CLASS_INTERFACE_INCLUD .
-  types:
-    BEGIN OF ty_oo_relationship,
+    TYPES ty_extension_code TYPE zif_shrinker_abap_code_adapter=>ty_extension_code .
+    TYPES ty_oo_include TYPE zif_shrinker_abap_code_adapter=>ty_oo_include .
+    TYPES ty_class TYPE zif_shrinker_abap_code_adapter=>ty_class .
+    TYPES ty_interface TYPE zif_shrinker_abap_code_adapter=>ty_interface .
+    TYPES ty_read_class_interface_includ TYPE zif_shrinker_abap_code_adapter=>ty_read_class_interface_includ .
+    TYPES:
+      BEGIN OF ty_oo_relationship,
         clsname    TYPE seometarel-clsname,
         reltype    TYPE seometarel-reltype,
         refclsname TYPE seometarel-refclsname,
       END OF ty_oo_relationship .
-  types:
-    ty_oo_relationships TYPE STANDARD TABLE OF ty_oo_relationship WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_class_description,
+    TYPES:
+      ty_oo_relationships TYPE STANDARD TABLE OF ty_oo_relationship WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_class_description,
         name      TYPE seoclassdf-clsname,
         "! <ul>
         "! <li>'0': class pool</li>
@@ -282,52 +290,52 @@ private section.
         clsccincl TYPE seoclassdf-clsccincl,
         category  TYPE seoclassdf-category,
       END OF ty_class_description .
-  types:
-    ty_class_descriptions TYPE STANDARD TABLE OF ty_class_description WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_method,
+    TYPES:
+      ty_class_descriptions TYPE STANDARD TABLE OF ty_class_description WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_method,
         classname  TYPE tmdir-classname,
         methodindx TYPE tmdir-methodindx,
         methodname TYPE tmdir-methodname,
       END OF ty_method .
-  types:
-    ty_methods TYPE STANDARD TABLE OF ty_method WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_used_exception_class,
+    TYPES:
+      ty_methods TYPE STANDARD TABLE OF ty_method WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_used_class,
         using_object_type TYPE tadir-object,
         using_object_name TYPE tadir-obj_name,
         used_object_type  TYPE tadir-object,
         used_object_name  TYPE tadir-obj_name,
-      END OF ty_used_exception_class .
-  types:
-    ty_used_exception_classes TYPE STANDARD TABLE OF ty_used_exception_class WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_miscellaneous,
-        all_objects            TYPE ty_objects,
-        oo_relationships       TYPE ty_oo_relationships,
-        class_descriptions     TYPE ty_class_descriptions,
-        used_exception_classes TYPE ty_used_exception_classes,
-        class_methods          TYPE ty_methods,
+      END OF ty_used_class .
+    TYPES:
+      ty_used_classes TYPE STANDARD TABLE OF ty_used_class WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_miscellaneous,
+        all_objects        TYPE ty_objects,
+        oo_relationships   TYPE ty_oo_relationships,
+        class_descriptions TYPE ty_class_descriptions,
+        used_classes       TYPE ty_used_classes,
+        class_methods      TYPE ty_methods,
       END OF ty_miscellaneous .
-  types:
-    BEGIN OF ty_abap_source_code_4_class,
+    TYPES:
+      BEGIN OF ty_abap_source_code_4_class,
         name           TYPE seoclsname,
         definition     TYPE ty_abap_source_code,
         implementation TYPE ty_abap_source_code,
       END OF ty_abap_source_code_4_class .
-  types:
-    ty_abap_source_code_4_classes TYPE STANDARD TABLE OF ty_abap_source_code_4_class WITH EMPTY KEY .
-  types:
-    BEGIN OF ty_class_pool_local_symbol,
-             class_name   TYPE string,
-             abap_keyword TYPE string,
-             symbol_name  TYPE string,
-             replacement  TYPE string,
-           END OF ty_class_pool_local_symbol .
-  types:
-    ty_class_pool_local_symbols TYPE HASHED TABLE OF ty_class_pool_local_symbol WITH UNIQUE KEY class_name abap_keyword symbol_name .
-  types:
-    BEGIN OF ty_scanned_class,
+    TYPES:
+      ty_abap_source_code_4_classes TYPE STANDARD TABLE OF ty_abap_source_code_4_class WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_class_pool_local_symbol,
+        class_name   TYPE string,
+        abap_keyword TYPE string,
+        symbol_name  TYPE string,
+        replacement  TYPE string,
+      END OF ty_class_pool_local_symbol .
+    TYPES:
+      ty_class_pool_local_symbols TYPE HASHED TABLE OF ty_class_pool_local_symbol WITH UNIQUE KEY class_name abap_keyword symbol_name .
+    TYPES:
+      BEGIN OF ty_scanned_class,
         name                   TYPE seoclsname,
         is_definition          TYPE abap_bool,
         cu_co_ci               TYPE abap_bool,
@@ -346,172 +354,226 @@ private section.
         start_line             TYPE i,
         end_line               TYPE i,
       END OF ty_scanned_class .
-  types:
-    "! Unique must be by name, is_definition, is_deferred, local_friends because of all these possibilities which may exist in the same source code at the same time
-    "! (NB: a same class cannot have both is_deferred = 'X' and local_friends = 'X' at the same time):
-    "! <ul>
-    "! <li>CLASS zcl_xxx DEFINITION.</li>
-    "! <li>CLASS zcl_xxx DEFINITION LOCAL FRIENDS xxxxxxxx.</li>
-    "! <li>CLASS zcl_xxx IMPLEMENTATION.</li>
-    "! </ul>
-    "! and
-    "! <ul>
-    "! <li>CLASS lcl_xxx DEFINITION DEFERRED.</li>
-    "! <li>CLASS lcl_xxx DEFINITION.</li>
-    "! <li>CLASS zcl_xxx IMPLEMENTATION.</li>
-    "! </ul>
-    ty_scanned_classes TYPE HASHED TABLE OF ty_scanned_class WITH UNIQUE KEY name is_definition is_deferred local_friends .
+    TYPES:
+      "! Unique must be by name, is_definition, is_deferred, local_friends because of all these possibilities which may exist in the same source code at the same time
+      "! (NB: a same class cannot have both is_deferred = 'X' and local_friends = 'X' at the same time):
+      "! <ul>
+      "! <li>CLASS zcl_xxx DEFINITION.</li>
+      "! <li>CLASS zcl_xxx DEFINITION LOCAL FRIENDS xxxxxxxx.</li>
+      "! <li>CLASS zcl_xxx IMPLEMENTATION.</li>
+      "! </ul>
+      "! and
+      "! <ul>
+      "! <li>CLASS lcl_xxx DEFINITION DEFERRED.</li>
+      "! <li>CLASS lcl_xxx DEFINITION.</li>
+      "! <li>CLASS zcl_xxx IMPLEMENTATION.</li>
+      "! </ul>
+      ty_scanned_classes TYPE HASHED TABLE OF ty_scanned_class WITH UNIQUE KEY name is_definition is_deferred local_friends.
 
-  data LOG type STRING_TABLE .
-  data PACKAGE_RANGE type TY_PACKAGE_RANGE .
-  data OBJECTS type TY_OBJECTS .
-  data RANGE_OF_OBJ_NAME type TY_RANGE_OF_OBJ_NAME .
-  data RANGE_OF_OBJ_TYPE type TY_RANGE_OF_OBJ_TYPE .
-  data CC_RENAMINGS type TY_CC_RENAMINGS .
-  data REPLACEMENTS type TY_OBJ_RENAMINGS .
-  data DEF_INCLUDE_NAME type STRING .
-  data IMP_INCLUDE_NAME type STRING .
-  data RANGE_ALL_OBJECTS type ZCL_SHRINKER=>TY_RANGE_OF_OBJ_NAME .
-  data CLASS_POOL_LOCAL_SYMBOLS type TY_CLASS_POOL_LOCAL_SYMBOLS .
-  data CUSTOMIZER type ref to ZIF_SHRINKER_ABAP_CODE_ADAPTER .
-  data PROGRAM_NAME type SYREPID .
 
-  methods CONVERT_METHODINDX_TO_EXTENSIO
-    importing
-      !METHODINDX type TMDIR-METHODINDX
-    returning
-      value(RESULT) type TY_EXTENSION_CODE .
-  methods GET_ABAP_FOR_CLASS_POOL
-    importing
-      !CLASS2 type TY_CLASS
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE_4_CLASS .
-  methods GET_ABAP_FOR_DATA_ELEMENT
-    importing
-      !DATA_ELEMENT type TY_DDIC_DATA_ELEMENT
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_ABAP_FOR_DATA_ELEMENTS
-    importing
-      !DATA_ELEMENTS type TY_DDIC_DATA_ELEMENTS
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_ABAP_FOR_DDIC_ELEM_INFO
-    importing
-      !TYPE_NAME type CSEQUENCE
-      !REF_TO type ABAP_BOOL default ABAP_FALSE
-      !ELEM_INFO type TY_DDIC_ELEMENTARY_TYPE
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_ABAP_FOR_INTERFACE_POOL
-    importing
-      !INTERFACE type TY_INTERFACE
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_ABAP_FOR_STRUCTURE
-    importing
-      !STRUCTURE type TY_DDIC_STRUCTURE
-      !STRUCTURE_COMPONENTS type TY_DDIC_STRUCTURE_COMPONENTS
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_ABAP_FOR_STRUCTURES
-    importing
-      !STRUCTURES type TY_DDIC_STRUCTURES
-      !STRUCTURE_COMPONENTS type TY_DDIC_STRUCTURE_COMPONENTS
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_ABAP_FOR_TABLE_TYPE
-    importing
-      !TABLE_TYPE type TY_DDIC_TABLE_TYPE
-      !KEY_COMPONENTS type TY_DDIC_TABLE_KEY_COMPONENTS
-      !SEC_KEYS type TY_DDIC_TABLE_TYPE_SEC_KEYS
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_ABAP_FOR_TABLE_TYPES
-    importing
-      !TABLE_TYPES type TY_DDIC_TABLE_TYPES
-      !KEY_COMPONENTS type TY_DDIC_TABLE_KEY_COMPONENTS
-      !SEC_KEYS type TY_DDIC_TABLE_TYPE_SEC_KEYS
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods GET_CLASS_INCLUDE_NAME
-    importing
-      !CLASS_NAME type SEOCLSNAME
-      !EXTENSION type CSEQUENCE
-    returning
-      value(RESULT) type INCLUDE .
-  class-methods GET_RANDOM_REPLACEMENT_NAME
-    returning
-      value(RESULT) type STRING .
-  methods GET_TABLE_TYPE_KEY_COMPONENTS
-    importing
-      !TYPENAME type DD43L-TYPENAME
-      !KEYNAME type DD43L-SECKEYNAME
-      !KEY_COMPONENTS type TY_DDIC_TABLE_KEY_COMPONENTS
-    returning
-      value(RESULT) type STRING .
-  methods ON_PROGRAM_GENERATED
-    for event PROGRAM_GENERATED of LCL_PROGRAM_LOAD
-    importing
-      !PROGNAME .
+    DATA log TYPE string_table .
+    DATA package_range TYPE ty_package_range .
+    DATA objects TYPE ty_objects .
+    DATA range_of_obj_name TYPE ty_range_of_obj_name .
+    DATA range_of_obj_type TYPE ty_range_of_obj_type .
+    DATA cc_renamings TYPE ty_cc_renamings .
+    DATA replacements TYPE ty_obj_renamings .
+    DATA def_include_name TYPE string .
+    DATA imp_include_name TYPE string .
+    DATA range_all_objects TYPE zcl_shrinker=>ty_range_of_obj_name .
+    DATA class_pool_local_symbols TYPE ty_class_pool_local_symbols .
+    DATA customizer TYPE REF TO zif_shrinker_abap_code_adapter .
+    DATA program_name TYPE syrepid .
+
+
+    METHODS convert_methodindx_to_extensio
+      IMPORTING
+        !methodindx   TYPE tmdir-methodindx
+      RETURNING
+        VALUE(result) TYPE ty_extension_code .
+
+    METHODS get_abap_for_class_pool
+      IMPORTING
+        !class2       TYPE ty_class
+      RETURNING
+        VALUE(result) TYPE ty_abap_source_code_4_class .
+
+    METHODS get_abap_for_data_element
+      IMPORTING
+        !data_element TYPE ty_ddic_data_element
+      RETURNING
+        VALUE(result) TYPE ty_abap_source_code .
+
+    METHODS get_abap_for_data_elements
+      IMPORTING
+        !data_elements TYPE ty_ddic_data_elements
+      RETURNING
+        VALUE(result)  TYPE ty_abap_source_code .
+
+    METHODS get_abap_for_ddic_elem_info
+      IMPORTING
+        !type_name    TYPE csequence
+        !ref_to       TYPE abap_bool DEFAULT abap_false
+        !elem_info    TYPE ty_ddic_elementary_type
+      RETURNING
+        VALUE(result) TYPE ty_abap_source_code .
+
+    METHODS get_abap_for_interface_pool
+      IMPORTING
+        !interface    TYPE ty_interface
+      RETURNING
+        VALUE(result) TYPE ty_abap_source_code .
+
+    METHODS get_abap_for_structure
+      IMPORTING
+        !structure            TYPE ty_ddic_structure
+        !structure_components TYPE ty_ddic_structure_components
+      RETURNING
+        VALUE(result)         TYPE ty_abap_source_code .
+
+    METHODS get_abap_for_structures
+      IMPORTING
+        !structures           TYPE ty_ddic_structures
+        !structure_components TYPE ty_ddic_structure_components
+      RETURNING
+        VALUE(result)         TYPE ty_abap_source_code .
+
+    METHODS get_abap_for_table_type
+      IMPORTING
+        !table_type     TYPE ty_ddic_table_type
+        !key_components TYPE ty_ddic_table_key_components
+        !sec_keys       TYPE ty_ddic_table_type_sec_keys
+      RETURNING
+        VALUE(result)   TYPE ty_abap_source_code .
+
+    METHODS get_abap_for_table_types
+      IMPORTING
+        !table_types    TYPE ty_ddic_table_types
+        !key_components TYPE ty_ddic_table_key_components
+        !sec_keys       TYPE ty_ddic_table_type_sec_keys
+      RETURNING
+        VALUE(result)   TYPE ty_abap_source_code .
+
+    METHODS get_class_endclass_positions
+      IMPORTING
+        !itab     TYPE ty_abap_source_code
+        !cu_co_ci TYPE abap_bool
+      CHANGING
+        !classes  TYPE ty_scanned_classes .
+
+    METHODS get_class_include_name
+      IMPORTING
+        !class_name   TYPE seoclsname
+        !extension    TYPE csequence
+      RETURNING
+        VALUE(result) TYPE include .
+
+    METHODS get_main_program_name
+      IMPORTING
+        object        TYPE trobjtype
+        obj_name      TYPE sobj_name
+      RETURNING
+        VALUE(result) TYPE syrepid.
+
+    CLASS-METHODS get_random_replacement_name
+      RETURNING
+        VALUE(result) TYPE string .
+
+    METHODS get_table_type_key_components
+      IMPORTING
+        !typename       TYPE dd43l-typename
+        !keyname        TYPE dd43l-seckeyname
+        !key_components TYPE ty_ddic_table_key_components
+      RETURNING
+        VALUE(result)   TYPE string .
+
+    METHODS on_program_generated
+      FOR EVENT program_generated OF lcl_program_load
+      IMPORTING
+        !progname .
+
     "! READ REPORT of all includes
-  methods READ_CLASS_INTERFACE_INCLUDES
-    importing
-      !CLASSES type TY_CLASS_DESCRIPTIONS
-      !CLASS_METHODS type TY_METHODS
-      !INTERFACES type TY_OBJECTS
-      !RENAMINGS type TY_CC_RENAMINGS
-    returning
-      value(RESULT) type TY_READ_CLASS_INTERFACE_INCLUD .
-  methods READ_REPORT
-    importing
-      !INCLUDE_NAME type INCLUDE
-    returning
-      value(RESULT) type TY_ABAP_SOURCE_CODE .
-  methods READ_REPORT_CLASS_INCLUDE
-    importing
-      !CLASS_NAME type SEOCLSNAME
-      !EXTENSION type CSEQUENCE
-      !METHOD_NAME type SEOCPDNAME optional
-      !CC_RENAMINGS type TY_CC_RENAMINGS optional
-    returning
-      value(RESULT) type TY_OO_INCLUDE .
-  methods REPLACE_TEXTS
-    importing
-      !REPLACEMENTS type TY_OBJ_RENAMINGS
-    changing
-      !ABAP_SOURCE_CODE type TY_ABAP_SOURCE_CODE .
-  methods SELECT_MISCELLANEOUS
-    importing
-      !PACKAGE_RANGE type TY_PACKAGE_RANGE
-      !OBJECTS type TY_OBJECTS
-      !RANGE_OF_OBJ_NAME type TY_RANGE_OF_OBJ_NAME
-      !RANGE_OF_OBJ_TYPE type TY_RANGE_OF_OBJ_TYPE
-    returning
-      value(RESULT) type TY_MISCELLANEOUS
-    raising
-      ZCX_SHRINKER .
-  methods SELECT_DDIC_OBJECTS
-    importing
-      !PACKAGE_RANGE type TY_PACKAGE_RANGE
-      !RANGE_OF_OBJ_NAME type TY_RANGE_OF_OBJ_NAME
-      !RANGE_OF_OBJ_TYPE type TY_RANGE_OF_OBJ_TYPE
-    returning
-      value(RESULT) type TY_DDIC_ALL .
-  methods REMOVE_TEST_CLASSES
-    changing
-      !ABAP_SOURCE_CODE type TY_ABAP_SOURCE_CODE_4_CLASSES .
-  methods GET_CLASS_ENDCLASS_POSITIONS
-    importing
-      !ITAB type TY_ABAP_SOURCE_CODE
-      !CU_CO_CI type ABAP_BOOL
-    changing
-      !CLASSES type TY_SCANNED_CLASSES .
+    METHODS read_class_interface_includes
+      IMPORTING
+        !classes       TYPE ty_class_descriptions
+        !class_methods TYPE ty_methods
+        !interfaces    TYPE ty_objects
+        !renamings     TYPE ty_cc_renamings
+      RETURNING
+        VALUE(result)  TYPE ty_read_class_interface_includ .
+
+        METHODS read_includes
+          CHANGING
+            source_units TYPE zif_shrinker_abap_code_adapter=>ty_source_units
+          RAISING
+            zcx_shrinker.
+
+    METHODS read_report
+      IMPORTING
+        !include_name TYPE include
+      RETURNING
+        VALUE(result) TYPE ty_abap_source_code .
+
+    METHODS read_report_class_include
+      IMPORTING
+        !class_name   TYPE seoclsname
+        !extension    TYPE csequence
+        !method_name  TYPE seocpdname OPTIONAL
+        !cc_renamings TYPE ty_cc_renamings OPTIONAL
+      RETURNING
+        VALUE(result) TYPE ty_oo_include .
+
+    METHODS remove_test_classes
+      CHANGING
+        !abap_source_code TYPE ty_abap_source_code_4_classes .
+
+    METHODS replace_includes
+      IMPORTING
+        program_name TYPE syrepid
+      CHANGING
+        source_units TYPE zif_shrinker_abap_code_adapter=>ty_source_units.
+
+    METHODS replace_texts
+      IMPORTING
+        !replacements     TYPE ty_obj_renamings
+      CHANGING
+        !abap_source_code TYPE ty_abap_source_code .
+
+    METHODS select_ddic_objects
+      IMPORTING
+        !package_range     TYPE ty_package_range
+        !range_of_obj_name TYPE ty_range_of_obj_name
+        !range_of_obj_type TYPE ty_range_of_obj_type
+      RETURNING
+        VALUE(result)      TYPE ty_ddic_all .
+
+    METHODS select_miscellaneous
+      IMPORTING
+        !package_range     TYPE ty_package_range
+        !objects           TYPE ty_objects
+        !range_of_obj_name TYPE ty_range_of_obj_name
+        !range_of_obj_type TYPE ty_range_of_obj_type
+      RETURNING
+        VALUE(result)      TYPE ty_miscellaneous
+      RAISING
+        zcx_shrinker .
+
+    METHODS select_used_classes
+      IMPORTING
+        package_range     TYPE ty_package_range
+        range_of_obj_name TYPE ty_range_of_obj_name
+        range_of_obj_type TYPE ty_range_of_obj_type
+        all_objects       TYPE ty_objects
+      RETURNING
+        VALUE(result)     TYPE ty_used_classes
+      RAISING
+        zcx_shrinker.
+
 ENDCLASS.
 
 
 
-CLASS ZCL_SHRINKER IMPLEMENTATION.
+CLASS zcl_shrinker IMPLEMENTATION.
 
 
   METHOD convert_methodindx_to_extensio.
@@ -1210,7 +1272,9 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
 
     TRY.
 
-        me->program_name = program_name.
+*        me->obj_name = obj_name.
+        me->program_name = get_main_program_name( object   = object
+                                                  obj_name = obj_name ).
         me->replacements = global_replacements.
 
         DATA(miscellaneous) = VALUE ty_miscellaneous( ).
@@ -1218,8 +1282,8 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
         SELECT pgmid, object, obj_name
             FROM tadir
             WHERE pgmid    = 'R3TR'
-              AND object   = 'PROG'
-              AND obj_name = @program_name
+              AND object   = @object
+              AND obj_name = @obj_name
             INTO TABLE @miscellaneous-all_objects.
         IF sy-subrc <> 0.
           RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Program &1 does not exist'(002) msgv1 = program_name.
@@ -1237,89 +1301,112 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
           RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Program &1 does not exist'(002) msgv1 = program_name.
         ENDIF.
 
-        FIND ALL OCCURRENCES
-            OF 'INCLUDE'
-            IN TABLE result
-            RESULTS DATA(matches).
 
-        TYPES:
-          BEGIN OF ty_include_statement,
-            row    TYPE i,
-            stokes TYPE zcl_shrinker_abap_scan=>ty_ut_stokes,
-          END OF ty_include_statement.
-        TYPES ty_include_statements TYPE STANDARD TABLE OF ty_include_statement WITH EMPTY KEY.
-        TYPES:
-          BEGIN OF ty_include,
-            name     TYPE syrepid,
-            if_found TYPE abap_bool,
-*            abap_source_code TYPE ty_abap_source_code,
-          END OF ty_include.
-        TYPES ty_includes TYPE STANDARD TABLE OF ty_include WITH EMPTY KEY.
-        DATA(include_statements) = VALUE ty_include_statements( ).
-        DATA(includes) = VALUE ty_includes( ).
-        LOOP AT matches REFERENCE INTO DATA(match).
-          DATA(include_statement) = zcl_shrinker_abap_scan=>get_abap_statement_at_cursor(
-                                        it_source = result
-                                        i_linenr  = match->line
-                                        i_offset  = match->offset ).
-          IF include_statement-stokes IS NOT INITIAL
-                AND include_statement-stokes[ 1 ]-str = 'INCLUDE'.
-            INSERT VALUE ty_include(
-                    name     = include_statement-stokes[ 2 ]-str
-                    if_found = xsdbool( lines( include_statement-stokes ) >= 4
-                                    AND include_statement-stokes[ 3 ]-str = 'IF'
-                                    AND include_statement-stokes[ 4 ]-str = 'FOUND' )
-                ) INTO TABLE includes.
-            INSERT VALUE #(
-                    row    = include_statement-stokes[ 1 ]-row
-                    stokes = include_statement-stokes
-                ) INTO TABLE include_statements.
-          ENDIF.
-        ENDLOOP.
+        read_includes( CHANGING source_units = source_units ).
 
-        LOOP AT includes REFERENCE INTO DATA(include).
+        IF customizer IS BOUND.
 
-          INSERT VALUE #(
-                  name = include->name )
-              INTO TABLE source_units
-              REFERENCE INTO source_unit.
+          customizer->adapt_source_code_before_rep_i( CHANGING source_units = source_units ).
 
-          READ REPORT include->name INTO source_unit->abap_source_code.
-          IF sy-subrc <> 0
-              AND include->if_found = abap_false.
-            RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Program &1 does not exist'(002) msgv1 = program_name.
-          ENDIF.
+          read_includes( CHANGING source_units = source_units ).
 
-        ENDLOOP.
+        ENDIF.
+
+        replace_includes( EXPORTING program_name = program_name
+                          CHANGING  source_units = source_units ).
 
         IF customizer IS BOUND.
           customizer->adapt_source_code( CHANGING other_source_units = source_units ).
         ENDIF.
 
-        result = source_units[ name = program_name ]-abap_source_code.
-
-        SORT include_statements BY row DESCENDING.
-        LOOP AT include_statements REFERENCE INTO DATA(include_statement_2).
-          DATA(line_index) = include_statement_2->stokes[ 1 ]-row.
-          source_unit = REF #( source_units[ name = include_statement_2->stokes[ 2 ]-str ] OPTIONAL ).
-          IF include IS NOT BOUND.
-            result[ line_index ] = '*' && result[ line_index ].
-          ELSE.
-            DATA(replaced_abap_line) = result[ line_index ].
-            DELETE result INDEX line_index.
-            INSERT LINES OF source_unit->abap_source_code INTO result INDEX line_index.
-            INSERT |*{ replaced_abap_line }| INTO result INDEX line_index.
-          ENDIF.
-        ENDLOOP.
-
         replace_texts( EXPORTING replacements     = replacements
                        CHANGING  abap_source_code = result ).
+
+
+        result = source_units[ name = program_name ]-abap_source_code.
+
 
       CATCH zcx_shrinker INTO DATA(error_2).
         RAISE EXCEPTION error_2.
       CATCH cx_root INTO DATA(error).
         RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
     ENDTRY.
+
+  ENDMETHOD.
+
+
+        method read_includes.
+
+        LOOP AT source_units REFERENCE INTO DATA(source_unit).
+
+          source_unit->include_statements = VALUE #( ).
+
+          FIND ALL OCCURRENCES
+              OF 'INCLUDE'
+              IN TABLE source_unit->abap_source_code
+              RESULTS DATA(matches).
+
+          LOOP AT matches REFERENCE INTO DATA(match).
+            DATA(abap_statement) = zcl_shrinker_abap_scan=>get_abap_statement_at_cursor(
+                                          it_source = source_unit->abap_source_code
+                                          i_linenr  = match->line
+                                          i_offset  = match->offset ).
+            IF abap_statement-stokes IS NOT INITIAL
+                  AND abap_statement-stokes[ 1 ]-str = 'INCLUDE'.
+              INSERT VALUE #(
+                      row      = abap_statement-stokes[ 1 ]-row
+                      stokes   = abap_statement-stokes
+                      name     = abap_statement-stokes[ 2 ]-str
+                      if_found = xsdbool( lines( abap_statement-stokes ) >= 4
+                                      AND abap_statement-stokes[ 3 ]-str = 'IF'
+                                      AND abap_statement-stokes[ 4 ]-str = 'FOUND' )
+                  ) INTO TABLE source_unit->include_statements.
+            ENDIF.
+          ENDLOOP.
+
+          LOOP AT source_unit->include_statements REFERENCE INTO DATA(include_statement).
+
+            if NOT line_exists( source_units[ name = include_statement->name ] ).
+            INSERT VALUE #(
+                    name = include_statement->name )
+                INTO TABLE source_units
+                REFERENCE INTO DATA(source_unit_2).
+
+            READ REPORT include_statement->name INTO source_unit_2->abap_source_code.
+            IF sy-subrc <> 0
+                AND include_statement->if_found = abap_false.
+              RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Program &1 does not exist'(002) msgv1 = program_name.
+            ENDIF.
+            ENDIF.
+
+          ENDLOOP.
+        ENDLOOP.
+
+        ENDMETHOD.
+
+
+  METHOD replace_includes.
+
+    DATA(source_unit) = REF #( source_units[ name = program_name ] ).
+
+    SORT source_unit->include_statements BY row DESCENDING.
+
+    LOOP AT source_unit->include_statements REFERENCE INTO DATA(include_statement).
+
+      replace_includes( EXPORTING program_name = include_statement->name
+                        CHANGING  source_units = source_units ).
+
+      DATA(line_index) = include_statement->stokes[ 1 ]-row.
+      DATA(source_unit_2) = REF #( source_units[ name = include_statement->stokes[ 2 ]-str ] OPTIONAL ).
+      IF source_unit_2 IS NOT BOUND.
+        source_unit->abap_source_code[ line_index ] = '*' && source_unit->abap_source_code[ line_index ].
+      ELSE.
+        DATA(replaced_abap_line) = source_unit->abap_source_code[ line_index ].
+        DELETE source_unit->abap_source_code INDEX line_index.
+        INSERT LINES OF source_unit_2->abap_source_code INTO source_unit->abap_source_code INDEX line_index.
+        INSERT |*{ replaced_abap_line }| INTO source_unit->abap_source_code INDEX line_index.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -1510,6 +1597,32 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_main_program_name.
+
+    result  = COND syrepid(
+      WHEN ( object = 'FUGR' OR object = 'FUGS' )
+               AND obj_name(1) = '/' THEN
+           '/' && replace( val  = substring( val = obj_name
+                                             off = 2 )
+                           sub  = '/'
+                           with = '/SAPL' )
+      WHEN ( object = 'FUGR' OR object = 'FUGS' )
+               AND obj_name(1) <> '/' THEN
+           'SAPL' && obj_name
+      WHEN object = 'CLAS' THEN
+           |{ obj_name WIDTH = 30 PAD = '=' }|
+           && 'CP'
+      WHEN object = 'INTF' THEN
+           |{ obj_name WIDTH = 30 PAD = '=' }|
+           && 'IP'
+      WHEN object = 'CNTX' THEN
+           'CONTEXT_X_' && obj_name
+      ELSE " PROG
+           obj_name ).
+
+  ENDMETHOD.
+
+
   METHOD get_one_abap_code.
 
     TRY.
@@ -1541,7 +1654,9 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
                                     WHERE ( object = 'INTF' )
                                     ( <object> ) )
                     renamings     = cc_renamings ).
+
         LOOP AT classes_interfaces-classes REFERENCE INTO DATA(class).
+
           DATA(class_cu_include) = REF #( class->includes[ extension_code = 'CU' ] ).
           FIND ALL OCCURRENCES OF 'FRIENDS' IN TABLE class_cu_include->abap_source_code RESULTS DATA(matches).
           LOOP AT matches REFERENCE INTO DATA(match).
@@ -1704,13 +1819,13 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
                         ) INTO TABLE dependencies.
         ENDLOOP.
 
-        LOOP AT miscellaneous-used_exception_classes REFERENCE INTO DATA(used_exception_class).
+        LOOP AT miscellaneous-used_classes REFERENCE INTO DATA(used_class).
           INSERT VALUE #( object     = VALUE #( pgmid    = 'R3TR'
-                                                object   = used_exception_class->using_object_type
-                                                obj_name = used_exception_class->using_object_name )
+                                                object   = used_class->using_object_type
+                                                obj_name = used_class->using_object_name )
                           ref_object = VALUE #( pgmid    = 'R3TR'
-                                                object   = used_exception_class->used_object_type
-                                                obj_name = used_exception_class->used_object_name )
+                                                object   = used_class->used_object_type
+                                                obj_name = used_class->used_object_name )
                         ) INTO TABLE dependencies.
         ENDLOOP.
 
@@ -2282,15 +2397,6 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
 
 
   METHOD select_miscellaneous.
-    TYPES:
-      BEGIN OF ty_tadir_main_program,
-        pgmid             TYPE tadir-pgmid,
-        object            TYPE tadir-object,
-        obj_name          TYPE tadir-obj_name,
-        devclass          TYPE tadir-devclass,
-        main_program_name TYPE syrepid,
-      END OF ty_tadir_main_program.
-    TYPES ty_tadir_main_programs TYPE STANDARD TABLE OF ty_tadir_main_program WITH EMPTY KEY.
 
     IF objects IS INITIAL.
       SELECT pgmid, object, obj_name
@@ -2314,6 +2420,94 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
           INTO TABLE @result-all_objects.
     ENDIF.
 
+    " CLSNAME               RELTYPE  REFCLSNAME
+    " ====================  =======  ====================
+    " ZCL_EXCEL             1        ZIF_EXCEL_BOOK_PROPERTIES
+    " ZCL_EXCEL_GRAPH_BARS  2        ZCL_EXCEL_GRAPH
+    " ZCX_EXCEL             2        CX_STATIC_CHECK
+
+
+    " At statement "CLASS zcl_excel_graph_bars DEFINITION INHERITING FROM zcl_excel_graph", this syntax error MESSAGEG)F:
+    " "Components of classes declared using "CLASS ZCL_EXCEL_GRAPH DEFINITION DEFERRED" can only be accessed after the class is defined (CLASS ZCL_EXCEL_GRAPH DEFINITION)."
+
+    SELECT seometarel~clsname, seometarel~reltype, seometarel~refclsname
+            FROM seometarel
+            INNER JOIN tadir
+              ON tadir~obj_name = seometarel~clsname
+            WHERE tadir~object   IN ('CLAS','INTF')
+              AND tadir~object   IN @range_of_obj_type
+              AND tadir~devclass IN @package_range
+              AND tadir~obj_name IN @range_of_obj_name
+            INTO TABLE @result-oo_relationships.
+
+
+    result-used_classes = select_used_classes(
+                            package_range     = package_range
+                            range_of_obj_name = range_of_obj_name
+                            range_of_obj_type = range_of_obj_type
+                            all_objects       = result-all_objects ).
+
+
+    " NAME                  CLSCCINCL
+    " ====================  =========
+    " ZCL_EXCEL             X
+    " ZCL_EXCEL_AUTOFILTER  X
+    SELECT seoclassdf~clsname, seoclass~clstype, seoclassdf~clsccincl, seoclassdf~category
+        FROM seoclassdf
+            INNER JOIN seoclass
+              ON seoclass~clsname = seoclassdf~clsname
+            INNER JOIN tadir
+              ON tadir~obj_name = seoclassdf~clsname
+        WHERE tadir~object   IN ('CLAS','INTF')
+          AND tadir~object   IN @range_of_obj_type
+          AND tadir~devclass IN @package_range
+          AND tadir~obj_name IN @range_of_obj_name
+        INTO TABLE @result-class_descriptions.
+
+
+    " CLASSNAME  METHODINDX  METHODNAME
+    " =========  ==========  =======================
+    " ZCL_EXCEL  00000
+    " ZCL_EXCEL  00001       ADD_NEW_AUTOFILTER
+    " ZCL_EXCEL  00002       ADD_NEW_COMMENT
+    SELECT tmdir~classname, tmdir~methodindx, tmdir~methodname
+        FROM tmdir
+            INNER JOIN tadir
+              ON tadir~obj_name = tmdir~classname
+        WHERE tadir~object   IN ('CLAS','INTF')
+          AND tadir~object   IN @range_of_obj_type
+          AND tadir~devclass IN @package_range
+          AND tadir~obj_name IN @range_of_obj_name
+        INTO TABLE @result-class_methods.
+
+  ENDMETHOD.
+
+
+  METHOD select_used_classes.
+
+    TYPES:
+      BEGIN OF ty_tadir_main_program,
+        pgmid             TYPE tadir-pgmid,
+        object            TYPE tadir-object,
+        obj_name          TYPE tadir-obj_name,
+        devclass          TYPE tadir-devclass,
+        main_program_name TYPE syrepid,
+      END OF ty_tadir_main_program.
+    TYPES ty_tadir_main_programs TYPE STANDARD TABLE OF ty_tadir_main_program WITH EMPTY KEY.
+
+*    TYPES:
+*      ty_using_object_type TYPE zshrinker_gtt_mp-object,
+*      ty_using_object_name TYPE zshrinker_gtt_mp-obj_name,
+*      ty_used_object_type  TYPE c LENGTH 4,
+*      ty_used_object_name  TYPE zshrinker_gtt_ec-exception_class_name.
+*    TYPES main_program_name TYPE syrepid.
+*    TYPES object TYPE tadir-object.
+*    TYPES obj_name TYPE tadir-obj_name.
+*    TYPES pgmid TYPE tadir-pgmid.
+*    TYPES devclass TYPE tadir-devclass.
+*    DATA ty_tadir_main_programs TYPE ty_tadir_main_programs.
+
+    " get_used_classes
     "=================================================
     " Make sure D010INC and WBCROSSGT are up-to-date
     "=================================================
@@ -2346,26 +2540,15 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
         INTO TABLE @tadir_main_programs.
 
     LOOP AT tadir_main_programs REFERENCE INTO DATA(tadir_main_program).
-      tadir_main_program->main_program_name = COND #(
-             WHEN ( tadir_main_program->object = 'FUGR' OR tadir_main_program->object = 'FUGS' )
-                      AND tadir_main_program->obj_name(1) = '/' THEN
-                  '/' && replace( val  = substring( val = tadir_main_program->obj_name
-                                                    off = 2 )
-                                  sub  = '/'
-                                  with = '/SAPL' )
-             WHEN ( tadir_main_program->object = 'FUGR' OR tadir_main_program->object = 'FUGS' )
-                      AND tadir_main_program->obj_name(1) <> '/' THEN
-                  'SAPL' && tadir_main_program->obj_name
-             WHEN tadir_main_program->object = 'CLAS' THEN
-                  |{ tadir_main_program->obj_name WIDTH = 30 PAD = '=' }|
-                  && 'CP'
-             WHEN tadir_main_program->object = 'INTF' THEN
-                  |{ tadir_main_program->obj_name WIDTH = 30 PAD = '=' }|
-                  && 'IP'
-             WHEN tadir_main_program->object = 'CNTX' THEN
-                  'CONTEXT_X_' && tadir_main_program->obj_name
-             ELSE " PROG
-                  tadir_main_program->obj_name ).
+      DATA(object) = tadir_main_program->object.
+      DATA(obj_name) = tadir_main_program->obj_name.
+      DATA main_program_name TYPE sy-repid.
+
+      main_program_name = get_main_program_name(
+      object = object
+      obj_name = obj_name ).
+
+      tadir_main_program->main_program_name = main_program_name.
     ENDLOOP.
 
     TYPES ty_table_zshrinker_gtt_mp TYPE STANDARD TABLE OF zshrinker_gtt_mp WITH EMPTY KEY.
@@ -2430,27 +2613,6 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
     SET HANDLER on_program_generated FOR lo_prog.
 
     lo_prog->gen_progs( i_commit_frequency = 10 ).
-
-
-    " CLSNAME               RELTYPE  REFCLSNAME
-    " ====================  =======  ====================
-    " ZCL_EXCEL             1        ZIF_EXCEL_BOOK_PROPERTIES
-    " ZCL_EXCEL_GRAPH_BARS  2        ZCL_EXCEL_GRAPH
-    " ZCX_EXCEL             2        CX_STATIC_CHECK
-
-
-    " At statement "CLASS zcl_excel_graph_bars DEFINITION INHERITING FROM zcl_excel_graph", this syntax error MESSAGEG)F:
-    " "Components of classes declared using "CLASS ZCL_EXCEL_GRAPH DEFINITION DEFERRED" can only be accessed after the class is defined (CLASS ZCL_EXCEL_GRAPH DEFINITION)."
-
-    SELECT seometarel~clsname, seometarel~reltype, seometarel~refclsname
-            FROM seometarel
-            INNER JOIN tadir
-              ON tadir~obj_name = seometarel~clsname
-            WHERE tadir~object   IN ('CLAS','INTF')
-              AND tadir~object   IN @range_of_obj_type
-              AND tadir~devclass IN @package_range
-              AND tadir~obj_name IN @range_of_obj_name
-            INTO TABLE @result-oo_relationships.
 
 
     " The definition of exception classes must be positioned before any class definition containing RAISING of this exception class,
@@ -2525,13 +2687,13 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
         INTO TABLE @DATA(table_seoclassdf_ec).
 
     TYPES ty_table_zshrinker_gtt_ec TYPE STANDARD TABLE OF zshrinker_gtt_ec WITH EMPTY KEY.
-    TYPES: BEGIN OF ty_used_exception_class,
-             using_object_type TYPE zshrinker_gtt_mp-object,
-             using_object_name TYPE zshrinker_gtt_mp-obj_name,
-             used_object_type  TYPE c LENGTH 4,
-             used_object_name  TYPE zshrinker_gtt_ec-exception_class_name,
-           END OF ty_used_exception_class.
-    TYPES ty_used_exception_classes TYPE STANDARD TABLE OF ty_used_exception_class WITH EMPTY KEY.
+*    TYPES: BEGIN OF ty_used_class,
+*             using_object_type TYPE zshrinker_gtt_mp-object,
+*             using_object_name TYPE zshrinker_gtt_mp-obj_name,
+*             used_object_type  TYPE c LENGTH 4,
+*             used_object_name  TYPE zshrinker_gtt_ec-exception_class_name,
+*           END OF ty_used_class.
+*    TYPES ty_used_classes TYPE STANDARD TABLE OF ty_used_class WITH EMPTY KEY.
 
     DATA(table_zshrinker_gtt_ec) = VALUE ty_table_zshrinker_gtt_ec(
                             FOR <seoclassdf_ec> IN table_seoclassdf_ec
@@ -2598,7 +2760,7 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
 *          AND +tadir_master~obj_name IN @range_of_obj_name
 *          AND +tadir_master~obj_name <> +exception_class~name " remove meaningless link CLAS ZCX_EXCEL ZCX_EXCEL
 *    UNION
-    DATA(used_exception_classes) = VALUE ty_used_exception_classes( ).
+    DATA(used_classes) = VALUE ty_used_classes( ).
 
     SELECT DISTINCT
             zshrinker_gtt_mp~object               AS using_object_type,
@@ -2617,7 +2779,7 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
           AND zshrinker_gtt_mp~object   IN @range_of_obj_type
           AND zshrinker_gtt_mp~obj_name IN @range_of_obj_name
           AND zshrinker_gtt_mp~obj_name <> zshrinker_gtt_ec~exception_class_name " remove meaningless link CLAS ZCX_EXCEL ZCX_EXCEL
-        APPENDING TABLE @used_exception_classes.
+        APPENDING TABLE @used_classes.
 
     " WBCROSSGT:
     "    OTYPE  NAME                             INCLUDE
@@ -2634,7 +2796,34 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
         WHERE zshrinker_gtt_in~uuid   =    @uuid
           AND zshrinker_gtt_in~object IN   ('CLAS','INTF')
           AND wbcrossgt~name          LIKE '%\%'
-        APPENDING TABLE @used_exception_classes.
+        INTO TABLE @DATA(wbcrossgt_lines).
+
+    LOOP AT wbcrossgt_lines REFERENCE INTO DATA(wbcrossgt_line).
+      wbcrossgt_line->used_object_name = substring_before( val = wbcrossgt_line->used_object_name
+                                                       sub = '\' ).
+      IF wbcrossgt_line->using_object_name = wbcrossgt_line->used_object_name.
+        DELETE wbcrossgt_lines USING KEY loop_key.
+      ELSEIF line_exists( all_objects[ pgmid    = 'R3TR'
+                                       object   = 'CLAS'
+                                       obj_name = wbcrossgt_line->used_object_name ] ).
+        wbcrossgt_line->used_object_type = 'CLAS'.
+      ELSEIF line_exists( all_objects[ pgmid    = 'R3TR'
+                                       object   = 'INTF'
+                                       obj_name = wbcrossgt_line->used_object_name ] ).
+        wbcrossgt_line->used_object_type = 'INTF'.
+      ELSE.
+        DELETE wbcrossgt_lines USING KEY loop_key.
+      ENDIF.
+
+      IF wbcrossgt_line IS BOUND.
+        INSERT VALUE #( using_object_type = wbcrossgt_line->using_object_type
+                        using_object_name = wbcrossgt_line->using_object_name
+                        used_object_type  = wbcrossgt_line->used_object_type
+                        used_object_name  = wbcrossgt_line->used_object_name )
+              INTO TABLE used_classes.
+      ENDIF.
+    ENDLOOP.
+
 *    SELECT DISTINCT
 *            tadir~object   AS using_object_type,
 *            tadir~obj_name AS using_object_name,
@@ -2669,12 +2858,11 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
 *          AND tadir~devclass IN @package_range
 *          AND tadir~obj_name IN @range_of_obj_name
 *          AND wbcrossgt~name LIKE '%\%'
-*    INTO TABLE @result-used_exception_classes.
+*    INTO TABLE @result-used_classes.
 
-    SORT used_exception_classes BY table_line.
-    DELETE ADJACENT DUPLICATES FROM used_exception_classes COMPARING table_line.
+    SORT used_classes BY table_line.
+    DELETE ADJACENT DUPLICATES FROM used_classes COMPARING table_line.
 
-    result-used_exception_classes = used_exception_classes.
 
     CALL FUNCTION 'DEQUEUE_EZSHRINKER_UUID'
       EXPORTING
@@ -2684,7 +2872,7 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
     DELETE FROM zshrinker_gtt_mp WHERE uuid = @uuid.
     DELETE FROM zshrinker_gtt_in WHERE uuid = @uuid.
 
-    " At this point, USED_EXCEPTION_CLASSES contains:
+    " At this point, used_classES contains:
     "
     " USING_OBJECT_TYPE  USING_OBJECT_NAME     USED_OBJECT_TYPE  USED_OBJECT_NAME
     " =================  ====================  ================  ===============================
@@ -2696,64 +2884,32 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
     " INTF               ZIF_EXCEL_READER      CLIF              SY\DA:BATCH
     " INTF               ZIF_EXCEL_READER      CLIF              SYST\TY:BATCH
 
-    SORT result-used_exception_classes BY table_line.
-    DELETE ADJACENT DUPLICATES FROM result-used_exception_classes COMPARING table_line.
-
-    " Replace CLIF with either CLAS or INTF.
-    LOOP AT result-used_exception_classes REFERENCE INTO DATA(using_used_object_type)
-        WHERE used_object_type = 'CLIF'.
-      using_used_object_type->used_object_name = substring_before( val = using_used_object_type->used_object_name
-                                                                   sub = '\' ).
-      IF using_used_object_type->using_object_name = using_used_object_type->used_object_name.
-        DELETE result-used_exception_classes USING KEY loop_key.
-      ELSEIF line_exists( result-all_objects[ pgmid    = 'R3TR'
-                                              object   = 'CLAS'
-                                              obj_name = using_used_object_type->used_object_name ] ).
-        using_used_object_type->used_object_type = 'CLAS'.
-      ELSEIF line_exists( result-all_objects[ pgmid    = 'R3TR'
-                                              object   = 'INTF'
-                                              obj_name = using_used_object_type->used_object_name ] ).
-        using_used_object_type->used_object_type = 'INTF'.
-      ELSE.
-        DELETE result-used_exception_classes USING KEY loop_key.
-      ENDIF.
-    ENDLOOP.
-
-    SORT result-used_exception_classes BY table_line.
-    DELETE ADJACENT DUPLICATES FROM result-used_exception_classes COMPARING table_line.
+*    " Replace CLIF with either CLAS or INTF.
+*    LOOP AT used_classes REFERENCE INTO DATA(using_used_object_type)
+*        WHERE used_object_type = 'CLIF'.
+*      DATA(used_object_name) = using_used_object_type->used_object_name. " Save value before changed (Debug helper)
+*      using_used_object_type->used_object_name = substring_before( val = using_used_object_type->used_object_name
+*                                                                   sub = '\' ).
+*      IF using_used_object_type->using_object_name = using_used_object_type->used_object_name.
+*        DELETE used_classes USING KEY loop_key.
+*      ELSEIF line_exists( all_objects[ pgmid    = 'R3TR'
+*                                       object   = 'CLAS'
+*                                       obj_name = using_used_object_type->used_object_name ] ).
+*        using_used_object_type->used_object_type = 'CLAS'.
+*      ELSEIF line_exists( all_objects[ pgmid    = 'R3TR'
+*                                       object   = 'INTF'
+*                                       obj_name = using_used_object_type->used_object_name ] ).
+*        using_used_object_type->used_object_type = 'INTF'.
+*      ELSE.
+*        DELETE used_classes USING KEY loop_key.
+*      ENDIF.
+*    ENDLOOP.
+*
+*    SORT used_classes BY table_line.
+*    DELETE ADJACENT DUPLICATES FROM used_classes COMPARING table_line.
 
 
-    " NAME                  CLSCCINCL
-    " ====================  =========
-    " ZCL_EXCEL             X
-    " ZCL_EXCEL_AUTOFILTER  X
-    SELECT seoclassdf~clsname, seoclass~clstype, seoclassdf~clsccincl, seoclassdf~category
-        FROM seoclassdf
-            INNER JOIN seoclass
-              ON seoclass~clsname = seoclassdf~clsname
-            INNER JOIN tadir
-              ON tadir~obj_name = seoclassdf~clsname
-        WHERE tadir~object   IN ('CLAS','INTF')
-          AND tadir~object   IN @range_of_obj_type
-          AND tadir~devclass IN @package_range
-          AND tadir~obj_name IN @range_of_obj_name
-        INTO TABLE @result-class_descriptions.
-
-
-    " CLASSNAME  METHODINDX  METHODNAME
-    " =========  ==========  =======================
-    " ZCL_EXCEL  00000
-    " ZCL_EXCEL  00001       ADD_NEW_AUTOFILTER
-    " ZCL_EXCEL  00002       ADD_NEW_COMMENT
-    SELECT tmdir~classname, tmdir~methodindx, tmdir~methodname
-        FROM tmdir
-            INNER JOIN tadir
-              ON tadir~obj_name = tmdir~classname
-        WHERE tadir~object   IN ('CLAS','INTF')
-          AND tadir~object   IN @range_of_obj_type
-          AND tadir~devclass IN @package_range
-          AND tadir~obj_name IN @range_of_obj_name
-        INTO TABLE @result-class_methods.
+    result = used_classes.
 
   ENDMETHOD.
 
@@ -2800,4 +2956,5 @@ CLASS ZCL_SHRINKER IMPLEMENTATION.
     result = synt.
 
   ENDMETHOD.
+
 ENDCLASS.
