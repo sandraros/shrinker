@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_SHRINKER</CLSNAME>
+    <CLSNAME>ZCL_SHRINKER_ANY_PROGRAM</CLSNAME>
     <LANGU>E</LANGU>
     <DESCRIPT>Shrink a project to minimal number of ABAP objects</DESCRIPT>
     <STATE>1</STATE>
@@ -32,6 +32,20 @@
      <LENGTH>110</LENGTH>
     </item>
    </TPOOL>
+   <DESCRIPTIONS_SUB>
+    <SEOSUBCOTX>
+     <CMPNAME>GET_ABAP_FOR_PROGRAM</CMPNAME>
+     <SCONAME>OBJECT</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>PROG, FUGR, CLAS or INTF</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>GET_ABAP_FOR_PROGRAM</CMPNAME>
+     <SCONAME>OBJ_NAME</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Name of program, function group or class/interface pool</DESCRIPT>
+    </SEOSUBCOTX>
+   </DESCRIPTIONS_SUB>
   </asx:values>
  </asx:abap>
 </abapGit>

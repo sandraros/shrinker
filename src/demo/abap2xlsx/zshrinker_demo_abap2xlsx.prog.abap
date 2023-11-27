@@ -232,7 +232,7 @@ CLASS lcl_app IMPLEMENTATION.
     " Interface and Class definitions, and class implementations
     "==============================================================================
 
-    DATA(package_range) = VALUE zcl_shrinker=>ty_package_range( ).
+    DATA(package_range) = VALUE zcl_shrinker_ddic_class_interf=>ty_package_range( ).
     SELECT 'I'      AS sign,
            'EQ'     AS option,
            devclass AS low
@@ -241,14 +241,14 @@ CLASS lcl_app IMPLEMENTATION.
       AND devclass NOT IN @s_devc_e
     INTO TABLE @package_range.
 
-    DATA(shrinker) = zcl_shrinker=>create( customizer = me ).
+    DATA(shrinker) = zcl_shrinker_ddic_class_interf=>create( customizer = me ).
     DATA(abap_code) = shrinker->get_one_abap_code(
                     package_range        = package_range
                     global_replacements  = VALUE #( ( posix_regex = 'ZEXCEL_TR_SHARED_STRINGS' with = p_tr_s1 )
                                                     ( posix_regex = 'ZEXCEL_TR_SHEET'          with = p_tr_s2 )
                                                     ( posix_regex = '\<Z(.._EXCEL\w*)'         with = 'L$1' ) ) ).
 
-    DATA(syntax_check) = shrinker->syntax_check( VALUE #(
+    DATA(syntax_check) = zcl_shrinker_abap_scan=>syntax_check( VALUE #(
                         ( `REPORT.` )
                         ( LINES OF abap_code-def_abap_source_code )
                         ( LINES OF abap_code-imp_abap_source_code ) ) ).

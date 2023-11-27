@@ -31,10 +31,11 @@ INTERFACE zif_shrinker_abap_code_adapter
     END OF ty_read_class_interface_includ.
   TYPES:
     BEGIN OF ty_include_statement,
-      row      TYPE i,
-      stokes   TYPE zcl_shrinker_abap_scan=>ty_ut_stokes,
-      name     TYPE syrepid,
-      if_found TYPE abap_bool,
+      row       TYPE i,
+      first_col TYPE i,
+      stokes    TYPE zcl_shrinker_abap_scan=>ty_ut_stokes,
+      name      TYPE syrepid,
+      if_found  TYPE abap_bool,
     END OF ty_include_statement.
   TYPES ty_include_statements TYPE STANDARD TABLE OF ty_include_statement WITH EMPTY KEY.
   TYPES:

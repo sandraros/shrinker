@@ -140,6 +140,14 @@ CLASS zcl_shrinker_abap_scan DEFINITION
       RETURNING
         VALUE(result)     TYPE ty_get_next_lines_of_statement .
 
+    CLASS-METHODS syntax_check
+      IMPORTING
+        abap_source_code TYPE ty_abap_source_code
+      RETURNING
+        VALUE(result)    TYPE ty_syntax_check
+      RAISING
+        zcx_shrinker.
+
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -185,6 +193,24 @@ CLASS ZCL_SHRINKER_ABAP_SCAN IMPLEMENTATION.
           offset           = abap_statement-stokes[ 1 ]-col
           length           = strlen( whole_text ) - abap_statement-stokes[ 1 ]-col ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD syntax_check.
+
+    DATA(synt) = VALUE ty_syntax_check( dir = VALUE #( name = '$$DUMMY' subc = '1' fixpt = 'X' uccheck = 'X' ) ).
+*X   VARCL *S   DBAPL *D$  DBNA
+    SYNTAX-CHECK FOR abap_source_code MESSAGE synt-mess LINE synt-lin WORD synt-wrd DIRECTORY ENTRY synt-dir INCLUDE synt-incl OFFSET synt-off MESSAGE-ID synt-mid.
+    synt-subrc = sy-subrc.
+    " SYNTAX-CHECK FOR itab MESSAGE mess LINE lin WORD wrd
+    "                  [PROGRAM prog] [DIRECTORY ENTRY dir]
+    "                  [WITH CURRENT SWITCHSTATES]
+    " ... [INCLUDE incl]
+    "     [OFFSET off]
+    "     [MESSAGE-ID mid] ...
+
+    result = synt.
 
   ENDMETHOD.
 

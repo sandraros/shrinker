@@ -1,12 +1,9 @@
-CLASS zcl_shrinker DEFINITION
+CLASS zcl_shrinker_ddic_class_interf DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE .
 
   PUBLIC SECTION.
-
-  PROTECTED SECTION.
-  PRIVATE SECTION.
 
     TYPES ty_package_range TYPE RANGE OF devclass.
     TYPES ty_range_of_obj_name TYPE RANGE OF tadir-obj_name.
@@ -85,6 +82,40 @@ CLASS zcl_shrinker DEFINITION
     TYPES ty_object_copies TYPE STANDARD TABLE OF ty_object_copy WITH EMPTY KEY.
 
 
+    CLASS-METHODS create
+      IMPORTING
+        customizer    TYPE REF TO zif_shrinker_abap_code_adapter OPTIONAL
+      RETURNING
+        VALUE(result) TYPE REF TO zcl_shrinker_ddic_class_interf.
+
+    "! <p class="shorttext synchronized" lang="en"></p>
+    "!
+    "! @parameter package_range | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter range_of_obj_name | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter global_replacements | <p class="shorttext synchronized" lang="en"></p> Do any text replacement e.g. to change
+    "! the prefix of shrinked object names from ZCL to LCL, use posix_regex = '\&lt;Z(\w+)' with = 'L$1'.
+    "! @parameter class_replacements | <p class="shorttext synchronized" lang="en"></p> Renamings in CCDEF, CCIMP, CCMAC and CCAU includes.
+    "! @parameter result | <p class="shorttext synchronized" lang="en"></p>
+    METHODS get_one_abap_code
+      IMPORTING
+        package_range       TYPE ty_package_range OPTIONAL
+        objects             TYPE ty_objects OPTIONAL
+        range_of_obj_name   TYPE ty_range_of_obj_name OPTIONAL
+        range_of_obj_type   TYPE ty_range_of_obj_type OPTIONAL
+        global_replacements TYPE ty_obj_renamings OPTIONAL
+        class_replacements  TYPE ty_cc_renamings OPTIONAL
+        omit_test_classes   TYPE abap_bool DEFAULT abap_true
+      RETURNING
+        VALUE(result)       TYPE ty_main_result
+      RAISING
+        zcx_shrinker.
+
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    TYPES:
+      ty_range_of_object_types TYPE RANGE OF tadir-object .
     TYPES:
       BEGIN OF ty_ddic_elementary_type,
         datatype TYPE dd04l-datatype,
@@ -271,6 +302,15 @@ CLASS zcl_shrinker DEFINITION
 
 
     DATA log TYPE string_table .
+    DATA package_range TYPE ty_package_range .
+    DATA objects TYPE ty_objects .
+    DATA range_of_obj_name TYPE ty_range_of_obj_name .
+    DATA range_of_obj_type TYPE ty_range_of_obj_type .
+    DATA cc_renamings TYPE ty_cc_renamings .
+    DATA replacements TYPE ty_obj_renamings .
+    DATA def_include_name TYPE string .
+    DATA imp_include_name TYPE string .
+    DATA range_all_objects TYPE zcl_shrinker_ddic_class_interf=>ty_range_of_obj_name .
     DATA class_pool_local_symbols TYPE ty_class_pool_local_symbols .
     DATA customizer TYPE REF TO zif_shrinker_abap_code_adapter .
     DATA program_name TYPE syrepid .
@@ -392,12 +432,6 @@ CLASS zcl_shrinker DEFINITION
       RETURNING
         VALUE(result)  TYPE ty_read_class_interface_includ .
 
-    METHODS read_includes
-      CHANGING
-        source_units TYPE zif_shrinker_abap_code_adapter=>ty_source_units
-      RAISING
-        zcx_shrinker.
-
     METHODS read_report
       IMPORTING
         !include_name TYPE include
@@ -463,7 +497,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_shrinker IMPLEMENTATION.
+CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
 
 
   METHOD convert_methodindx_to_extensio.
@@ -480,10 +514,12 @@ CLASS zcl_shrinker IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD create.
 
+    result = NEW zcl_shrinker_ddic_class_interf( ).
+    result->customizer = customizer.
 
-
-
+  ENDMETHOD.
 
 
   METHOD get_abap_for_class_pool.
@@ -1013,9 +1049,6 @@ CLASS zcl_shrinker IMPLEMENTATION.
   ENDMETHOD.
 
 
-
-
-
   METHOD get_abap_for_structure.
 
     result = VALUE #(
@@ -1219,7 +1252,327 @@ CLASS zcl_shrinker IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_one_abap_code.
 
+    TRY.
+
+        me->package_range     = package_range.
+        me->objects           = objects.
+        me->range_of_obj_name = range_of_obj_name.
+        me->range_of_obj_type = range_of_obj_type.
+        me->cc_renamings      = class_replacements.
+        me->replacements      = global_replacements.
+
+        DATA(miscellaneous) = select_miscellaneous( package_range     = package_range
+                                                    objects           = objects
+                                                    range_of_obj_type = range_of_obj_type
+                                                    range_of_obj_name = range_of_obj_name ).
+
+        range_all_objects = VALUE ty_range_of_obj_name(
+                FOR <object> IN miscellaneous-all_objects
+                WHERE ( obj_name IN range_of_obj_name )
+                ( sign   = 'I'
+                  option = 'EQ'
+                  low    = <object>-obj_name ) ).
+
+        DATA(classes_interfaces) = read_class_interface_includes(
+                    classes       = miscellaneous-class_descriptions
+                    class_methods = miscellaneous-class_methods
+                    interfaces    = VALUE #(
+                                    FOR <object> IN miscellaneous-all_objects
+                                    WHERE ( object = 'INTF' )
+                                    ( <object> ) )
+                    renamings     = cc_renamings ).
+
+        LOOP AT classes_interfaces-classes REFERENCE INTO DATA(class).
+
+          DATA(class_cu_include) = REF #( class->includes[ extension_code = 'CU' ] ).
+          FIND ALL OCCURRENCES OF 'FRIENDS' IN TABLE class_cu_include->abap_source_code RESULTS DATA(matches).
+          LOOP AT matches REFERENCE INTO DATA(match).
+            DATA(abap_statement) = zcl_shrinker_abap_scan=>get_abap_statement_at_cursor(
+                                      it_source = class_cu_include->abap_source_code
+                                      i_linenr  = match->line
+                                      i_offset  = match->offset ).
+            IF abap_statement-stokes[ 1 ]-str = 'CLASS'.
+              DATA(tabix_friends) = line_index( abap_statement-stokes[ str = 'FRIENDS' ] ).
+              IF tabix_friends >= 2
+                    AND abap_statement-stokes[ tabix_friends - 1 ]-str = 'GLOBAL'.
+                DATA(at_least_one_friend_remains) = abap_false.
+                DATA(tokens_to_remove) = VALUE zcl_shrinker_abap_scan=>ty_ut_stokes( ).
+                LOOP AT abap_statement-stokes REFERENCE INTO DATA(token)
+                    FROM tabix_friends + 1.
+                  IF line_exists( miscellaneous-class_descriptions[ name     = token->str
+                                                                    category = '05' ] ).
+                    " Remove the friend if it's a class pool FOR TESTING (05)
+                    APPEND token->* TO tokens_to_remove.
+                  ELSE.
+                    at_least_one_friend_remains = abap_true.
+                  ENDIF.
+                ENDLOOP.
+                IF at_least_one_friend_remains = abap_false.
+                  " Remove GLOBAL
+                  token = REF #( abap_statement-stokes[ tabix_friends - 1 ] ).
+                  APPEND token->* TO tokens_to_remove.
+                  " Remove FRIENDS
+                  token = REF #( abap_statement-stokes[ tabix_friends ] ).
+                  APPEND token->* TO tokens_to_remove.
+                ENDIF.
+                SORT tokens_to_remove BY row ASCENDING col DESCENDING.
+                LOOP AT tokens_to_remove REFERENCE INTO token.
+                  DATA(abap_line) = REF #( class_cu_include->abap_source_code[ token->row ] OPTIONAL ).
+                  IF abap_line IS BOUND.
+                    REPLACE SECTION
+                          OFFSET token->col
+                          LENGTH strlen( token->str )
+                          OF abap_line->*
+                          WITH space.
+                  ENDIF.
+                ENDLOOP.
+              ENDIF.
+            ENDIF.
+          ENDLOOP.
+        ENDLOOP.
+
+        IF customizer IS BOUND.
+          customizer->adapt_source_code( CHANGING classes_interfaces = classes_interfaces ).
+        ENDIF.
+
+        DATA(deferred) = VALUE ty_abap_source_code(
+            FOR <clas_intf> IN miscellaneous-class_descriptions
+            WHERE ( category <> '05' ) " exclude class pools FOR TESTING
+            ( SWITCH #( <clas_intf>-clstype WHEN '0' THEN |CLASS { <clas_intf>-name } DEFINITION DEFERRED.|
+                                            WHEN '1' THEN |INTERFACE { <clas_intf>-name } DEFERRED.| ) ) ).
+
+        DATA(ddic) = select_ddic_objects( package_range     = package_range
+                                          range_of_obj_name = range_of_obj_name
+                                          range_of_obj_type = range_of_obj_type ).
+
+        TYPES: BEGIN OF ty_dependency,
+                 object     TYPE ty_object,
+                 "! Object which is needed by OBJECT i.e. REF_OBJECT must be defined before OBJECT.
+                 ref_object TYPE ty_object,
+               END OF ty_dependency.
+        TYPES ty_dependencies TYPE STANDARD TABLE OF ty_dependency WITH EMPTY KEY.
+
+        DATA(dependencies) = VALUE ty_dependencies( ).
+        LOOP AT ddic-data_elements REFERENCE INTO DATA(data_element).
+          IF data_element->domname IS NOT INITIAL
+              AND data_element->domname <> data_element->rollname
+              AND data_element->domname <> 'OBJECT'
+              AND data_element->domname <> 'DATA'.
+            INSERT VALUE #( object     = VALUE #( pgmid    = 'R3TR'
+                                                  object   = 'DTEL'
+                                                  obj_name = data_element->rollname )
+                            ref_object = VALUE #( pgmid    = 'R3TR'
+                                                  object   = SWITCH #( data_element->reftype
+                                                            WHEN 'C' THEN 'CLAS'
+                                                            WHEN 'E' THEN 'DTEL'
+                                                            WHEN 'I' THEN 'INTF'
+                                                            WHEN 'L' THEN 'TTYP'
+                                                            WHEN 'S' THEN 'TABL'
+                                                            ELSE          'DOMA' )
+                                                  obj_name = data_element->domname )
+                          ) INTO TABLE dependencies.
+          ENDIF.
+        ENDLOOP.
+
+        LOOP AT ddic-structure_components REFERENCE INTO DATA(structure_component).
+          IF structure_component->fieldname(1) = '.'.
+            INSERT VALUE #( object     = VALUE #( pgmid    = 'R3TR'
+                                                  object   = 'TABL'
+                                                  obj_name = structure_component->tabname )
+                            ref_object = VALUE #( pgmid    = 'R3TR'
+                                                  object   = 'TABL'
+                                                  obj_name = structure_component->precfield )
+                          ) INTO TABLE dependencies.
+          ELSEIF structure_component->rollname IS NOT INITIAL
+                AND structure_component->reftype <> 'B'
+                AND structure_component->reftype <> 'D'
+                AND structure_component->rollname <> 'OBJECT'.
+            INSERT VALUE #( object     = VALUE #( pgmid    = 'R3TR'
+                                                  object   = 'TABL'
+                                                  obj_name = structure_component->tabname )
+                            ref_object = VALUE #( pgmid    = 'R3TR'
+                                                  object   = SWITCH #( structure_component->comptype
+                                                            WHEN 'E' THEN 'DTEL'
+                                                            WHEN 'L' THEN 'TTYP'
+                                                            WHEN 'R' THEN SWITCH #( structure_component->reftype
+                                                                    WHEN 'C' THEN 'CLAS'
+                                                                    WHEN 'E' THEN 'DTEL'
+                                                                    WHEN 'I' THEN 'INTF'
+                                                                    WHEN 'L' THEN 'TTYP'
+                                                                    WHEN 'S' THEN 'TABL'
+                                                                    ELSE          '?' )
+                                                            WHEN 'S' THEN 'TABL'
+                                                            ELSE          '?' )
+                                                  obj_name = structure_component->rollname )
+                          ) INTO TABLE dependencies.
+          ENDIF.
+        ENDLOOP.
+
+        LOOP AT ddic-table_types REFERENCE INTO DATA(table_type).
+          IF table_type->rowtype IS NOT INITIAL.
+            INSERT VALUE #( object     = VALUE #( pgmid    = 'R3TR'
+                                                  object   = 'TTYP'
+                                                  obj_name = table_type->typename )
+                            ref_object = VALUE #( pgmid    = 'R3TR'
+                                                  object   = SWITCH #( table_type->rowkind
+                                                            WHEN 'E' THEN 'DTEL'
+                                                            WHEN 'L' THEN 'TTYP'
+                                                            WHEN 'R' THEN SWITCH #( table_type->reftype
+                                                                    WHEN 'C' THEN 'CLAS'
+                                                                    WHEN 'E' THEN 'DTEL'
+                                                                    WHEN 'I' THEN 'INTF'
+                                                                    WHEN 'L' THEN 'TTYP'
+                                                                    ELSE          '?' )
+                                                            WHEN 'S' THEN COND #( WHEN table_type->ttypkind IS INITIAL
+                                                                                THEN 'TABL'   " pas un range
+                                                                                ELSE 'DTEL' ) " range
+                                                            ELSE          '?' )
+                                                  obj_name = table_type->rowtype )
+                          ) INTO TABLE dependencies.
+          ENDIF.
+        ENDLOOP.
+
+        LOOP AT miscellaneous-oo_relationships REFERENCE INTO DATA(oo_relationship).
+          INSERT VALUE #( object     = VALUE #( pgmid    = 'R3TR'
+                                                object   = SWITCH #( oo_relationship->reltype
+                                                              WHEN '0' THEN 'INTF'
+                                                              ELSE          'CLAS' )
+                                                obj_name = oo_relationship->clsname )
+                          ref_object = VALUE #( pgmid    = 'R3TR'
+                                                object   = SWITCH #( oo_relationship->reltype
+                                                              WHEN '2' THEN 'CLAS'
+                                                              ELSE          'INTF' )
+                                                obj_name = oo_relationship->refclsname )
+                        ) INTO TABLE dependencies.
+        ENDLOOP.
+
+        LOOP AT miscellaneous-used_classes REFERENCE INTO DATA(used_class).
+          INSERT VALUE #( object     = VALUE #( pgmid    = 'R3TR'
+                                                object   = used_class->using_object_type
+                                                obj_name = used_class->using_object_name )
+                          ref_object = VALUE #( pgmid    = 'R3TR'
+                                                object   = used_class->used_object_type
+                                                obj_name = used_class->used_object_name )
+                        ) INTO TABLE dependencies.
+        ENDLOOP.
+
+        SORT dependencies BY table_line.
+        DELETE ADJACENT DUPLICATES FROM dependencies COMPARING table_line.
+
+        TYPES ty_ref_objects TYPE STANDARD TABLE OF ty_object WITH EMPTY KEY.
+        TYPES: BEGIN OF ty_dependency_2,
+                 object      TYPE ty_object,
+                 "! Object which is needed by OBJECT i.e. REF_OBJECT must be defined before OBJECT.
+                 ref_objects TYPE ty_objects,
+               END OF ty_dependency_2.
+        TYPES ty_dependencies_2 TYPE STANDARD TABLE OF ty_dependency_2 WITH EMPTY KEY.
+
+        DATA(dependencies_2) = VALUE ty_dependencies_2(
+                ( LINES OF VALUE #(
+                    FOR GROUPS <group_object> OF <dependency> IN dependencies
+                    GROUP BY <dependency>-object
+                    ( object      = <group_object>
+                      ref_objects = VALUE #(
+                                    FOR <dependency_bis> IN GROUP <group_object>
+                                    ( LINES OF COND #( WHEN line_exists( miscellaneous-all_objects[ table_line = <dependency_bis>-ref_object ] )
+                                                       THEN VALUE #( ( <dependency_bis>-ref_object ) ) ) ) ) ) ) )
+                ( LINES OF VALUE #(
+                    FOR <object> IN miscellaneous-all_objects
+                    ( LINES OF COND #( WHEN NOT line_exists( dependencies[ object = <object> ] ) THEN VALUE #( ( object = <object> ) ) ) ) ) ) ).
+
+        SORT dependencies_2 BY table_line.
+
+        " All dictionary objects will be positioned before classes and interfaces because
+        " the object types will be defined as DEFERRED before the TYPES equivalences of dictionary objects.
+
+        TYPES ty_range_objects TYPE RANGE OF trobjtype.
+
+        DATA(objects_in_order) = VALUE ty_objects( ).
+        DATA(range_ddic_objects) = VALUE ty_range_objects(
+                sign   = 'I'
+                option = 'EQ'
+                ( low = 'DOMA' )
+                ( low = 'DTEL' )
+                ( low = 'TABL' )
+                ( low = 'TTYP' ) ).
+
+        LOOP AT dependencies_2 REFERENCE INTO DATA(dependency_2)
+              WHERE object-object IN range_ddic_objects.
+          DELETE dependency_2->ref_objects
+              WHERE object = 'CLAS'
+                 OR object = 'INTF'.
+        ENDLOOP.
+
+        DATA(range_objects) = range_ddic_objects.
+
+        DO.
+          DATA(dependencies_implying_a_move) = VALUE ty_dependencies( ).
+          LOOP AT dependencies_2 REFERENCE INTO dependency_2
+                WHERE object-object IN range_objects
+                  AND ref_objects IS INITIAL.
+            INSERT dependency_2->object INTO TABLE objects_in_order.
+            LOOP AT dependencies_2 REFERENCE INTO DATA(dependency_2_bis).
+              DELETE dependency_2_bis->ref_objects WHERE table_line = dependency_2->object.
+            ENDLOOP.
+            DELETE dependencies_2 USING KEY loop_key.
+          ENDLOOP.
+          IF sy-subrc <> 0 OR dependencies_2 IS INITIAL.
+            IF range_objects IS NOT INITIAL.
+              range_objects = VALUE #( ).
+            ELSE.
+              EXIT.
+            ENDIF.
+          ENDIF.
+        ENDDO.
+
+        IF dependencies_2 IS NOT INITIAL.
+          " circular reference error (e.g. object A requires object B which requires A)
+          RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Circular reference while resolving order in DDIC objects'(001).
+        ENDIF.
+
+
+        DATA(abap_source_code_4_classes) = VALUE ty_abap_source_code_4_classes(
+                    FOR <class> IN classes_interfaces-classes
+                    ( get_abap_for_class_pool( <class> ) ) ).
+
+        IF omit_test_classes = abap_true.
+          remove_test_classes( CHANGING abap_source_code = abap_source_code_4_classes ).
+        ENDIF.
+
+
+        result-def_abap_source_code = VALUE ty_abap_source_code(
+            ( LINES OF deferred )
+            ( LINES OF VALUE #(
+                FOR <object> IN objects_in_order
+                ( LINES OF SWITCH #( <object>-object
+                    WHEN 'DTEL' THEN get_abap_for_data_element( ddic-data_elements[ rollname = <object>-obj_name ] )
+                    WHEN 'CLAS' THEN abap_source_code_4_classes[ name = <object>-obj_name ]-definition
+                    WHEN 'INTF' THEN get_abap_for_interface_pool( classes_interfaces-interfaces[ name = <object>-obj_name ] )
+                    WHEN 'TABL' THEN get_abap_for_structure( structure            = ddic-structures[ tabname = <object>-obj_name ]
+                                                             structure_components = ddic-structure_components )
+                    WHEN 'TTYP' THEN get_abap_for_table_type( table_type     = ddic-table_types[ typename = <object>-obj_name ]
+                                                              key_components = ddic-table_type_key_components
+                                                              sec_keys       = ddic-table_type_sec_keys ) ) ) ) ) ).
+
+
+        replace_texts( EXPORTING replacements     = replacements
+                       CHANGING  abap_source_code = result-def_abap_source_code ).
+
+        result-imp_abap_source_code = VALUE ty_abap_source_code(
+                FOR <object> IN miscellaneous-all_objects
+                WHERE ( object = 'CLAS' )
+                ( LINES OF abap_source_code_4_classes[ name = <object>-obj_name ]-implementation ) ).
+
+        replace_texts( EXPORTING replacements     = replacements
+                       CHANGING  abap_source_code = result-imp_abap_source_code ).
+
+      CATCH cx_root INTO DATA(error).
+        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
+    ENDTRY.
+
+  ENDMETHOD.
 
 
   METHOD get_random_replacement_name.
@@ -1308,56 +1661,6 @@ CLASS zcl_shrinker IMPLEMENTATION.
                                              extension  = 'IP' ) )
                 ( read_report_class_include( class_name = intf_name
                                              extension  = 'IU' ) ) ) ) ).
-
-  ENDMETHOD.
-
-
-  METHOD read_includes.
-
-    LOOP AT source_units REFERENCE INTO DATA(source_unit).
-
-      source_unit->include_statements = VALUE #( ).
-
-      FIND ALL OCCURRENCES
-          OF 'INCLUDE'
-          IN TABLE source_unit->abap_source_code
-          RESULTS DATA(matches).
-
-      LOOP AT matches REFERENCE INTO DATA(match).
-        DATA(abap_statement) = zcl_shrinker_abap_scan=>get_abap_statement_at_cursor(
-                                      it_source = source_unit->abap_source_code
-                                      i_linenr  = match->line
-                                      i_offset  = match->offset ).
-        IF abap_statement-stokes IS NOT INITIAL
-              AND abap_statement-stokes[ 1 ]-str = 'INCLUDE'.
-          INSERT VALUE #(
-                  row      = abap_statement-stokes[ 1 ]-row
-                  stokes   = abap_statement-stokes
-                  name     = abap_statement-stokes[ 2 ]-str
-                  if_found = xsdbool( lines( abap_statement-stokes ) >= 4
-                                  AND abap_statement-stokes[ 3 ]-str = 'IF'
-                                  AND abap_statement-stokes[ 4 ]-str = 'FOUND' )
-              ) INTO TABLE source_unit->include_statements.
-        ENDIF.
-      ENDLOOP.
-
-      LOOP AT source_unit->include_statements REFERENCE INTO DATA(include_statement).
-
-        IF NOT line_exists( source_units[ name = include_statement->name ] ).
-          INSERT VALUE #(
-                  name = include_statement->name )
-              INTO TABLE source_units
-              REFERENCE INTO DATA(source_unit_2).
-
-          READ REPORT include_statement->name INTO source_unit_2->abap_source_code.
-          IF sy-subrc <> 0
-              AND include_statement->if_found = abap_false.
-            RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Program &1 does not exist'(002) msgv1 = program_name.
-          ENDIF.
-        ENDIF.
-
-      ENDLOOP.
-    ENDLOOP.
 
   ENDMETHOD.
 
@@ -1866,9 +2169,8 @@ CLASS zcl_shrinker IMPLEMENTATION.
       DATA(obj_name) = tadir_main_program->obj_name.
       DATA main_program_name TYPE sy-repid.
 
-      main_program_name = get_main_program_name(
-      object = object
-      obj_name = obj_name ).
+      main_program_name = get_main_program_name( object = object
+                                                 obj_name = obj_name ).
 
       tadir_main_program->main_program_name = main_program_name.
     ENDLOOP.

@@ -85,8 +85,8 @@ CLASS lcl_app DEFINITION.
 
   PRIVATE SECTION.
 
-    CLASS-DATA shrinker_classes_interfaces TYPE REF TO zcl_shrinker.
-    DATA abap_of_zabapgit_oo TYPE zcl_shrinker=>ty_main_result.
+*    CLASS-DATA shrinker_classes_interfaces TYPE REF TO zcl_shrinker.
+    DATA abap_of_zabapgit_oo TYPE zcl_shrinker_ddic_class_interf=>ty_main_result.
 
 
     CLASS-METHODS get_mime_object
@@ -101,7 +101,7 @@ CLASS lcl_app DEFINITION.
 
     CLASS-METHODS replace_abapmerge
       CHANGING
-        abap_source_code TYPE zcl_shrinker=>ty_abap_source_code.
+        abap_source_code TYPE zcl_shrinker_ddic_class_interf=>ty_abap_source_code.
 
     CLASS-METHODS split_at_regex
       IMPORTING
@@ -171,7 +171,7 @@ CLASS lcl_app IMPLEMENTATION.
     "=================================
     " All classes and interfaces
     "=================================
-    shrinker_classes_interfaces = zcl_shrinker=>create( me ).
+    DATA(shrinker_classes_interfaces) = zcl_shrinker_ddic_class_interf=>create( me ).
 
     abap_of_zabapgit_oo = shrinker_classes_interfaces->get_one_abap_code(
                                 package_range        = s_devc[]
@@ -207,7 +207,7 @@ CLASS lcl_app IMPLEMENTATION.
         ( `****************************************************` )
         ) INTO TABLE abap_of_zabapgit_oo-def_abap_source_code.
 
-    DATA(syntax_check_oo) = shrinker_classes_interfaces->syntax_check( VALUE #(
+    DATA(syntax_check_oo) = zcl_shrinker_abap_scan=>syntax_check( VALUE #(
                         ( `REPORT.` )
                         ( LINES OF abap_of_zabapgit_oo-def_abap_source_code )
                         ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code ) ) ).
@@ -216,7 +216,7 @@ CLASS lcl_app IMPLEMENTATION.
     " ZABAPGIT
     "=================================
 
-    DATA(shrinker_zabapgit_standalone) = zcl_shrinker=>create( me ).
+    DATA(shrinker_zabapgit_standalone) = zcl_shrinker_any_program=>create( me ).
 
     DATA(abap_of_zabapgit_standalone) = shrinker_zabapgit_standalone->get_abap_for_program(
             object              = 'PROG'
@@ -227,7 +227,7 @@ CLASS lcl_app IMPLEMENTATION.
         INTO abap_of_zabapgit_standalone
         INDEX 1.
 
-    DATA(syntax_check_standalone) = shrinker_zabapgit_standalone->syntax_check( abap_of_zabapgit_standalone ).
+    DATA(syntax_check_standalone) = zcl_shrinker_abap_scan=>syntax_check( abap_of_zabapgit_standalone ).
 
     "=================================
     " Replace code of includes and program
@@ -254,7 +254,7 @@ CLASS lcl_app IMPLEMENTATION.
           ADD 1 TO last_line.
         ENDWHILE.
 
-        DATA(abap_source_code) = VALUE zcl_shrinker=>ty_abap_source_code(
+        DATA(abap_source_code) = VALUE zcl_shrinker_ddic_class_interf=>ty_abap_source_code(
                       ( LINES OF header_lines )
                       ( LINES OF abap_of_zabapgit_oo-imp_abap_source_code FROM first_line TO last_line ) ).
 

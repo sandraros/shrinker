@@ -2,7 +2,7 @@
 
 *CLASS ltc_replace_texts DEFINITION DEFERRED.
 *
-*CLASS zcl_shrinker DEFINITION LOCAL FRIENDS
+*CLASS zcl_shrinker_copy_objects DEFINITION LOCAL FRIENDS
 *    ltc_replace_texts.
 *
 *
@@ -50,9 +50,9 @@
 *CLASS ltc_replace_texts IMPLEMENTATION.
 *
 *  METHOD member_interface_prefix.
-*    DATA(abap_source_code) = VALUE zcl_shrinker=>ty_abap_source_code(
+*    DATA(abap_source_code) = VALUE zcl_shrinker_copy_objects=>ty_abap_source_code(
 *            ( ` lo_cut ?= lo_cut->zif_abapgit_ajson~slice( '/issues' ).` ) ).
-*    DATA(cut) = zcl_shrinker=>create( ).
+*    DATA(cut) = zcl_shrinker_copy_objects=>create( ).
 *    cut->replace_texts(
 *        EXPORTING
 *            replacements     = VALUE #( ( posix_regex = '\<Z(.._ABAPGIT\w*)' with = 'L$1' member_interface_prefix = abap_true ) )
@@ -60,15 +60,15 @@
 *            abap_source_code = abap_source_code ).
 *    cl_abap_unit_assert=>assert_equals(
 *        act = abap_source_code
-*        exp = VALUE zcl_shrinker=>ty_abap_source_code(
+*        exp = VALUE zcl_shrinker_copy_objects=>ty_abap_source_code(
 *            ( ` lo_cut ?= lo_cut->Lif_abapgit_ajson~slice( '/issues' ).` ) ) ).
 *  ENDMETHOD.
 *
 *
 *  METHOD start_of_abap_word.
-*    DATA(abap_source_code) = VALUE zcl_shrinker=>ty_abap_source_code(
+*    DATA(abap_source_code) = VALUE zcl_shrinker_copy_objects=>ty_abap_source_code(
 *            ( `zif_abapgit_ajson=>member.` ) ).
-*    DATA(cut) = zcl_shrinker=>create( ).
+*    DATA(cut) = zcl_shrinker_copy_objects=>create( ).
 *    cut->replace_texts(
 *        EXPORTING
 *            replacements     = VALUE #( ( posix_regex = '\<Z(.._ABAPGIT\w*)' with = 'L$1' start_of_abap_word = abap_true ) )
@@ -76,7 +76,7 @@
 *            abap_source_code = abap_source_code ).
 *    cl_abap_unit_assert=>assert_equals(
 *        act = abap_source_code
-*        exp = VALUE zcl_shrinker=>ty_abap_source_code(
+*        exp = VALUE zcl_shrinker_copy_objects=>ty_abap_source_code(
 *            ( `Lif_abapgit_ajson=>member.` ) ) ).
 *  ENDMETHOD.
 *

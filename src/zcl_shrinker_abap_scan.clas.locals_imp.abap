@@ -147,6 +147,12 @@ CLASS lcl_abap_statement_at_cursor IMPLEMENTATION.
 
   METHOD get.
 
+    IF '*' = substring( val = it_source[ i_linenr ]
+                        off = 0
+                        len = 1 ).
+      RETURN.
+    ENDIF.
+
     raw_scan_lines_around( EXPORTING it_source = it_source
                                      i_linenr  = i_linenr
                                      i_offset  = i_offset
