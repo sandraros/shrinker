@@ -68,7 +68,7 @@
     <item>
      <ID>I</ID>
      <KEY>T11</KEY>
-     <ENTRY>Sub-package(s), end with slash - separate several sub-packages with slash)</ENTRY>
+     <ENTRY>Message class = copy of ZABAP2XLSX</ENTRY>
      <LENGTH>108</LENGTH>
     </item>
     <item>

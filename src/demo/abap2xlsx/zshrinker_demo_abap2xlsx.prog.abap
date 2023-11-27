@@ -16,57 +16,63 @@ DATA: BEGIN OF dummy_select_options,
 
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_devc_i VISIBLE LENGTH 60.
-SELECTION-SCREEN POSITION 62.
-SELECT-OPTIONS s_devc_i FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSX*' SIGN I OPTION CP.
+  SELECTION-SCREEN COMMENT (80) t_devc_i VISIBLE LENGTH 60.
+  SELECTION-SCREEN POSITION 62.
+  SELECT-OPTIONS s_devc_i FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSX*' SIGN I OPTION CP.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_devc_e VISIBLE LENGTH 60.
-SELECTION-SCREEN POSITION 62.
-SELECT-OPTIONS s_devc_e FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSXDEMOS*' SIGN I OPTION CP.
+  SELECTION-SCREEN COMMENT (80) t_devc_e VISIBLE LENGTH 60.
+  SELECTION-SCREEN POSITION 62.
+  SELECT-OPTIONS s_devc_e FOR dummy_select_options-devclass DEFAULT '$ABAP2XLSXDEMOS*' SIGN I OPTION CP.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_devc VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_devc TYPE devclass DEFAULT '$SHRINKER_DEMO_ABAP2XLSX'.
+  SELECTION-SCREEN COMMENT (80) t_devc VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_devc TYPE devclass DEFAULT '$SHRINKER_DEMO_ABAP2XLSX'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_oo_def VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_to_def TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_DEF'.
+  SELECTION-SCREEN COMMENT (80) t_oo_def VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_to_def TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_DEF'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_oo_imp VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_to_imp TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_IMP'.
+  SELECTION-SCREEN COMMENT (80) t_oo_imp VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_to_imp TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_IMP'.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_tr_s1 VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_tr_s1 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S1'. " ZEXCEL_TR_SHARED_STRINGS
+  SELECTION-SCREEN COMMENT (80) t_tr_s1 VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_tr_s1 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S1'. " ZEXCEL_TR_SHARED_STRINGS
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_tr_s2 VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_tr_s2 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S2'. " ZEXCEL_TR_SHEET
+  SELECTION-SCREEN COMMENT (80) t_tr_s2 VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_tr_s2 TYPE ty_transformation_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_TR_S2'. " ZEXCEL_TR_SHEET
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_intf VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_intf TYPE seoclsname DEFAULT 'ZIF_SHRINKER_DEMO_ABAP2XLSX_WH'. " ZCL_EXCEL_WRITER_HUGE_FILE
+  SELECTION-SCREEN COMMENT (80) t_intf VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_intf TYPE seoclsname DEFAULT 'ZIF_SHRINKER_DEMO_ABAP2XLSX_WH'. " ZCL_EXCEL_WRITER_HUGE_FILE
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT (80) t_licens VISIBLE LENGTH 63.
-SELECTION-SCREEN POSITION 65.
-PARAMETERS p_licens TYPE seoclsname DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_LICEN'.
+  SELECTION-SCREEN COMMENT (80) t_msag VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_msag TYPE t100a-arbgb DEFAULT 'ZSHRINKER_DEMO_ABAP2'. " ZABAP2XLSX
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+  SELECTION-SCREEN COMMENT (80) t_licens VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_licens TYPE seoclsname DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_LICEN'.
 SELECTION-SCREEN END OF LINE.
 
 
@@ -79,6 +85,7 @@ INITIALIZATION.
   t_tr_s1  = 'Transformation = copy of ZEXCEL_TR_SHARED_STRINGS'(t03).
   t_tr_s2  = 'Transformation = copy of ZEXCEL_TR_SHEET + rename ZCL_EXCEL_WRITER_HUGE_FILE'(t04).
   t_intf   = 'Interface pool to contain public section of ZCL_EXCEL_WRITER_HUGE_FILE'(t05).
+  t_msag   = 'Message class = copy of ZABAP2XLSX'(t11).
   t_licens = 'Include program containing the license and notice'(t10).
 
 
@@ -166,8 +173,29 @@ CLASS lcl_app IMPLEMENTATION.
                     ( object = 'PROG' obj_name = p_to_def )   " definitions of all abap2xlsx class and interface pools, made local
                     ( object = 'PROG' obj_name = p_to_imp )   " class implementations of all abap2xlsx class pools, made local
                     ( object = 'INTF' obj_name = p_intf )     " Interface pool to contain public section of ZCL_EXCEL_WRITER_HUGE_FILE
-                    ( object = 'XSLT' obj_name = p_tr_s1 )    " copy of ZEXCEL_TR_SHARED_STRINGS
-                    ( object = 'XSLT' obj_name = p_tr_s2 ) ). " copy of ZEXCEL_TR_SHEET + rename ZCL_EXCEL_WRITER_HUGE_FILE
+                    ( object = 'XSLT' obj_name = p_tr_s1 )    " copy of transformation ZEXCEL_TR_SHARED_STRINGS
+                    ( object = 'XSLT' obj_name = p_tr_s2 )    " copy of transformation ZEXCEL_TR_SHEET + rename ZCL_EXCEL_WRITER_HUGE_FILE
+                    ( object = 'MSAG' obj_name = p_msag ) ).  " copy of message class ZABAP2XLSX
+
+    DATA(package_range) = VALUE zcl_shrinker_ddic_class_interf=>ty_package_range( ).
+    SELECT 'I'      AS sign,
+           'EQ'     AS option,
+           devclass AS low
+        FROM tdevc
+        WHERE devclass IN @s_devc_i
+          AND devclass NOT IN @s_devc_e
+        INTO TABLE @package_range.
+
+
+    "==============================================================================
+    " Serialize the source Git repository
+    "==============================================================================
+
+    " Taking the first one arbitrarily, because using any package is sufficient to locate the Git repository.
+    DATA(git_abap2xlsx) = zcl_shrinker_connect_abapgit=>create( package = package_range[ 1 ]-low ).
+    git_abap2xlsx->serialize( ).
+    DATA(zip_git_abap2xlsx) = git_abap2xlsx->get_zip( ).
+
 
     "==============================================================================
     " Serialize the target package
@@ -209,7 +237,7 @@ CLASS lcl_app IMPLEMENTATION.
     ( `*                                                                               ` )
     ( `* LICENSE and NOTICE                                                            ` )
     ( `*                                                                               ` )
-    ( |* See include program { p_licens WIDTH = 30 }                            | )
+    ( |* See include program { p_licens WIDTH = 30        }                            | )
     ( `*                                                                               ` )
     ( `********************************************************************************` ) ).
 
@@ -232,20 +260,12 @@ CLASS lcl_app IMPLEMENTATION.
     " Interface and Class definitions, and class implementations
     "==============================================================================
 
-    DATA(package_range) = VALUE zcl_shrinker_ddic_class_interf=>ty_package_range( ).
-    SELECT 'I'      AS sign,
-           'EQ'     AS option,
-           devclass AS low
-    FROM tdevc
-    WHERE devclass IN @s_devc_i
-      AND devclass NOT IN @s_devc_e
-    INTO TABLE @package_range.
-
     DATA(shrinker) = zcl_shrinker_ddic_class_interf=>create( customizer = me ).
     DATA(abap_code) = shrinker->get_one_abap_code(
                     package_range        = package_range
                     global_replacements  = VALUE #( ( posix_regex = 'ZEXCEL_TR_SHARED_STRINGS' with = p_tr_s1 )
                                                     ( posix_regex = 'ZEXCEL_TR_SHEET'          with = p_tr_s2 )
+                                                    ( posix_regex = 'ZABAP2XLSX'               with = p_msag )
                                                     ( posix_regex = '\<Z(.._EXCEL\w*)'         with = 'L$1' ) ) ).
 
     DATA(syntax_check) = zcl_shrinker_abap_scan=>syntax_check( VALUE #(
@@ -354,6 +374,21 @@ CLASS lcl_app IMPLEMENTATION.
 
     abapgit->zip_replace( file_path = |{ target_package_path }{ to_lower( p_tr_s2 ) }.xslt.xml|
                           content   = get_transformation_xml( p_tr_s2 ) ).
+
+
+    "==============================================================================
+    " Message class ZABAP2XLSX
+    "==============================================================================
+
+    zip_git_abap2xlsx->get( EXPORTING name    = 'src/zabap2xlsx.msag.xml'
+                            IMPORTING content = DATA(msag_xml_xstring) ).
+
+    data(msag_xml_string) = cl_abap_codepage=>convert_from( msag_xml_xstring ).
+    REPLACE ALL OCCURRENCES OF 'ZABAP2XLSX' IN msag_xml_string WITH p_msag.
+    msag_xml_xstring = cl_abap_codepage=>convert_to( msag_xml_string ).
+
+    abapgit->zip_replace( file_path = |{ target_package_path }{ to_lower( p_msag ) }.msag.xml|
+                          content   = msag_xml_xstring ).
 
     "==============================================================================
     " Recreate ABAP objects from the ZIP file = Deserialize objects via abapGit
