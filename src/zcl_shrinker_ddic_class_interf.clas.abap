@@ -398,13 +398,6 @@ CLASS zcl_shrinker_ddic_class_interf DEFINITION
       RETURNING
         VALUE(result) TYPE include .
 
-    METHODS get_main_program_name
-      IMPORTING
-        object        TYPE trobjtype
-        obj_name      TYPE sobj_name
-      RETURNING
-        VALUE(result) TYPE syrepid.
-
     CLASS-METHODS get_random_replacement_name
       RETURNING
         VALUE(result) TYPE string .
@@ -506,7 +499,7 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
     result = ''.
     DATA(methodindx_2) = methodindx.
     DO 3 TIMES.
-      DATA(indx)  = methodindx_2 MOD 36.
+      DATA(indx) = CONV i( methodindx_2 ) MOD 36.
       result = base+indx(1) && result.
       methodindx_2 = methodindx_2 DIV 36.
     ENDDO.
@@ -711,7 +704,8 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
     "=======================================================================
 
     LOOP AT local_class_pool_local_symbols REFERENCE INTO DATA(local_class_pool_local_symbol).
-      REPLACE ALL OCCURRENCES OF REGEX |\\<{ local_class_pool_local_symbol->symbol_name }\\>|
+      REPLACE ALL OCCURRENCES OF
+              REGEX |\\<{ local_class_pool_local_symbol->symbol_name }\\>| ##REGEX_POSIX
               IN TABLE class_abap_source_code
               WITH local_class_pool_local_symbol->replacement
               IGNORING CASE.
@@ -724,17 +718,17 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
     "=======================================================================
     DATA(regex) = |^\\s*class\\s+{ class-name }\\s+definition|.
     FIND ALL OCCURRENCES OF
-            REGEX regex
+            REGEX regex ##REGEX_POSIX
             IN TABLE class_abap_source_code
             IGNORING CASE
-            RESULTS DATA(class_definition_matches) ##REGEX_POSIX.
+            RESULTS DATA(class_definition_matches).
 
     IF sy-subrc = 0.
       DATA(class_definition_statement) = zcl_shrinker_abap_scan=>get_whole_abap_statement(
                               line_index       = class_definition_matches[ 1 ]-line
                               abap_source_code = class_abap_source_code ).
 
-      REPLACE REGEX '(?!create)(\<\w+\>\s+)public'
+      REPLACE REGEX '(?!create)(\<\w+\>\s+)public' ##REGEX_POSIX
             IN SECTION OFFSET class_definition_statement-offset
             LENGTH class_definition_statement-length
             OF class_definition_statement-whole_text
@@ -1011,7 +1005,7 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
                 to   = <ref_include>->abap_source_code ) ) ) ).
 
     LOOP AT find_replace_items REFERENCE INTO DATA(find_replace_item).
-      FIND REGEX find_replace_item->from
+      FIND REGEX find_replace_item->from ##REGEX_POSIX
             IN TABLE interface_abap_source_code
             IGNORING CASE
             MATCH LINE DATA(line_index).
@@ -1039,7 +1033,7 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
           REFERENCE INTO DATA(abap_line)
           FROM interface_statement-first_line_index
           TO interface_statement-last_line_index.
-        REPLACE REGEX `\<public\>` IN abap_line->* WITH `` IGNORING CASE.
+        REPLACE REGEX `\<public\>` IN abap_line->* WITH `` IGNORING CASE ##REGEX_POSIX.
       ENDLOOP.
 
     ENDLOOP..
@@ -1150,7 +1144,7 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
     DATA current_class TYPE ty_scanned_class.
 
     FIND ALL OCCURRENCES OF
-        REGEX 'definition|implementation|endclass'
+        REGEX 'definition|implementation|endclass' ##REGEX_POSIX
         IN TABLE itab
         IGNORING CASE
         RESULTS DATA(matches).
@@ -1222,32 +1216,6 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
                                  extension  = extension ) )
                         from = ` `
                         to   = '=' ).
-
-  ENDMETHOD.
-
-
-  METHOD get_main_program_name.
-
-    result  = COND syrepid(
-      WHEN ( object = 'FUGR' OR object = 'FUGS' )
-               AND obj_name(1) = '/' THEN
-           '/' && replace( val  = substring( val = obj_name
-                                             off = 2 )
-                           sub  = '/'
-                           with = '/SAPL' )
-      WHEN ( object = 'FUGR' OR object = 'FUGS' )
-               AND obj_name(1) <> '/' THEN
-           'SAPL' && obj_name
-      WHEN object = 'CLAS' THEN
-           |{ obj_name WIDTH = 30 PAD = '=' }|
-           && 'CP'
-      WHEN object = 'INTF' THEN
-           |{ obj_name WIDTH = 30 PAD = '=' }|
-           && 'IP'
-      WHEN object = 'CNTX' THEN
-           'CONTEXT_X_' && obj_name
-      ELSE " PROG
-           obj_name ).
 
   ENDMETHOD.
 
@@ -2169,8 +2137,8 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
       DATA(obj_name) = tadir_main_program->obj_name.
       DATA main_program_name TYPE sy-repid.
 
-      main_program_name = get_main_program_name( object = object
-                                                 obj_name = obj_name ).
+      main_program_name = zcl_shrinker_utils=>get_main_program_name( object = object
+                                                                     obj_name = obj_name ).
 
       tadir_main_program->main_program_name = main_program_name.
     ENDLOOP.

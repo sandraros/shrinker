@@ -1,11 +1,22 @@
 CLASS zcl_shrinker_utils DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC .
+  CREATE PRIVATE .
 
   PUBLIC SECTION.
 
     TYPES ty_program_name TYPE c LENGTH 30.
+    TYPES ty_extension_code TYPE c LENGTH 10.
+    TYPES:
+      BEGIN OF ty_program_name_parts,
+        main           TYPE ty_program_name,
+        extension_code TYPE ty_extension_code,
+      END OF ty_program_name_parts.
+    TYPES:
+      BEGIN OF ty_tadir_object,
+        object   TYPE trobjtype,
+        obj_name TYPE sobj_name,
+      END OF ty_tadir_object.
 
     CLASS-METHODS abap_message_for_exception
       IMPORTING
@@ -24,12 +35,31 @@ CLASS zcl_shrinker_utils DEFINITION
         program_description TYPE rs38m-repti
         package_name        TYPE devclass.
 
+    CLASS-METHODS get_class_include_name
+      IMPORTING
+        class_name     TYPE seoclsname
+        extension_code TYPE ty_extension_code
+      RETURNING
+        VALUE(result)  TYPE string.
+
+    CLASS-METHODS get_equivalent_method_includes
+      IMPORTING
+        class_pool_name TYPE seoclsname
+      RETURNING
+        VALUE(result)   TYPE string_table.
+
     CLASS-METHODS get_main_program_name
       IMPORTING
         object        TYPE trobjtype
         obj_name      TYPE sobj_name
       RETURNING
         VALUE(result) TYPE syrepid.
+
+    CLASS-METHODS get_program_as_tadir_object
+      IMPORTING
+        main_program_name TYPE syrepid
+      RETURNING
+        VALUE(result)     TYPE ty_tadir_object.
 
     "! <p class="shorttext synchronized" lang="en"></p>Utility method same as SPLIT ABAP statement but a POSIX Regular
     "! Expression can be used instead of a simple text (AT word in SPLIT). Example: <br/>
@@ -50,6 +80,13 @@ CLASS zcl_shrinker_utils DEFINITION
 
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    CLASS-METHODS convert_methodindx_to_extensio
+      IMPORTING
+        !methodindx   TYPE tmdir-methodindx
+      RETURNING
+        VALUE(result) TYPE ty_extension_code .
+
 ENDCLASS.
 
 
@@ -77,6 +114,20 @@ CLASS zcl_shrinker_utils IMPLEMENTATION.
                                 type         = 'I'
                                 display_like = 'E' ).
 
+  ENDMETHOD.
+
+
+  METHOD convert_methodindx_to_extensio.
+    CONSTANTS base TYPE c LENGTH 36 VALUE '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
+
+    result = ''.
+    DATA(methodindx_2) = methodindx.
+    DO 3 TIMES.
+      DATA(indx) = CONV i( methodindx_2 ) MOD 36.
+      result = base+indx(1) && result.
+      methodindx_2 = methodindx_2 DIV 36.
+    ENDDO.
+    result = 'CM' && result.
   ENDMETHOD.
 
 
@@ -115,21 +166,45 @@ CLASS zcl_shrinker_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_class_include_name.
+
+    result = |{ class_name WIDTH = 30 PAD = '=' }| && extension_code.
+
+  ENDMETHOD.
+
+
+  METHOD get_equivalent_method_includes.
+
+    SELECT tmdir~classname, tmdir~methodindx, tmdir~methodname
+        FROM tmdir
+        WHERE tmdir~classname = @class_pool_name
+          AND tmdir~methodname <> ''
+        INTO TABLE @DATA(class_methods).
+
+    result = VALUE #(
+            FOR <method> IN class_methods
+            ( |INCLUDE { zcl_shrinker_utils=>get_class_include_name(
+                           class_name     = <method>-classname
+                           extension_code = convert_methodindx_to_extensio( <method>-methodindx ) )
+                       }. "{ <method>-methodname }| ) ).
+
+  ENDMETHOD.
+
+
   METHOD get_main_program_name.
 
-    result  = COND syrepid(
+    result  = COND #(
       WHEN ( object = 'FUGR' OR object = 'FUGS' )
-               AND obj_name(1) = '/' THEN
+               AND obj_name CP '/*' THEN
            '/' && replace( val  = substring( val = obj_name
-                                             off = 2 )
+                                             off = 1 )
                            sub  = '/'
                            with = '/SAPL' )
-      WHEN ( object = 'FUGR' OR object = 'FUGS' )
-               AND obj_name(1) <> '/' THEN
+      WHEN object = 'FUGR' OR object = 'FUGS' THEN
            'SAPL' && obj_name
       WHEN object = 'CLAS' THEN
-           |{ obj_name WIDTH = 30 PAD = '=' }|
-           && 'CP'
+           get_class_include_name( class_name     = CONV #( obj_name )
+                                   extension_code = 'CP' )
       WHEN object = 'INTF' THEN
            |{ obj_name WIDTH = 30 PAD = '=' }|
            && 'IP'
@@ -141,9 +216,46 @@ CLASS zcl_shrinker_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_program_as_tadir_object.
+
+    DATA(program_name_parts) = CONV ty_program_name_parts( main_program_name ).
+    TRANSLATE program_name_parts-main USING '= '.
+
+    result  = COND #(
+      WHEN program_name_parts-extension_code = 'CP' THEN
+           VALUE #( object   = 'CLAS'
+                    obj_name = program_name_parts-main )
+      WHEN program_name_parts-extension_code = 'IP' THEN
+           VALUE #( object   = 'INTF'
+                    obj_name = program_name_parts-main )
+      WHEN program_name_parts-main CP 'CONTEXT_X_*' THEN
+           VALUE #( object   = 'CNTX'
+                    obj_name = substring( val = program_name_parts-main
+                                          off = 10 ) )
+      WHEN program_name_parts-main CP 'SAPL*' THEN
+           VALUE #( object   = 'FUGR'
+                    obj_name = substring( val = program_name_parts-main
+                                          off = 4 ) )
+      WHEN program_name_parts-main CP '/*/SAPL*' THEN
+           VALUE #( object   = 'FUGR'
+                    obj_name = CONV sobj_name( LET offset_second_slash = 1 + find( val = substring( val = program_name_parts-main
+                                                                                                    off = 1 )
+                                                                                   sub = '/' )
+                                               IN substring( val = program_name_parts-main
+                                                             off = 0
+                                                             len = offset_second_slash + 1 )
+                                               && substring( val = program_name_parts-main
+                                                             off = offset_second_slash + 5 ) ) )
+      ELSE
+           VALUE #( object   = 'PROG'
+                    obj_name = program_name_parts-main ) ).
+
+  ENDMETHOD.
+
+
   METHOD split_at_regex.
 
-    FIND ALL OCCURRENCES OF REGEX regex IN val RESULTS DATA(matches).
+    FIND ALL OCCURRENCES OF REGEX regex IN val RESULTS DATA(matches) ##REGEX_POSIX.
 
     " 0 match means 1 segment (split 'ab' at ':' -> 0 match and result is 'ab')
     IF matches IS INITIAL.

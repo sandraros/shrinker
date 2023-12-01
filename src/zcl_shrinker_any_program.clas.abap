@@ -58,8 +58,7 @@ CLASS zcl_shrinker_any_program DEFINITION
 
     DATA replacements TYPE ty_obj_renamings .
     DATA customizer TYPE REF TO zif_shrinker_abap_code_adapter .
-*    DATA program_name TYPE syrepid .
-
+    DATA main_program_name TYPE syrepid.
 
 
     METHODS read_includes
@@ -100,6 +99,7 @@ CLASS zcl_shrinker_any_program IMPLEMENTATION.
     TRY.
 
         me->replacements = global_replacements.
+        me->main_program_name = main_program_name.
 
         SELECT COUNT(*)
             UP TO 1 ROWS
@@ -121,29 +121,46 @@ CLASS zcl_shrinker_any_program IMPLEMENTATION.
           RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Program &1 does not exist'(002) msgv1 = main_program_name.
         ENDIF.
 
-
         read_includes( CHANGING source_units = source_units ).
 
-        IF customizer IS BOUND.
+        DO.
 
-          customizer->adapt_source_code_before_rep_i( CHANGING source_units = source_units ).
+          IF customizer IS BOUND.
+
+            customizer->adapt_source_code_before_rep_i( CHANGING source_units = source_units ).
+
+            read_includes( CHANGING source_units = source_units ).
+
+          ENDIF.
+
+          replace_includes( EXPORTING program_name = main_program_name
+                            CHANGING  source_units = source_units ).
+
+          IF customizer IS BOUND.
+            customizer->adapt_source_code( CHANGING other_source_units = source_units ).
+          ENDIF.
+
+          result = source_units[ name = main_program_name ]-abap_source_code.
+
+          replace_texts( EXPORTING replacements     = replacements
+                         CHANGING  abap_source_code = result ).
+
+          "-------------------------------------
+          " Parse again to process eventual nested "INCLUDE <include_program>".
+          "-------------------------------------
+
+          source_units = VALUE #(
+                        ( name             = main_program_name
+                          abap_source_code = result ) ).
 
           read_includes( CHANGING source_units = source_units ).
 
-        ENDIF.
+          IF lines( source_units ) = 1.
+            " No additional "INCLUDE <include_program>".
+            EXIT.
+          ENDIF.
 
-        replace_includes( EXPORTING program_name = main_program_name
-                          CHANGING  source_units = source_units ).
-
-        IF customizer IS BOUND.
-          customizer->adapt_source_code( CHANGING other_source_units = source_units ).
-        ENDIF.
-
-        replace_texts( EXPORTING replacements     = replacements
-                       CHANGING  abap_source_code = result ).
-
-
-        result = source_units[ name = main_program_name ]-abap_source_code.
+        ENDDO.
 
 
       CATCH zcx_shrinker INTO DATA(error_2).
@@ -175,23 +192,70 @@ CLASS zcl_shrinker_any_program IMPLEMENTATION.
       FIND ALL OCCURRENCES
           OF 'INCLUDE'
           IN TABLE source_unit->abap_source_code
+          IGNORING CASE
           RESULTS DATA(matches).
 
       LOOP AT matches REFERENCE INTO DATA(match).
+        DATA(tabix) = sy-tabix.
         DATA(abap_statement) = zcl_shrinker_abap_scan=>get_abap_statement_at_cursor(
                                       it_source = source_unit->abap_source_code
                                       i_linenr  = match->line
                                       i_offset  = match->offset ).
         IF abap_statement-stokes IS NOT INITIAL
-              AND abap_statement-stokes[ 1 ]-str = 'INCLUDE'.
-          INSERT VALUE #(
-                  row      = abap_statement-stokes[ 1 ]-row
-                  stokes   = abap_statement-stokes
-                  name     = abap_statement-stokes[ 2 ]-str
-                  if_found = xsdbool( lines( abap_statement-stokes ) >= 4
-                                  AND abap_statement-stokes[ 3 ]-str = 'IF'
-                                  AND abap_statement-stokes[ 4 ]-str = 'FOUND' )
-              ) INTO TABLE source_unit->include_statements.
+              AND abap_statement-stokes[ 1 ]-str = 'INCLUDE'
+              AND abap_statement-stokes[ 2 ]-str <> 'STRUCTURE'
+              AND abap_statement-stokes[ 2 ]-str <> 'TYPE'.
+
+          IF abap_statement-stokes[ 2 ]-str = 'METHODS'.
+
+            " Get the class pool name (NB: INCLUDE METHODS can be used only inside a class pool)
+            DATA(class_pool_tadir_object) = zcl_shrinker_utils=>get_program_as_tadir_object( main_program_name ).
+
+            " Get all "INCLUDE <source_unit>", each one equivalent to one method implementation.
+            DATA(method_includes) = CONV zcl_shrinker_abap_scan=>ty_abap_source_code(
+                                    zcl_shrinker_utils=>get_equivalent_method_includes( CONV #( class_pool_tadir_object-obj_name ) ) ).
+
+            " Replace "INCLUDE METHODS" (at match->line) with all these method includes.
+            " NB: inserting new lines would make invalid the next matches of the initial FIND,
+            " hopefully "INCLUDE METHODS" is the last possible "INCLUDE" in the main program of a class pool.
+            DATA(abap_statement_line) = match->line.
+            DELETE source_unit->abap_source_code INDEX abap_statement_line.
+
+            LOOP AT method_includes REFERENCE INTO DATA(method_include).
+
+              DATA(tabix_2) = sy-tabix.
+              DATA(abap_statement_2) = zcl_shrinker_abap_scan=>get_abap_statement_at_cursor(
+                                        it_source = method_includes
+                                        i_linenr  = tabix_2 ).
+
+              IF abap_statement_2-stokes IS NOT INITIAL
+                    AND abap_statement_2-stokes[ 1 ]-str = 'INCLUDE'.
+
+                INSERT method_include->* INTO source_unit->abap_source_code INDEX abap_statement_line.
+
+                INSERT VALUE #(
+                        row      = abap_statement_line
+                        stokes   = abap_statement_2-stokes
+                        name     = abap_statement_2-stokes[ 2 ]-str
+                        if_found = abap_false
+                    ) INTO TABLE source_unit->include_statements.
+
+                abap_statement_line = abap_statement_line + 1.
+              ENDIF.
+            ENDLOOP.
+
+          ELSE.
+
+            INSERT VALUE #(
+                    row      = abap_statement-stokes[ 1 ]-row
+                    stokes   = abap_statement-stokes
+                    name     = abap_statement-stokes[ 2 ]-str
+                    if_found = xsdbool( lines( abap_statement-stokes ) >= 4
+                                    AND abap_statement-stokes[ 3 ]-str = 'IF'
+                                    AND abap_statement-stokes[ 4 ]-str = 'FOUND' )
+                ) INTO TABLE source_unit->include_statements.
+
+          ENDIF.
         ENDIF.
       ENDLOOP.
 
@@ -227,7 +291,7 @@ CLASS zcl_shrinker_any_program IMPLEMENTATION.
       replace_includes( EXPORTING program_name = include_statement->name
                         CHANGING  source_units = source_units ).
 
-      DATA(line_index) = include_statement->stokes[ 1 ]-row.
+      DATA(line_index) = include_statement->row. "stokes[ 1 ]-row.
       DATA(source_unit_2) = REF #( source_units[ name = include_statement->stokes[ 2 ]-str ] OPTIONAL ).
       IF source_unit_2 IS NOT BOUND.
         source_unit->abap_source_code[ line_index ] = '*' && source_unit->abap_source_code[ line_index ].
