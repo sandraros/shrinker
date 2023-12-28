@@ -141,6 +141,7 @@ CLASS zcl_shrinker_ddic_class_interf DEFINITION
     TYPES:
       BEGIN OF ty_ddic_structure_component,
         tabname   TYPE dd03l-tabname,
+        position  TYPE dd03l-position,
         fieldname TYPE dd03l-fieldname,
         rollname  TYPE dd03l-rollname,
         precfield TYPE dd03l-precfield,
@@ -1940,7 +1941,7 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
               AND dd02l~as4local = 'A'
             INTO TABLE @result-structures.
 
-    SELECT dd03l~tabname, dd03l~fieldname, dd03l~rollname, dd03l~precfield, dd03l~comptype, dd03l~reftype, dd03l~datatype, dd03l~leng, dd03l~decimals
+    SELECT dd03l~tabname, dd03l~position, dd03l~fieldname, dd03l~rollname, dd03l~precfield, dd03l~comptype, dd03l~reftype, dd03l~datatype, dd03l~leng, dd03l~decimals
             FROM dd03l
             INNER JOIN tadir
               ON tadir~obj_name = dd03l~tabname
@@ -1952,6 +1953,7 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
               AND dd03l~adminfield = '0' " skip components added via ".INCLUDE structure"
               AND dd03l~depth = 0        " skip components added via "component TYPE structure"
             INTO TABLE @result-structure_components.
+    SORT result-structure_components BY tabname position.
 
     SELECT dd40l~typename, dd40l~rowkind, dd40l~reftype, dd40l~rowtype, dd40l~keydef, dd40l~keykind, dd40l~ttypkind, dd40l~accessmode, dd40l~datatype, dd40l~leng, dd40l~decimals
             FROM dd40l
@@ -1974,6 +1976,7 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
               AND tadir~obj_name IN @range_of_obj_name
               AND dd42s~as4local = 'A'
             INTO TABLE @result-table_type_key_components.
+    SORT result-table_type_key_components BY typename seckeyname keyfdpos.
 
     SELECT dd43l~typename, dd43l~seckeyname, dd43l~seckeyunique, dd43l~accessmode, dd43l~kind
             FROM dd43l
