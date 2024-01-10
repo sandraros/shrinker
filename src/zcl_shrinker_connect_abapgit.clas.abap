@@ -1,7 +1,7 @@
 CLASS zcl_shrinker_connect_abapgit DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
 
@@ -18,6 +18,8 @@ CLASS zcl_shrinker_connect_abapgit DEFINITION
         zcx_shrinker.
 
     METHODS deserialize
+      IMPORTING
+        transport_request TYPE trkorr OPTIONAL
       RAISING
         zcx_shrinker.
 
@@ -26,7 +28,7 @@ CLASS zcl_shrinker_connect_abapgit DEFINITION
         !iv_path TYPE string
         !iv_xstr TYPE xstring
       RAISING
-        zcx_shrinker .
+        zcx_shrinker.
 
     METHODS get_package_path
       IMPORTING
@@ -56,11 +58,11 @@ CLASS zcl_shrinker_connect_abapgit DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA zip TYPE REF TO cl_abap_zip.
+    DATA zip            TYPE REF TO cl_abap_zip.
     DATA git_repository TYPE REF TO lif_abapgit_repo.
-    DATA dot_abapgit TYPE REF TO lcl_abapgit_dot_abapgit.
-    DATA user_exit TYPE REF TO zif_shrinker_user_exit_abapgit.
-    DATA log TYPE REF TO lif_abapgit_log.
+    DATA dot_abapgit    TYPE REF TO lcl_abapgit_dot_abapgit.
+    DATA user_exit      TYPE REF TO zif_shrinker_user_exit_abapgit.
+    DATA log            TYPE REF TO lif_abapgit_log.
 
 
     METHODS handle_exception
@@ -72,46 +74,44 @@ CLASS zcl_shrinker_connect_abapgit DEFINITION
 ENDCLASS.
 
 
-
 CLASS zcl_shrinker_connect_abapgit IMPLEMENTATION.
-
   METHOD create.
-
     TRY.
 
         result = NEW zcl_shrinker_connect_abapgit( ).
 
-        lcl_abapgit_repo_srv=>get_instance( )->get_repo_from_package(
-          EXPORTING
-            iv_package = package
-          IMPORTING
-            ei_repo    = result->git_repository ).
+        lcl_abapgit_repo_srv=>get_instance( )->get_repo_from_package( EXPORTING iv_package = package
+                                                                      IMPORTING ei_repo    = result->git_repository ).
 
         IF result->git_repository IS NOT BOUND.
-          RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = |Package { package } is not part of a Git repository in ZABAPGIT|.
+          RAISE EXCEPTION TYPE zcx_shrinker
+            EXPORTING text = |Package { package } is not part of a Git repository in ZABAPGIT|.
         ENDIF.
 
-        result->dot_abapgit = result->git_repository->get_dot_abapgit( ).
+        result->dot_abapgit  = result->git_repository->get_dot_abapgit( ).
 
         result->package_path = result->get_package_path( package ).
 
-        result->user_exit = user_exit.
+        result->user_exit    = user_exit.
 
       CATCH lcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
+        RAISE EXCEPTION TYPE zcx_shrinker
+          EXPORTING previous = error.
     ENDTRY.
-
   ENDMETHOD.
 
-
   METHOD deserialize.
-
     TRY.
 
         DATA(zip_xstring) = zip->save( ).
         DATA(files_remote) = lcl_abapgit_zip=>load( zip_xstring ).
 
         CAST lcl_abapgit_repo( git_repository )->set_files_remote( files_remote ).
+
+        " remove the write protection
+        DATA(settings) = CAST lcl_abapgit_repo( git_repository )->get_local_settings( ).
+        settings-write_protected = abap_false.
+        CAST lcl_abapgit_repo( git_repository )->set_local_settings( settings ).
 
         " Credit: method GUI_DESERIALIZE of lcl_abapgit_SERVICES_REPO
         " Note that the source code units are compared in the method CALCULATE of lcl_abapgit_REPO_STATUS.
@@ -129,9 +129,9 @@ CLASS zcl_shrinker_connect_abapgit IMPLEMENTATION.
               "   2: update local object
               "   3: overwrite local object
               "   4: delete local object
-              IF user_exit IS BOUND
-                AND user_exit->is_to_be_deserialized( object   = check_overwrite->obj_type
-                                                      obj_name = check_overwrite->obj_name ).
+              IF     user_exit IS BOUND
+                 AND user_exit->is_to_be_deserialized( object   = check_overwrite->obj_type
+                                                       obj_name = check_overwrite->obj_name ).
                 check_overwrite->decision = lif_abapgit_definitions=>c_yes.
               ELSE.
                 check_overwrite->decision = lif_abapgit_definitions=>c_no.
@@ -141,6 +141,8 @@ CLASS zcl_shrinker_connect_abapgit IMPLEMENTATION.
           ENDCASE.
         ENDLOOP.
 
+        ls_checks-transport-transport = transport_request.
+
         log = CAST lif_abapgit_log( NEW lcl_abapgit_log( ) ).
         " NB: REPO->DESERIALIZE does a COMMIT WORK.
         git_repository->deserialize( is_checks = ls_checks
@@ -149,29 +151,23 @@ CLASS zcl_shrinker_connect_abapgit IMPLEMENTATION.
       CATCH cx_root INTO DATA(error).
         handle_exception( error ).
     ENDTRY.
-
   ENDMETHOD.
 
-
   METHOD file_download.
-
     TRY.
 
         DATA(li_fe_serv) = lcl_abapgit_ui_factory=>get_frontend_services( ).
 
-        li_fe_serv->file_download(
-          iv_path = iv_path
-          iv_xstr = iv_xstr ).
+        li_fe_serv->file_download( iv_path = iv_path
+                                   iv_xstr = iv_xstr ).
 
       CATCH lcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
+        RAISE EXCEPTION TYPE zcx_shrinker
+          EXPORTING previous = error.
     ENDTRY.
-
   ENDMETHOD.
 
-
   METHOD get_package_path.
-
     TRY.
 
         result = lcl_abapgit_folder_logic=>get_instance(
@@ -180,41 +176,35 @@ CLASS zcl_shrinker_connect_abapgit IMPLEMENTATION.
                                     iv_package = package ).
 
       CATCH lcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
+        RAISE EXCEPTION TYPE zcx_shrinker
+          EXPORTING previous = error.
     ENDTRY.
-
   ENDMETHOD.
 
-
   METHOD get_zip.
-
     DATA(zip_xstring) = zip->save( ).
 
     result = NEW cl_abap_zip( ).
     result->load( zip_xstring ).
-
   ENDMETHOD.
 
-
   METHOD handle_exception.
-
     TRY.
         DATA(abapgit_error) = CAST lcx_abapgit_exception( exception ).
         DATA(triggering_location) = REF #( abapgit_error->mt_callstack[ 1 ] OPTIONAL ).
         RAISE EXCEPTION TYPE zcx_shrinker
-            EXPORTING
-                previous = exception
-                text     = |Error raised by program { triggering_location->mainprogram }, include { triggering_location->include
-                           }, line { triggering_location->line }, { triggering_location->blocktype
-                           } { triggering_location->blockname }|.
+          EXPORTING
+            previous = exception
+            text     = |Error raised by program { triggering_location->mainprogram }, include { triggering_location->include
+                       }, line { triggering_location->line }, { triggering_location->blocktype
+                       } { triggering_location->blockname }|.
       CATCH cx_sy_move_cast_error.
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = exception.
+        RAISE EXCEPTION TYPE zcx_shrinker
+          EXPORTING previous = exception.
     ENDTRY.
   ENDMETHOD.
 
-
   METHOD serialize.
-
     TRY.
 
         "==========================================
@@ -234,36 +224,29 @@ CLASS zcl_shrinker_connect_abapgit IMPLEMENTATION.
         " Instantiate a ZIP instance, whose content will be modified
         "==========================================
         zip = NEW cl_abap_zip( ).
-        zip->load(
-          EXPORTING
-            zip             = zip_xstring
-          EXCEPTIONS
-            zip_parse_error = 1
-            OTHERS          = 2 ).
+        zip->load( EXPORTING  zip             = zip_xstring
+                   EXCEPTIONS zip_parse_error = 1
+                              OTHERS          = 2 ).
         IF sy-subrc <> 0.
           RAISE EXCEPTION TYPE zcx_shrinker.
         ENDIF.
 
       CATCH lcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING previous = error.
+        RAISE EXCEPTION TYPE zcx_shrinker
+          EXPORTING previous = error.
     ENDTRY.
-
   ENDMETHOD.
 
-
   METHOD show_log.
-
     IF log IS BOUND.
       lcl_abapgit_log_viewer=>show_log( log ).
     ENDIF.
-
   ENDMETHOD.
 
-
   METHOD zip_replace.
-
     IF zip IS NOT BOUND.
-      RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Serialize must be called first'.
+      RAISE EXCEPTION TYPE zcx_shrinker
+        EXPORTING text = 'Serialize must be called first'.
     ENDIF.
 
     IF line_exists( zip->files[ name = file_path ] ).
@@ -271,13 +254,12 @@ CLASS zcl_shrinker_connect_abapgit IMPLEMENTATION.
                    EXCEPTIONS zip_index_error = 1
                               OTHERS          = 2 ).
       IF sy-subrc <> 0.
-        RAISE EXCEPTION TYPE zcx_shrinker EXPORTING text = 'Unexpected error, file exists but cannot be deleted'.
+        RAISE EXCEPTION TYPE zcx_shrinker
+          EXPORTING text = 'Unexpected error, file exists but cannot be deleted'.
       ENDIF.
     ENDIF.
 
     zip->add( name    = file_path
               content = content ).
-
   ENDMETHOD.
-
 ENDCLASS.
