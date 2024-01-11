@@ -72,6 +72,12 @@
      <LENGTH>108</LENGTH>
     </item>
     <item>
+     <ID>I</ID>
+     <KEY>T12</KEY>
+     <ENTRY>Transport request if the target package is transportable (otherwise empty)</ENTRY>
+     <LENGTH>132</LENGTH>
+    </item>
+    <item>
      <ID>R</ID>
      <ENTRY>Demo - Shrink abap2xlsx</ENTRY>
      <LENGTH>23</LENGTH>

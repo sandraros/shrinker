@@ -34,6 +34,12 @@ SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
+  SELECTION-SCREEN COMMENT (80) t_trkorr VISIBLE LENGTH 63.
+  SELECTION-SCREEN POSITION 65.
+  PARAMETERS p_trkorr TYPE e070-trkorr DEFAULT ''.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
   SELECTION-SCREEN COMMENT (80) t_oo_def VISIBLE LENGTH 63.
   SELECTION-SCREEN POSITION 65.
   PARAMETERS p_to_def TYPE ty_include_program_name DEFAULT 'ZSHRINKER_DEMO_ABAP2XLSX_DEF'.
@@ -80,6 +86,7 @@ INITIALIZATION.
   t_devc_i = 'abap2xlsx packages of objects to include'(t06).
   t_devc_e = 'abap2xlsx packages of objects to exclude'(t07).
   t_devc   = 'Package of objects to be (re)generated'(t08).
+  t_trkorr = 'Transport request if the target package is transportable (otherwise empty)'(t12).
   t_oo_def = 'Include = definitions of all abap2xlsx class and interface pools, made local'(t01).
   t_oo_imp = 'Include = class implementations of all abap2xlsx class pools, made local'(t02).
   t_tr_s1  = 'Transformation = copy of ZEXCEL_TR_SHARED_STRINGS'(t03).
@@ -394,7 +401,7 @@ CLASS lcl_app IMPLEMENTATION.
     " Recreate ABAP objects from the ZIP file = Deserialize objects via abapGit
     "==============================================================================
 
-    abapgit->deserialize( ).
+    abapgit->deserialize( transport_request = p_trkorr ).
 
 
   ENDMETHOD.
