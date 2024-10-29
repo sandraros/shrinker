@@ -488,6 +488,7 @@ CLASS lcl_app IMPLEMENTATION.
       " renaming all which later lead to syntax errors in other objects referring to the Class Type T_RELATIONSHIP
       " which doesn't exist because it has been renamed.
       " Solution: Local Type not used so just remove it.
+      " REGEX with \< and \> to search only WHOLE words.
       FIND REGEX '\<T_RELATIONSHIP\>'
           IN TABLE reader_2007_ccimp->abap_source_code
           MATCH LINE DATA(line_index)
@@ -504,9 +505,30 @@ CLASS lcl_app IMPLEMENTATION.
 
     DATA(writer_huge_file_cu) = REF #( classes_interfaces-classes[ name = 'ZCL_EXCEL_WRITER_HUGE_FILE' ]-includes[ extension_code = 'CU' ] OPTIONAL ).
     IF writer_huge_file_cu IS BOUND.
-      DATA(table_abap_code_clas_new) = VALUE string_table(
-              ( LINES OF writer_huge_file_cu->abap_source_code FROM 1 TO tabix_public_section )
-              ( |  INTERFACES { p_intf }.| ) ).
+      writer_huge_file_cu->abap_source_code = VALUE string_table( LET copy = writer_huge_file_cu->abap_source_code IN
+                                                                  ( LINES OF copy FROM 1 TO tabix_public_section )
+                                                                  ( |  INTERFACES { to_lower( p_intf ) }.| )
+                                                                  ( LINES OF copy FROM tabix_public_section + 1 ) ).
+      FIND 'METHODS get_cells'
+          IN TABLE writer_huge_file_cu->abap_source_code
+          MATCH LINE line_index
+          IGNORING CASE ##REGEX_POSIX.
+      IF sy-subrc = 0.
+        DATA(methods_get_cells) = zcl_shrinker_abap_scan=>get_whole_abap_statement(
+            line_index       = line_index
+            abap_source_code = writer_huge_file_cu->abap_source_code ).
+        DELETE writer_huge_file_cu->abap_source_code
+            FROM methods_get_cells-first_line_index
+            TO methods_get_cells-last_line_index.
+      ENDIF.
+    ENDIF.
+
+    DATA(writer_huge_file_get_cells) = REF #( classes_interfaces-classes[ name = 'ZCL_EXCEL_WRITER_HUGE_FILE' ]-includes[ method_name = 'GET_CELLS' ] OPTIONAL ).
+    IF writer_huge_file_get_cells IS BOUND.
+      DATA(writer_huge_file_get_cells_l_1) = REF #( writer_huge_file_get_cells->abap_source_code[ 1 ] ).
+      REPLACE `  METHOD get_cells.`
+        IN writer_huge_file_get_cells_l_1->*
+        WITH |  METHOD { to_lower( p_intf ) }~get_cells.|.
     ENDIF.
 
   ENDMETHOD.
