@@ -1510,29 +1510,51 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
           remove_test_classes( CHANGING abap_source_code = abap_source_code_4_classes ).
         ENDIF.
 
-
+        " The object names may exist in TADIR but the objects may not exist, so need to add conditions.
         result-def_abap_source_code = VALUE ty_abap_source_code(
             ( LINES OF deferred )
             ( LINES OF VALUE #(
-                FOR <object> IN objects_in_order
-                ( LINES OF SWITCH #( <object>-object
-                    WHEN 'DTEL' THEN get_abap_for_data_element( ddic-data_elements[ rollname = <object>-obj_name ] )
-                    WHEN 'CLAS' THEN abap_source_code_4_classes[ name = <object>-obj_name ]-definition
-                    WHEN 'INTF' THEN get_abap_for_interface_pool( classes_interfaces-interfaces[ name = <object>-obj_name ] )
-                    WHEN 'TABL' THEN get_abap_for_structure( structure            = ddic-structures[ tabname = <object>-obj_name ]
-                                                             structure_components = ddic-structure_components )
-                    WHEN 'TTYP' THEN get_abap_for_table_type( table_type     = ddic-table_types[ typename = <object>-obj_name ]
-                                                              key_components = ddic-table_type_key_components
-                                                              sec_keys       = ddic-table_type_sec_keys ) ) ) ) ) ).
+                  FOR <object> IN objects_in_order
+                  ( LINES OF SWITCH #( <object>-object
+                                       WHEN 'DTEL' THEN
+                                         LET aux_data_element = REF #( ddic-data_elements[
+                                                                           rollname = <object>-obj_name ] OPTIONAL )
+                                         IN COND #( WHEN aux_data_element IS BOUND
+                                                    THEN get_abap_for_data_element( aux_data_element->* ) )
+                                       WHEN 'CLAS' THEN
+                                         LET aux_class = REF #( abap_source_code_4_classes[ name = <object>-obj_name ] OPTIONAL )
+                                         IN COND #( WHEN aux_class IS BOUND THEN aux_class->definition )
+                                       WHEN 'INTF' THEN
+                                         LET aux_interface = REF #( classes_interfaces-interfaces[
+                                                                        name = <object>-obj_name ] OPTIONAL )
+                                         IN COND #( WHEN aux_interface IS BOUND
+                                                    THEN get_abap_for_interface_pool( aux_interface->* ) )
+                                       WHEN 'TABL' THEN
+                                         LET aux_ddic_structure = REF #( ddic-structures[ tabname = <object>-obj_name ] OPTIONAL )
+                                         IN COND #( WHEN aux_ddic_structure IS BOUND
+                                                    THEN get_abap_for_structure(
+                                                            structure            = aux_ddic_structure->*
+                                                            structure_components = ddic-structure_components ) )
+                                       WHEN 'TTYP' THEN
+                                         LET aux_ddic_table_type = REF #( ddic-table_types[
+                                                                              typename = <object>-obj_name ] OPTIONAL )
+                                         IN COND #( WHEN aux_ddic_table_type IS BOUND
+                                                    THEN get_abap_for_table_type(
+                                                            table_type     = aux_ddic_table_type->*
+                                                            key_components = ddic-table_type_key_components
+                                                            sec_keys       = ddic-table_type_sec_keys ) ) ) ) ) ) ).
 
 
         replace_texts( EXPORTING replacements     = replacements
                        CHANGING  abap_source_code = result-def_abap_source_code ).
 
+        " The object names may exist in TADIR but the objects may not exist, so need to add conditions.
         result-imp_abap_source_code = VALUE ty_abap_source_code(
-                FOR <object> IN miscellaneous-all_objects
-                WHERE ( object = 'CLAS' )
-                ( LINES OF abap_source_code_4_classes[ name = <object>-obj_name ]-implementation ) ).
+            FOR <object> IN miscellaneous-all_objects
+            WHERE ( object = 'CLAS' )
+            ( LINES OF COND #( LET aux_class = REF #( abap_source_code_4_classes[ name = <object>-obj_name ] OPTIONAL ) IN
+                               WHEN aux_class IS BOUND
+                               THEN aux_class->implementation ) ) ).
 
         replace_texts( EXPORTING replacements     = replacements
                        CHANGING  abap_source_code = result-imp_abap_source_code ).
