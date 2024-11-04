@@ -1262,7 +1262,8 @@ CLASS zcl_shrinker_ddic_class_interf IMPLEMENTATION.
                                       it_source = class_cu_include->abap_source_code
                                       i_linenr  = match->line
                                       i_offset  = match->offset ).
-            IF abap_statement-stokes[ 1 ]-str = 'CLASS'.
+            IF lines( abap_statement-stokes ) >= 1
+                AND abap_statement-stokes[ 1 ]-str = 'CLASS'.
               DATA(tabix_friends) = line_index( abap_statement-stokes[ str = 'FRIENDS' ] ).
               IF tabix_friends >= 2
                     AND abap_statement-stokes[ tabix_friends - 1 ]-str = 'GLOBAL'.
